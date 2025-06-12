@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>@yield('title', 'Admin Dashboard')</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="{{ asset('admin/css/vendor.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('admin/css/icons.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('admin/css/app.min.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+
+    @stack('styles')
+</head>
+<body>
+    <div class="wrapper">
+        @include('admin.layouts.header')
+        @include('admin.layouts.sidebar')
+
+        <div class="main-content">
+            <div class="page-content">
+                <div class="container-fluid">
+                    @yield('content')
+                </div>
+            </div>
+
+            @include('admin.layouts.footer')
+        </div>
+    </div>
+
+    <!-- JS -->
+    <script src="{{ asset('admin/js/config.js') }}"></script>
+    <script src="{{ asset('admin/js/vendor.min.js') }}"></script>
+    <script src="{{ asset('admin/js/app.min.js') }}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <!-- Vendor Javascript (Require in all Page) -->
+<script src="{{ asset('admin/js/vendor.js') }}"></script>
+
+<!-- App Javascript (Require in all Page) -->
+<script src="{{ asset('admin/js/app.js') }}"></script>
+
+<!-- Vector Map Js -->
+<script src="{{ asset('admin/vendor/jsvectormap/js/jsvectormap.min.js') }}"></script>
+<script src="{{ asset('admin/vendor/jsvectormap/maps/world-merc.js') }}"></script>
+<script src="{{ asset('admin/vendor/jsvectormap/maps/world.js') }}"></script>
+
+<!-- Dashboard Js -->
+<script src="{{ asset('admin/js/pages/dashboard.js') }}"></script>
+ @stack('scripts')
+</body>
+</html>
