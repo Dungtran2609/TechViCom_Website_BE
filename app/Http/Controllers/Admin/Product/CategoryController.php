@@ -11,18 +11,21 @@ use Illuminate\Support\Str;
 class CategoryController extends Controller
 {
     public function index()
-{
-    $query = Category::with('parent');
+    {
+        $query = Category::with('parent');
 
-    if (request()->has('search')) {
-        $search = request('search');
-        $query->where('name', 'like', '%' . $search . '%');
+        if (request()->has('search')) {
+            $search = request('search');
+            $query->where('name', 'like', '%' . $search . '%');
+        }
+
+        // Sắp xếp theo mới nhất
+        $query->orderBy('category_id', 'desc');
+
+        $categories = $query->paginate(5)->withQueryString(); 
+
+        return view('admin.products.categories.index', compact('categories'));
     }
-
-    $categories = $query->paginate(5)->withQueryString(); 
-
-    return view('admin.products.categories.index', compact('categories'));
-}
 
 
     public function create()

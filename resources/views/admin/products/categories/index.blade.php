@@ -13,9 +13,15 @@
     </div>
 </div>
 
-<form method="GET" action="{{ route('admin.products.categories.index') }}" class="mb-4 d-flex gap-2">
+<form method="GET" action="{{ route('admin.products.categories.index') }}" class="mb-4 d-flex gap-2 align-items-center">
     <input type="text" name="search" value="{{ request('search') }}" class="form-control w-25" placeholder="Tìm danh mục...">
     <button type="submit" class="btn btn-outline-primary">Tìm kiếm</button>
+    
+    @if(request('search'))
+        <a href="{{ route('admin.products.categories.index') }}" class="btn btn-secondary">
+            <i class="fas fa-undo"></i> Quay lại danh sách đầy đủ
+        </a>
+    @endif
 </form>
 
 @if (session('success'))

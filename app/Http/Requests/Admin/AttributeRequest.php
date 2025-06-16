@@ -8,24 +8,29 @@ class AttributeRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true; // Cho phép tất cả người dùng (bạn có thể thay đổi logic phân quyền nếu cần)
+        return true;
     }
 
     public function rules(): array
     {
+        // Nếu đang update: $this->route('attribute') là model => cần lấy id
+        $id = optional($this->route('attribute'))->id;
+
         return [
-            'name' => ['required', 'string', 'max:100'],
-            'values' => ['required', 'array', 'min:1'],
-            'values.*' => ['required', 'string', 'max:100'],
+            'name' => 'required|string|max:100|unique:attributes,name,' . $id,
+            'type' => 'required|in:text,select,color,number',
+            'description' => 'nullable|string',
         ];
     }
 
     public function messages(): array
     {
         return [
-            'name.required' => 'Tên thuộc tính là bắt buộc.',
-            'values.required' => 'Bạn phải nhập ít nhất một giá trị cho thuộc tính.',
-            'values.*.required' => 'Giá trị không được để trống.',
+            'name.required' => 'Vui lòng nhập tên thuộc tính.',
+            'name.unique' => 'Tên thuộc tính đã tồn tại.',
+            'name.max' => 'Tên không được vượt quá 100 ký tự.',
+            'type.required' => 'Vui lòng chọn loại thuộc tính.',
+            'type.in' => 'Loại thuộc tính không hợp lệ.',
         ];
     }
 }
