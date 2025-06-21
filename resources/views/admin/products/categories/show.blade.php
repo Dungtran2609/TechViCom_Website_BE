@@ -25,7 +25,7 @@
                     <table class="table">
                         <tr>
                             <th style="width: 150px;">ID:</th>
-                            <td>{{ $category->category_id }}</td>
+                            <td>{{ $category->id }}</td>
                         </tr>
                         <tr>
                             <th>Tên danh mục:</th>
@@ -75,7 +75,7 @@
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="card-title mb-0"> Danh mục con</h5>
-                    <a href="{{ route('admin.products.categories.create') }}?parent_id={{ $category->category_id }}"
+                    <a href="{{ route('admin.products.categories.create') }}?parent_id={{ $category->id }}"
                        class="btn btn-sm btn-primary">
                         <i class="fas fa-plus"></i> Thêm danh mục con
                     </a>

@@ -15,7 +15,7 @@ class CategoryRequest extends FormRequest
     {
         return [
             'name' => 'required|max:100',
-            'parent_id' => 'nullable|exists:categories,category_id',
+            'parent_id' => 'nullable|exists:categories,id',
             'image' => 'nullable|image|max:2048',
             'status' => 'required|boolean',
         ];

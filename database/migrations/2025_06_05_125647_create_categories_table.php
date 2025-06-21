@@ -8,8 +8,8 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::create('categories', function (Blueprint $table) {
-            $table->id('category_id');
-            $table->foreignId('parent_id')->nullable()->constrained('categories', 'category_id');
+            $table->id();
+            $table->foreignId('parent_id')->nullable()->constrained('categories', 'id');
             $table->string('name', 100);
             $table->string('slug', 100)->nullable();
             $table->string('image')->nullable();      

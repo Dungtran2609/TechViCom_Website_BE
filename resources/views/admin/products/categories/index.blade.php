@@ -48,7 +48,7 @@
                 <tbody>
                     @foreach ($categories as $category)
                         <tr>
-                            <td>{{ $category->category_id }}</td>
+                            <td>{{ $category->id }}</td>
                             <td>
                                 <p class="text-dark fw-medium fs-15 mb-0">{{ $category->name }}</p>
                             </td>

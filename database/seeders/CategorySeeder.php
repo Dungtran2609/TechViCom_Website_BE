@@ -31,7 +31,7 @@ class CategorySeeder extends Seeder
         Category::create([
             'name' => 'Laptop Gaming',
             'slug' => Str::slug('Laptop Gaming'),
-            'parent_id' => $parent1->category_id,
+            'parent_id' => $parent1->id,
             'image' => null,
             'status' => true,
         ]);
@@ -39,7 +39,7 @@ class CategorySeeder extends Seeder
         Category::create([
             'name' => 'Laptop Văn phòng',
             'slug' => Str::slug('Laptop Văn phòng'),
-            'parent_id' => $parent1->category_id,
+            'parent_id' => $parent1->id,
             'image' => null,
             'status' => false,
         ]);
@@ -47,7 +47,7 @@ class CategorySeeder extends Seeder
         Category::create([
             'name' => 'Điện thoại Apple',
             'slug' => Str::slug('Điện thoại Apple'),
-            'parent_id' => $parent2->category_id,
+            'parent_id' => $parent2->id,
             'image' => null,
             'status' => true,
         ]);

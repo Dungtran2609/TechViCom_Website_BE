@@ -31,7 +31,7 @@
                         <tbody>
                             @foreach($categories as $category)
                                 <tr>
-                                    <td>{{ $category->category_id }}</td>
+                                    <td>{{ $category->id }}</td>
                                     <td>{{ $category->name }}</td>
                                     <td>{{ $category->parent?->name ?? 'Không có' }}</td>
                                     <td>
@@ -41,13 +41,13 @@
                                     </td>
                                     <td>{{ $category->deleted_at->format('d/m/Y H:i') }}</td>
                                     <td>
-                                        <form action="{{ route('admin.products.categories.restore', $category->category_id) }}" method="POST" class="d-inline">
+                                        <form action="{{ route('admin.products.categories.restore', $category->id) }}" method="POST" class="d-inline">
                                             @csrf
                                             <button type="submit" class="btn btn-sm btn-success">
                                                 <i class="fas fa-undo"></i> Khôi phục
                                             </button>
                                         </form>
-                                        <form action="{{ route('admin.products.categories.force-delete', $category->category_id) }}" method="POST" class="d-inline" onsubmit="return confirm('Xoá vĩnh viễn?')">
+                                        <form action="{{ route('admin.products.categories.force-delete', $category->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Xoá vĩnh viễn?')">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="btn btn-sm btn-danger">

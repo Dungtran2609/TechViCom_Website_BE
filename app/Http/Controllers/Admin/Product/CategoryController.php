@@ -20,7 +20,7 @@ class CategoryController extends Controller
         }
 
         // Sắp xếp theo mới nhất
-        $query->orderBy('category_id', 'desc');
+        $query->orderBy('id', 'desc');
 
         $categories = $query->paginate(5)->withQueryString(); 
 
@@ -54,7 +54,7 @@ class CategoryController extends Controller
 
     public function edit(Category $category)
     {
-        $categories = Category::where('category_id', '!=', $category->category_id)->get();
+        $categories = Category::where('id', '!=', $category->id)->get();
         return view('admin.products.categories.edit', compact('category', 'categories'));
     }
 
