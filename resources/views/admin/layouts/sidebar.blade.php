@@ -37,7 +37,7 @@
                     <ul class="nav sub-navbar-nav">
                         <li class="sub-nav-item"><a class="sub-nav-link" href="#">Danh sách sản phẩm</a></li>
                         <li class="sub-nav-item"><a class="sub-nav-link" href="{{ route('admin.products.categories.index') }}">Danh mục</a></li>
-                        <li class="sub-nav-item"><a class="sub-nav-link" href="#">Thương hiệu</a></li>
+                        <li class="sub-nav-item"><a class="sub-nav-link" href="{{ route('admin.products.brands.index') }}">Thương hiệu</a></li>
                         <li class="sub-nav-item"><a class="sub-nav-link" href="{{ route('admin.products.attributes.index') }}">Thuộc tính</a></li>
                     </ul>
                 </div>
