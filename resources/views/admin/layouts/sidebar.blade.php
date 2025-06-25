@@ -136,6 +136,8 @@
                     <ul class="nav sub-navbar-nav">
                         <li class="sub-nav-item"><a class="sub-nav-link" href="#">Vai trò</a></li>
                         <li class="sub-nav-item"><a class="sub-nav-link" href="#">Phân quyền chi tiết</a>
+                            {{-- nothing --}}
+                            
                         </li>
                     </ul>
                 </div>
