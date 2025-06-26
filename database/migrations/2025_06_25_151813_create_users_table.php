@@ -13,9 +13,11 @@ class CreateUsersTable extends Migration
             $table->string('name');
             $table->string('password');
             $table->string('email')->unique();
+            $table->timestamp('email_verified_at')->nullable();
             $table->string('phone_number', 20)->nullable();
             $table->string('image_profile')->nullable();
             $table->boolean('is_active')->default(true);
+            $table->rememberToken();
             $table->timestamps();
             $table->date('birthday')->nullable();
             $table->enum('gender', ['Male', 'Female', 'Non-Binary', 'Other'])->default('Male');
