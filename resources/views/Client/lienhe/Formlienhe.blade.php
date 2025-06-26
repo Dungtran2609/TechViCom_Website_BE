@@ -72,12 +72,12 @@
     <div class="contact-form">
         <h2>Liên hệ với chúng tôi</h2>
 
-        {{-- Hiển thị thông báo thành công --}}
+        {{-- Thông báo thành công --}}
         @if (session('success'))
             <div class="alert">{{ session('success') }}</div>
         @endif
 
-        {{-- Hiển thị lỗi tổng quát --}}
+        {{-- Hiển thị lỗi --}}
         @if ($errors->any())
             <div class="error-message">
                 <ul style="padding-left: 20px; margin: 0;">
@@ -88,7 +88,6 @@
             </div>
         @endif
 
-        {{-- Form --}}
         <form action="{{ route('client.lienhe.store') }}" method="POST">
             @csrf
 
@@ -103,6 +102,10 @@
             <label for="phone">Số điện thoại</label>
             <input type="text" id="phone" name="phone" value="{{ old('phone') }}" required>
             @error('phone') <div class="error-message">{{ $message }}</div> @enderror
+
+            <label for="subject">Tiêu đề</label>
+            <input type="text" id="subject" name="subject" value="{{ old('subject') }}" required>
+            @error('subject') <div class="error-message">{{ $message }}</div> @enderror
 
             <label for="message">Nội dung</label>
             <textarea id="message" name="message" rows="5" required>{{ old('message') }}</textarea>

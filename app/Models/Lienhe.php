@@ -8,11 +8,5 @@ class Lienhe extends Model
 {
     protected $table = 'contacts'; // nếu bảng tên là 'contacts'
 
-    protected $fillable = [
-        'name',
-        'email',
-        'phone',
-        'message',
-        'is_read',
-    ];
+    protected $fillable = ['name', 'email', 'phone', 'subject', 'message'];
 }
