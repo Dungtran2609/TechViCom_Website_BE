@@ -11,7 +11,7 @@
 <body>
     <h1 class="text-center">Trang chủ</h1>
     <a class="sub-nav-link" href="{{ route('client.lienhe.index') }}">Liên hệ</a><br>
-    <a href="{{ route('client.profile.index') }}">Thông tin cá nhân</a>
+    {{-- <a href="{{ route('client.profile.index') }}">Thông tin cá nhân</a> --}}
 
 </body>
 
