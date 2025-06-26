@@ -2,11 +2,11 @@
     <!-- Sidebar Logo -->
     <div class="logo-box">
         <a href="{{ route('admin.dashboard') }}" class="logo-dark">
-            <img src="{{ asset('admin/images/logo-sm.png') }}" class="logo-sm" alt="logo sm">
+            <img src="{{ asset('admin/images/logotechvicom.png') }}" class="logo-sm" alt="logo sm">
             <img src="{{ asset('admin/images/logo-dark.png') }}" class="logo-lg" alt="logo dark">
         </a>
         <a href="{{ route('admin.dashboard') }}" class="logo-light">
-            <img src="{{ asset('admin/images/logo-sm.png') }}" class="logo-sm" alt="logo sm">
+            <img src="{{ asset('admin/images/logotechvicom.png') }}" class="logo-sm" alt="logo sm">
             <img src="{{ asset('admin/images/logo-light.png') }}" class="logo-lg" alt="logo light">
         </a>
     </div>
@@ -159,6 +159,8 @@
                     <ul class="nav sub-navbar-nav">
                         <li class="sub-nav-item"><a class="sub-nav-link" href="#">Vai trò</a></li>
                         <li class="sub-nav-item"><a class="sub-nav-link" href="#">Phân quyền chi tiết</a>
+                            {{-- nothing --}}
+                            
                         </li>
                     </ul>
                 </div>
