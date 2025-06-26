@@ -36,12 +36,12 @@ Route::prefix('/')->name('client.')->group(function () {
     Route::get('/', [HomeController::class, 'index'])->name('home');
     Route::resource('lienhe', LienHeController::class);
 
-    // Tài khoản người dùng
-    Route::controller(UserProfileController::class)->group(function () {
-        Route::get('profile', 'index')->name('profile.index');
-        Route::get('profile/edit', 'edit')->name('profile.edit');
-        Route::post('profile/update', 'update')->name('profile.update');
-    });
+    // // Tài khoản người dùng
+    // Route::controller(UserProfileController::class)->group(function () {
+    //     Route::get('profile', 'index')->name('profile.index');
+    //     Route::get('profile/edit', 'edit')->name('profile.edit');
+    //     Route::post('profile/update', 'update')->name('profile.update');
+    // });
 });
 
 
