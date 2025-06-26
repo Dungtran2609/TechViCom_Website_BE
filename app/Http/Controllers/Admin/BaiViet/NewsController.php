@@ -5,13 +5,14 @@ namespace App\Http\Controllers\Admin\BaiViet;
 use App\Http\Controllers\Controller;
 use App\Models\News;
 use App\Models\NewsCategory;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class NewsController extends Controller
 {
     public function index(Request $request)
     {
-        $query = News::with('category');
+        $query = News::with(['category', 'author']);
 
         if ($request->filled('search')) {
             $query->where('title', 'like', '%' . $request->search . '%');
@@ -25,7 +26,8 @@ class NewsController extends Controller
     public function create()
     {
         $categories = NewsCategory::all();
-        return view('admin.BaiViet.create', compact('categories'));
+        $authors = User::all(); // Hoặc lọc theo vai trò nếu cần
+        return view('admin.BaiViet.create', compact('categories', 'authors'));
     }
 
     public function store(Request $request)
@@ -33,21 +35,24 @@ class NewsController extends Controller
         $data = $request->validate([
             'title' => 'required|max:255',
             'content' => 'required',
-            'author_id' => 'nullable|exists:users,user_id',
+            'author_id' => 'required|exists:users,id',
             'status' => 'required|in:published,draft',
             'published_at' => 'nullable|date',
             'category_id' => 'nullable|exists:news_categories,category_id',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ], [
             'title.required' => 'Tiêu đề là bắt buộc.',
             'content.required' => 'Nội dung là bắt buộc.',
+            'author_id.required' => 'Tác giả là bắt buộc.',
             'status.required' => 'Trạng thái là bắt buộc.',
             'status.in' => 'Trạng thái không hợp lệ.',
             'published_at.date' => 'Ngày đăng không hợp lệ.',
+            'category_id.exists' => 'Danh mục được chọn không tồn tại.',
             'image.image' => 'Tệp tải lên phải là hình ảnh.',
-            'image.mimes' => 'Hình ảnh phải có định dạng jpeg, png, jpg hoặc gif.',
+            'image.mimes' => 'Hình ảnh phải có định dạng jpeg, png, jpg, gif hoặc webp.',
             'image.max' => 'Kích thước ảnh không được vượt quá 2MB.',
         ]);
+
 
         if ($request->hasFile('image')) {
             $file = $request->file('image');
@@ -58,56 +63,62 @@ class NewsController extends Controller
 
         News::create($data);
 
-        return redirect()->route('admin.news.index')->with('success', 'Bài viết đã được tạo thành công.');
-    }
 
-    public function show(News $news)
-    {
-        return view('admin.BaiViet.show', compact('news'));
+        return redirect()->route('admin.news.index')->with('success', 'Bài viết đã được tạo thành công.');
     }
 
     public function edit(News $news)
     {
         $categories = NewsCategory::all();
-        return view('admin.BaiViet.edit', compact('news', 'categories'));
+        $authors = User::all();
+        return view('admin.BaiViet.edit', compact('news', 'categories', 'authors'));
     }
 
     public function update(Request $request, News $news)
     {
+
         $data = $request->validate([
             'title' => 'required|max:255',
             'content' => 'required',
-            'author_id' => 'nullable|exists:users,user_id',
+            'author_id' => 'required|exists:users,id',
             'status' => 'required|in:published,draft',
             'published_at' => 'nullable|date',
             'category_id' => 'nullable|exists:news_categories,category_id',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+
         ], [
             'title.required' => 'Tiêu đề là bắt buộc.',
             'title.max' => 'Tiêu đề không được vượt quá 255 ký tự.',
             'content.required' => 'Nội dung là bắt buộc.',
+            'author_id.required' => 'Tác giả là bắt buộc.',
             'status.required' => 'Trạng thái là bắt buộc.',
             'status.in' => 'Trạng thái không hợp lệ.',
             'published_at.date' => 'Ngày đăng không hợp lệ.',
             'category_id.exists' => 'Danh mục được chọn không tồn tại.',
             'image.image' => 'Tệp tải lên phải là hình ảnh.',
-            'image.mimes' => 'Hình ảnh phải có định dạng jpeg, png, jpg hoặc gif.',
+            'image.mimes' => 'Hình ảnh phải có định dạng jpeg, png, jpg, gif hoặc webp.',
             'image.max' => 'Kích thước ảnh không được vượt quá 2MB.',
         ]);
 
-        // Nếu có ảnh mới được tải lên, lưu lại
         if ($request->hasFile('image')) {
             $file = $request->file('image');
-            $filename = time() . '_' . $file->getClientOriginalName();
+            $extension = $file->getClientOriginalExtension(); // lấy đúng đuôi: webp, jpg, ...
+            $filename = time() . '_' . uniqid() . '.' . $extension;
             $file->move(public_path('uploads/news'), $filename);
             $data['image'] = 'uploads/news/' . $filename;
         }
+
 
         $news->update($data);
 
         return redirect()->route('admin.news.index')->with('success', 'Bài viết đã được cập nhật thành công.');
     }
 
+    public function show(News $news)
+    {
+        $news->load(['comments.user']);
+        return view('admin.BaiViet.show', compact('news'));
+    }
 
     public function destroy(News $news)
     {

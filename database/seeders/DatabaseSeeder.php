@@ -56,6 +56,7 @@ class DatabaseSeeder extends Seeder
             ProductVariantsAttributeSeeder::class,
             LoginHistorySeeder::class,
             BannerSeeder::class,
+            ContactSeeder::class,
         ]);
     }
 }

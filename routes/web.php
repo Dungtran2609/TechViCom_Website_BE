@@ -49,6 +49,14 @@ Route::prefix('/')->name('client.')->group(function () {
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
+    Route::prefix('products')->name('products.')->group(function () {
+            Route::resource('categories', AdminCategoryController::class);
+            Route::resource('products', AdminProductController::class);
+            Route::resource('brands', AdminBrandController::class);
+            Route::resource('attributes', AdminAttributeController::class);
+        });
+        // Thêm các resource khác nếu cần
+
     // Quản lý bài viết
     Route::resource('news', NewsController::class);
     Route::resource('news-categories', NewsCategoryController::class);
@@ -59,14 +67,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('lien-he/{id}', [LienHeAdminController::class, 'show'])->name('lienhe.show');
     Route::delete('lien-he/{id}', [LienHeAdminController::class, 'destroy'])->name('lienhe.destroy');
 
+
     Route::group(['prefix' => 'laravel-filemanager', 'middleware' => ['web']], function () {
         \UniSharp\LaravelFilemanager\Lfm::routes();
-        Route::prefix('products')->name('products.')->group(function () {
-            Route::resource('categories', AdminCategoryController::class);
-            Route::resource('products', AdminProductController::class);
-            Route::resource('brands', AdminBrandController::class);
-            Route::resource('attributes', AdminAttributeController::class);
-        });
-        // Thêm các resource khác nếu cần
     });
 });
