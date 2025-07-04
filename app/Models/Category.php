@@ -4,21 +4,28 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Category extends Model
 {
-    use HasFactory;
+    use SoftDeletes;
 
-    // Nếu bảng không phải là 'categories', hãy khai báo:
-    // protected $table = 'categories';
-
-    // Nếu không dùng khóa chính mặc định 'id', hãy khai báo:
-    // protected $primaryKey = 'id';
-
-    // Các trường có thể gán giá trị hàng loạt
     protected $fillable = [
         'name',
-        'description',
-        // Thêm các trường khác nếu có
+        'slug',
+        'parent_id',
+        'image',
+        'status',
     ];
+
+    public function parent()
+    {
+        return $this->belongsTo(Category::class, 'parent_id');
+    }
+
+    public function children()
+    {
+        return $this->hasMany(Category::class, 'parent_id');
+    }
+    
 }

@@ -8,10 +8,18 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Middleware\IsAdmin;
 use App\Http\Controllers\Client\ProfileController;
 use App\Http\Controllers\Client\AccountController;
+use App\Http\Controllers\Admin\Products\CategoryController;
 
-Route::get('/admin-control', [AdminController::class, 'dashboard'])
-    ->middleware([IsAdmin::class])
-    ->name('admin.dashboard');
+Route::middleware([IsAdmin::class])->prefix('admin-control')->name('admin.')->group(function () {
+    // Trang dashboard admin
+    Route::get('/', [AdminController::class, 'dashboard'])->name('dashboard');
+
+    // Categories
+    Route::get('products/categories/trashed', [CategoryController::class, 'trashed'])->name('products.categories.trashed');
+    Route::post('products/categories/{id}/restore', [CategoryController::class, 'restore'])->name('products.categories.restore');
+    Route::delete('products/categories/{id}/force-delete', [CategoryController::class, 'forceDelete'])->name('products.categories.force-delete');
+    Route::resource('products/categories', CategoryController::class)->names('products.categories');
+});
 
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
