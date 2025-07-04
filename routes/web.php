@@ -24,11 +24,6 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
 
-Route::prefix('admin')->name('admin.')->group(function () {
-    Route::get('users', [UserController::class, 'index'])->name('users.index');
-    // ... các route admin khác ...
-});
-
 Route::middleware('auth')->group(function () {
     Route::get('/account/show', [AccountController::class, 'show'])->name('account.show');
     Route::get('/account/edit', [AccountController::class, 'edit'])->name('account.edit');
