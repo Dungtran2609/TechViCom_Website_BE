@@ -43,7 +43,7 @@
                     <div class="card-body">
                         <h5 class="card-title">{{ $product->name }}</h5>
                         <p class="card-text">{{ number_format($product->price, 0, ',', '.') }} VNĐ</p>
-                        <a href="{{ route('product.show', $product->id) }}" class="btn btn-outline-primary">Xem chi tiết</a>
+                        <a href="" class="btn btn-outline-primary">Xem chi tiết</a>
                     </div>
                 </div>
             </div>

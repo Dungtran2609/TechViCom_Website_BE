@@ -49,6 +49,10 @@ class User extends Authenticatable
     /**
      * Quan hệ một-nhiều với bảng user_addresses.
      */
+    public function isAdmin()
+    {
+        return $this->roles()->where('name', 'admin')->exists();
+    }
     public function addresses(): HasMany
     {
         return $this->hasMany(
