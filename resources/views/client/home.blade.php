@@ -5,7 +5,7 @@
     <div class="d-flex justify-content-end mb-3">
         @auth
             <span class="me-2">Xin chào, {{ Auth::user()->name }}</span>
-            <a href="{{ route('account.show') }}" class="btn btn-outline-info me-2">Quản trị tài khoản</a>
+            <a href="#" class="btn btn-outline-info me-2">Quản trị tài khoản</a>
             <a href="{{ route('logout') }}" class="btn btn-outline-danger"
                onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                 Đăng xuất
@@ -43,7 +43,7 @@
                     <div class="card-body">
                         <h5 class="card-title">{{ $product->name }}</h5>
                         <p class="card-text">{{ number_format($product->price, 0, ',', '.') }} VNĐ</p>
-                        <a href="{{ route('product.show', $product->id) }}" class="btn btn-outline-primary">Xem chi tiết</a>
+                        <a href="#" class="btn btn-outline-primary">Xem chi tiết</a>
                     </div>
                 </div>
             </div>

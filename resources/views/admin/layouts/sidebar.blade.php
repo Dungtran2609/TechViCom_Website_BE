@@ -87,9 +87,31 @@
                     <span class="nav-icon"><iconify-icon icon="mdi:post-outline"></iconify-icon></span>
                     <span class="nav-text"> Quản lý bài viết </span>
                 </a>
+                
                 <div class="collapse" id="4">
+                    {{-- danh mục bai viet --}}
                     <ul class="nav sub-navbar-nav">
-                        <li class="sub-nav-item"><a class="sub-nav-link" href="#">Bài viết</a></li>
+                        <li class="sub-nav-item"><a class="sub-nav-link"
+                                href="{{ route('admin.news-categories.index') }}">Danh mục bài viết</a></li>
+                    </ul>
+                    {{-- bai viet --}}
+                    <ul class="nav sub-navbar-nav">
+                        <li class="sub-nav-item"><a class="sub-nav-link" href="{{ route('admin.news.index') }}">Bài viết</a></li>
+                    </ul>
+                </div>
+            </li>
+
+            {{-- Liên hệ --}}
+            <li class="nav-item">
+                <a class="nav-link menu-arrow" href="#9" data-bs-toggle="collapse">
+                    <span class="nav-icon"><iconify-icon icon="mdi:message-text-outline"></iconify-icon></span>
+                    <span class="nav-text"> Liên hệ </span>
+                </a>
+                <div class="collapse" id="9">
+                    <ul class="nav sub-navbar-nav">
+                        <li class="sub-nav-item"><a class="sub-nav-link"
+                                href="{{ route('admin.contacts.index') }}">Người dùng</a>
+                        </li>
                     </ul>
                 </div>
             </li>
