@@ -71,8 +71,12 @@ class User extends Authenticatable
     public function hasRole($roles): bool
     {
         if (is_array($roles)) {
-            return $this->roles()->whereIn('slug', $roles)->exists();
+            return $this->roles()->whereIn('name', $roles)->exists();
         }
-        return $this->roles()->where('slug', $roles)->exists();
+        return $this->roles()->where('name', $roles)->exists();
+    }
+    public function isAdmin()
+    {
+        return $this->hasRole('admin');
     }
 }

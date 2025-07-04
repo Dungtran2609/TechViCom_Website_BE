@@ -1,17 +1,31 @@
 <?php
+
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Client\HomeController;
 use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\Admin\Contacts\ContactsAdminController;
+use App\Http\Controllers\Admin\News\NewsCategoryController;
+use App\Http\Controllers\Admin\News\NewsController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Middleware\IsAdmin;
 use App\Http\Controllers\Client\ProfileController;
 use App\Http\Controllers\Client\AccountController;
 
-Route::get('/admin-control', [AdminController::class, 'dashboard'])
-    ->middleware([IsAdmin::class])
-    ->name('admin.dashboard');
+Route::middleware([IsAdmin::class])->prefix('admin-control')->name('admin.')->group(function () {
+    // Trang dashboard admin
+    Route::get('/', [AdminController::class, 'dashboard'])->name('dashboard');
+
+    // Quản lý bài viết
+    Route::resource('news', NewsController::class);
+    Route::resource('news-categories', NewsCategoryController::class);
+
+    // Quản lý liên hệ
+    Route::get('contacts', [ContactsAdminController::class, 'index'])->name('contacts.index');
+    Route::get('contacts/{id}', [ContactsAdminController::class, 'show'])->name('contacts.show');
+    Route::delete('contacts/{id}', [ContactsAdminController::class, 'destroy'])->name('contacts.destroy');
+});
 
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
@@ -36,6 +50,3 @@ Route::middleware('auth')->group(function () {
     Route::post('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
     Route::post('/profile/delete', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
-
-
-

@@ -21,7 +21,7 @@
                 <ul class="navbar-nav ms-auto">
                     @auth
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ route('account.show') }}">Tài khoản</a>
+                            <a class="nav-link" href="#">Tài khoản</a>
                         </li>
                         <li class="nav-item">
                             <form action="{{ route('logout') }}" method="POST" class="d-inline">
