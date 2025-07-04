@@ -52,11 +52,7 @@ Route::middleware([IsAdmin::class])->prefix('admin-control')->name('admin.')->gr
     });
 
     // Quản lý bài viết
-    Route::prefix('news')->name('news.')->group(function () {
-        Route::get('trash', [NewsController::class, 'trash'])->name('trash'); // Hiển thị thùng rác
-        Route::post('restore/{id}', [NewsController::class, 'restore'])->name('restore'); // Khôi phục
-        Route::delete('force-delete/{id}', [NewsController::class, 'forceDelete'])->name('force-delete'); // Xoá vĩnh viễn
-    });
+    Route::resource('news', NewsController::class);
     Route::resource('news-categories', NewsCategoryController::class);
 
     // Quản lý liên hệ
