@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\Admin\BannerController;
 use App\Http\Controllers\Client\HomeController;
 use App\Http\Controllers\Client\AccountController;
 use App\Http\Controllers\Admin\Contacts\ContactsAdminController;
@@ -16,12 +17,11 @@ use App\Http\Controllers\Admin\Products\BrandController;
 use App\Http\Controllers\Admin\Products\CategoryController;
 use App\Http\Controllers\Admin\Products\AttributeController;
 use App\Http\Controllers\Admin\Products\AttributeValueController;
-use App\Http\Controllers\Admin\OrderController;
 
 Route::middleware([IsAdmin::class])->prefix('admin-control')->name('admin.')->group(function () {
     // Trang dashboard admin
     Route::get('/', [AdminController::class, 'dashboard'])->name('dashboard');
-
+    Route::resource('banner', BannerController::class);
     // Categories
     Route::get('products/categories/trashed', [CategoryController::class, 'trashed'])->name('products.categories.trashed');
     Route::post('products/categories/{id}/restore', [CategoryController::class, 'restore'])->name('products.categories.restore');
@@ -44,7 +44,7 @@ Route::middleware([IsAdmin::class])->prefix('admin-control')->name('admin.')->gr
     Route::prefix('products/attributes')->name('products.attributes.')->group(function () {
         Route::get('{attribute}/values/trashed', [AttributeValueController::class, 'trashed'])->name('values.trashed');
         Route::post('values/{id}/restore', [AttributeValueController::class, 'restore'])->name('values.restore');
-        Route::delete('values/{id}/force-delete', [AttributeValueController::class, 'forceDelete'])->name('values.force-delete');
+Route::delete('values/{id}/force-delete', [AttributeValueController::class, 'forceDelete'])->name('values.force-delete');
         Route::get('{attribute}/values', [AttributeValueController::class, 'index'])->name('values.index');
         Route::post('{attribute}/values', [AttributeValueController::class, 'store'])->name('values.store');
         Route::get('values/{value}/edit', [AttributeValueController::class, 'edit'])->name('values.edit');
@@ -60,15 +60,6 @@ Route::middleware([IsAdmin::class])->prefix('admin-control')->name('admin.')->gr
     Route::get('contacts', [ContactsAdminController::class, 'index'])->name('contacts.index');
     Route::get('contacts/{id}', [ContactsAdminController::class, 'show'])->name('contacts.show');
     Route::delete('contacts/{id}', [ContactsAdminController::class, 'destroy'])->name('contacts.destroy');
-    Route::prefix('order')->name('order.')->group(function () {
-        Route::get('trashed', [OrderController::class, 'trashed'])->name('trashed');
-        Route::post('{id}/restore', [OrderController::class, 'restore'])->name('restore');
-        Route::delete('{id}/force-delete', [OrderController::class, 'forceDelete'])->name('force-delete');
-        Route::post('{id}/update-status', [OrderController::class, 'updateOrders'])->name('updateOrders');
-        Route::get('returns', [OrderController::class, 'returnsIndex'])->name('returns');
-        Route::post('returns/{id}/process', [OrderController::class, 'processReturn'])->name('process-return');
-        Route::resource('', OrderController::class)->parameters(['' => 'order'])->names('');
-    });
 });
 
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
@@ -80,6 +71,7 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
+
 
 Route::middleware('auth')->group(function () {
     Route::get('/account/show', [AccountController::class, 'show'])->name('account.show');
