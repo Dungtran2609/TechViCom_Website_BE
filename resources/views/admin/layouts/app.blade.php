@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>@yield('title', 'Admin Dashboard')</title>
@@ -11,9 +12,39 @@
     <link rel="stylesheet" href="{{ asset('admin/css/icons.min.css') }}">
     <link rel="stylesheet" href="{{ asset('admin/css/app.min.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-PvNcazjx3bDAzjlfKEXAMPLEKEY..." crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+        integrity="sha512-PvNcazjx3bDAzjlfKEXAMPLEKEY..." crossorigin="anonymous" referrerpolicy="no-referrer" />
     @stack('styles')
+    <style>
+        label.form-label {
+            font-weight: 500;
+        }
+
+        /* Badge notification hiệu ứng rung nhẹ */
+        .notification-badge {
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.2);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .btn-notification:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+    </style>
 </head>
+
 <body>
     <div class="wrapper">
         @include('admin.layouts.header')
@@ -40,21 +71,25 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
     <!-- Vendor Javascript (Require in all Page) -->
-<script src="{{ asset('admin/js/vendor.js') }}"></script>
+    <script src="{{ asset('admin/js/vendor.js') }}"></script>
 
 
-<!-- App Javascript (Require in all Page) -->
-<script src="{{ asset('admin/js/app.js') }}"></script>
+    <!-- App Javascript (Require in all Page) -->
+    <script src="{{ asset('admin/js/app.js') }}"></script>
 
 
-<!-- Vector Map Js -->
-<script src="{{ asset('admin/vendor/jsvectormap/js/jsvectormap.min.js') }}"></script>
-<script src="{{ asset('admin/vendor/jsvectormap/maps/world-merc.js') }}"></script>
-<script src="{{ asset('admin/vendor/jsvectormap/maps/world.js') }}"></script>
+    <!-- Vector Map Js -->
+    <script src="{{ asset('admin/vendor/jsvectormap/js/jsvectormap.min.js') }}"></script>
+    <script src="{{ asset('admin/vendor/jsvectormap/maps/world-merc.js') }}"></script>
+    <script src="{{ asset('admin/vendor/jsvectormap/maps/world.js') }}"></script>
 
 
-<!-- Dashboard Js -->
-<script src="{{ asset('admin/js/pages/dashboard.js') }}"></script>
- @stack('scripts')
+    <!-- Dashboard Js -->
+    <script src="{{ asset('admin/js/pages/dashboard.js') }}"></script>
+    @stack('scripts')
+
+    {{-- End main wrapper --}}
+    @yield('scripts')
 </body>
+
 </html>
