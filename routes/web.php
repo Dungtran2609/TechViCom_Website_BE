@@ -8,13 +8,14 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Client\HomeController;
 use App\Http\Controllers\Client\AccountController;
-use App\Http\Controllers\Admin\Contacts\ContactsAdminController;
-use App\Http\Controllers\Admin\News\NewsCategoryController;
 use App\Http\Controllers\Admin\News\NewsController;
 use App\Http\Controllers\Client\ProfileController;
 use App\Http\Controllers\Admin\Products\BrandController;
+use App\Http\Controllers\Admin\Products\ProductController;
+use App\Http\Controllers\Admin\News\NewsCategoryController;
 use App\Http\Controllers\Admin\Products\CategoryController;
 use App\Http\Controllers\Admin\Products\AttributeController;
+use App\Http\Controllers\Admin\Contacts\ContactsAdminController;
 use App\Http\Controllers\Admin\Products\AttributeValueController;
 
 Route::middleware([IsAdmin::class])->prefix('admin-control')->name('admin.')->group(function () {
@@ -59,6 +60,12 @@ Route::middleware([IsAdmin::class])->prefix('admin-control')->name('admin.')->gr
     Route::get('contacts', [ContactsAdminController::class, 'index'])->name('contacts.index');
     Route::get('contacts/{id}', [ContactsAdminController::class, 'show'])->name('contacts.show');
     Route::delete('contacts/{id}', [ContactsAdminController::class, 'destroy'])->name('contacts.destroy');
+
+    // Quản lý sản phẩm
+    Route::get('products/trashed', [ProductController::class, 'trashed'])->name('products.trashed');
+    Route::post('products/{id}/restore', [ProductController::class, 'restore'])->name('products.restore');
+    Route::delete('products/{id}/force-delete', [ProductController::class, 'forceDelete'])->name('products.force-delete');
+    Route::resource('products', ProductController::class)->names('products');
 });
 
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
