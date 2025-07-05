@@ -12,7 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('banners', function (Blueprint $table) {
-            $table->string('link')->nullable()->after('image');
+         $table->integer('stt')->default(0);
+            $table->string('image');
+            $table->dateTime('start_date');
+            $table->dateTime('end_date');
         });
     }
 
@@ -22,7 +25,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('banners', function (Blueprint $table) {
-            $table->dropColumn('link');
+            $table->dropColumn(['stt', 'image', 'start_date', 'end_date']);
         });
     }
 };
