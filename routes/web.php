@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\News\NewsController;
 use App\Http\Controllers\Client\ProfileController;
 use App\Http\Controllers\Admin\Products\BrandController;
 use App\Http\Controllers\Admin\Products\ProductController;
+use App\Http\Controllers\Admin\Products\ProductVariantController;
 use App\Http\Controllers\Admin\News\NewsCategoryController;
 use App\Http\Controllers\Admin\Products\CategoryController;
 use App\Http\Controllers\Admin\Products\AttributeController;
@@ -47,10 +48,26 @@ Route::middleware([IsAdmin::class])->prefix('admin-control')->name('admin.')->gr
         Route::delete('values/{id}/force-delete', [AttributeValueController::class, 'forceDelete'])->name('values.force-delete');
         Route::get('{attribute}/values', [AttributeValueController::class, 'index'])->name('values.index');
         Route::post('{attribute}/values', [AttributeValueController::class, 'store'])->name('values.store');
+        
         Route::get('values/{value}/edit', [AttributeValueController::class, 'edit'])->name('values.edit');
         Route::put('values/{value}', [AttributeValueController::class, 'update'])->name('values.update');
         Route::delete('values/{value}', [AttributeValueController::class, 'destroy'])->name('values.destroy');
     });
+    // Chọn sản phẩm để quản lý biến thể
+Route::get('products/variants/select', [ProductVariantController::class, 'selectProduct'])->name('products.variants.select');
+
+
+    // Biến thể sản phẩm
+    Route::prefix('products')->name('products.')->group(function () {
+        Route::get('variants/{variant}', [ProductVariantController::class, 'show'])->name('variants.show');
+        Route::get('{product}/variants', [ProductVariantController::class, 'index'])->name('variants.index');
+        Route::get('{product}/variants/create', [ProductVariantController::class, 'create'])->name('variants.create');
+        Route::post('{product}/variants', [ProductVariantController::class, 'store'])->name('variants.store');
+        Route::get('variants/{variant}/edit', [ProductVariantController::class, 'edit'])->name('variants.edit');
+        Route::put('variants/{variant}', [ProductVariantController::class, 'update'])->name('variants.update');
+        Route::delete('variants/{variant}', [ProductVariantController::class, 'destroy'])->name('variants.destroy');
+    });
+
 
     // Quản lý bài viết
     Route::resource('news', NewsController::class);

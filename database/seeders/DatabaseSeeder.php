@@ -29,6 +29,8 @@ class DatabaseSeeder extends Seeder
             AttributeSeeder::class,
             AttributeValueSeeder::class,
             ContactSeeder::class,
+            ProductVariantSeeder::class,
+            ProductVariantsAttributeSeeder::class,
         ]);
     }
 }

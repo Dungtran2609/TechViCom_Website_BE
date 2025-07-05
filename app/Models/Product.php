@@ -48,5 +48,13 @@ class Product extends Model
     {
         return $this->hasMany(ProductAllImage::class);
     }
+    // app/Models/Product.php
+
+    public function variants()
+    {
+        return $this->hasMany(ProductVariant::class);
+    }
+    // 👉 Quan hệ tới các biến thể sản phẩm
     
+
 }
