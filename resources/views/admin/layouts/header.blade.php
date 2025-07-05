@@ -28,38 +28,61 @@
 
                 <!-- Notification -->
                 <div class="dropdown topbar-item">
-                    <button type="button" class="topbar-button position-relative" id="page-header-notifications-dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        <iconify-icon icon="solar:bell-bing-bold-duotone" class="fs-24 align-middle"></iconify-icon>
-                        <span class="position-absolute topbar-badge fs-10 translate-middle badge bg-danger rounded-pill">3</span>
+                    <!-- Button Thông báo -->
+                    <button type="button"
+                        class="btn btn-icon btn-topbar btn-ghost-secondary rounded-circle position-relative btn-notification"
+                        id="page-header-notifications-dropdown" data-bs-toggle="dropdown" aria-haspopup="true"
+                        aria-expanded="false">
+
+                        <i class="bx bx-bell fs-22"></i>
+
+                        @if ($newContacts->count() > 0)
+                            <span
+                                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger fs-10 px-2 notification-badge"
+                                style="z-index: 1;">
+                                {{ $newContacts->count() }}
+                            </span>
+                        @endif
                     </button>
-                    <div class="dropdown-menu py-0 dropdown-lg dropdown-menu-end" aria-labelledby="page-header-notifications-dropdown">
-                        <div class="p-3 border-top-0 border-start-0 border-end-0 border-dashed border">
+
+                    <div class="dropdown-menu py-0 dropdown-lg dropdown-menu-end"
+                        aria-labelledby="page-header-notifications-dropdown">
+                        <div class="p-3">
                             <div class="row align-items-center">
                                 <div class="col">
-                                    <h6 class="m-0 fs-16 fw-semibold">Notifications</h6>
+                                    <h6 class="m-0 fs-16 fw-semibold">Thông báo liên hệ mới</h6>
                                 </div>
                                 <div class="col-auto">
-                                    <a href="javascript:void(0);" class="text-dark text-decoration-underline"><small>Clear All</small></a>
+                                    <a href="{{ route('admin.contacts.index') }}"
+                                        class="text-dark text-decoration-underline"><small>Xem tất cả</small></a>
                                 </div>
                             </div>
                         </div>
+
                         <div data-simplebar style="max-height: 280px;">
-                            <a href="javascript:void(0);" class="dropdown-item py-3 border-bottom text-wrap">
-                                <div class="d-flex">
-                                    <div class="flex-shrink-0">
-                                        <img src="{{ asset('admin/images/users/avatar-1.jpg') }}" class="img-fluid me-2 avatar-sm rounded-circle" alt="avatar-1">
+                            @forelse($newContacts as $contact)
+                                <a href="{{ route('admin.contacts.show', $contact->id) }}"
+                                    class="dropdown-item py-3 border-bottom text-wrap">
+                                    <div class="d-flex">
+                                        <div class="flex-grow-1">
+                                            <p class="mb-0">
+                                                <span class="fw-medium">{{ $contact->name }}</span> đã gửi một liên hệ
+                                                mới.
+                                                <br>
+                                                <small
+                                                    class="text-muted">{{ $contact->created_at->diffForHumans() }}</small>
+                                            </p>
+                                        </div>
                                     </div>
-                                    <div class="flex-grow-1">
-                                        <p class="mb-0">
-                                            <span class="fw-medium">Josephine Thompson</span> commented on admin panel
-                                            <span>" Wow 😍! this admin looks good and awesome design"</span>
-                                        </p>
-                                    </div>
-                                </div>
-                            </a>
+                                </a>
+                            @empty
+                                <p class="text-center text-muted p-3">Không có liên hệ mới.</p>
+                            @endforelse
                         </div>
+
                         <div class="text-center py-3">
-                            <a href="#" class="btn btn-primary btn-sm">View All Notifications <i class="bx bx-right-arrow-alt ms-1"></i></a>
+                            <a href="{{ route('admin.contacts.index') }}" class="btn btn-primary btn-sm">Xem tất cả liên
+                                hệ</a>
                         </div>
                     </div>
                 </div>
@@ -67,7 +90,8 @@
 
                 <!-- Theme Settings -->
                 <div class="topbar-item d-none d-md-flex">
-                    <button type="button" class="topbar-button" data-bs-toggle="offcanvas" data-bs-target="#theme-settings-offcanvas" aria-controls="theme-settings-offcanvas">
+                    <button type="button" class="topbar-button" data-bs-toggle="offcanvas"
+                        data-bs-target="#theme-settings-offcanvas" aria-controls="theme-settings-offcanvas">
                         <iconify-icon icon="solar:settings-bold-duotone" class="fs-24 align-middle"></iconify-icon>
                     </button>
                 </div>
@@ -75,9 +99,11 @@
 
                 <!-- User Dropdown -->
                 <div class="dropdown topbar-item">
-                    <a type="button" class="topbar-button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <a type="button" class="topbar-button" data-bs-toggle="dropdown" aria-haspopup="true"
+                        aria-expanded="false">
                         <span class="d-flex align-items-center">
-                            <img class="rounded-circle" width="32" src="{{ asset('admin/images/users/avatar-1.jpg') }}" alt="avatar">
+                            <img class="rounded-circle" width="32"
+                                src="{{ asset('admin/images/users/avatar-1.jpg') }}" alt="avatar">
                         </span>
                     </a>
                     <div class="dropdown-menu dropdown-menu-end">

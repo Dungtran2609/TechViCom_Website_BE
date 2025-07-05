@@ -10,13 +10,25 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        $this->call([
-            // Auth & quyền
+
+        
+        
+
+        $this->call([ 
+            UserSeeder::class,
+            CategorySeeder::class,
+            NewsCategorySeeder::class,
+            NewsSeeder::class,
+            NewsCommentSeeder::class,
+            LoginHistorySeeder::class,
+            ProductSeeder::class,
+
             RoleSeeder::class,
             PermissionSeeder::class,
             UserSeeder::class,
             UserRoleSeeder::class,
             PermissionRoleSeeder::class,
+
 
             // Thông báo
             NotificationSeeder::class,
@@ -76,6 +88,12 @@ class DatabaseSeeder extends Seeder
 
             // Lịch sử đăng nhập
             LoginHistorySeeder::class,
+
+
+
+
+
+
         ]);
     }
 }
