@@ -12,7 +12,7 @@ use App\Http\Controllers\Admin\Contacts\ContactsAdminController;
 use App\Http\Controllers\Admin\News\NewsCategoryController;
 use App\Http\Controllers\Admin\News\NewsController;
 use App\Http\Controllers\Client\ProfileController;
-use App\Http\Controllers\Admin\Products\BrandController;
+
 use App\Http\Controllers\Admin\Products\CategoryController;
 use App\Http\Controllers\Admin\Products\AttributeController;
 use App\Http\Controllers\Admin\Products\AttributeValueController;
@@ -28,11 +28,11 @@ Route::middleware([IsAdmin::class])->prefix('admin-control')->name('admin.')->gr
     Route::delete('products/categories/{id}/force-delete', [CategoryController::class, 'forceDelete'])->name('products.categories.force-delete');
     Route::resource('products/categories', CategoryController::class)->names('products.categories');
 
-    // Brands
-    Route::get('products/brands/trashed', [BrandController::class, 'trashed'])->name('products.brands.trashed');
-    Route::post('products/brands/{id}/restore', [BrandController::class, 'restore'])->name('products.brands.restore');
-    Route::delete('products/brands/{id}/force-delete', [BrandController::class, 'forceDelete'])->name('products.brands.force-delete');
-    Route::resource('products/brands', BrandController::class)->names('products.brands');
+   
+   
+   
+   
+   
 
     // Attributes
     Route::get('products/attributes/trashed', [AttributeController::class, 'trashed'])->name('products.attributes.trashed');
