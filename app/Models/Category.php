@@ -21,4 +21,18 @@ class Category extends Model
         'description',
         // Thêm các trường khác nếu có
     ];
+    /**
+ * Mối quan hệ với bảng Category (Danh mục cha)
+ */
+public function parent()
+{
+        return $this->belongsTo(Category::class, 'parent_id');
+}
+/**
+ * Mối quan hệ với các bảng Product (Sản phẩm thuộc danh mục này)
+ */
+public function products()
+{
+    return $this->hasMany(Product::class);
+}
 }

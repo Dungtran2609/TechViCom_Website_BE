@@ -1,17 +1,40 @@
 <?php
+use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\Admin\Products\BrandController;
+use App\Http\Controllers\Admin\OrderController;
+use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\Client\AccountController;
+use App\Http\Controllers\Client\HomeController;
+use App\Http\Controllers\Client\ProfileController;
+use App\Http\Middleware\IsAdmin;
 use Illuminate\Support\Facades\Route;
 
-use App\Http\Controllers\Auth\AuthController;
-use App\Http\Controllers\Client\HomeController;
-use App\Http\Controllers\Admin\AdminController;
-use App\Http\Controllers\Admin\UserController;
-use App\Http\Middleware\IsAdmin;
-use App\Http\Controllers\Client\ProfileController;
-use App\Http\Controllers\Client\AccountController;
+Route::middleware([IsAdmin::class])->prefix('admin-control')->name('admin.')->group(function () {
+    // Trang dashboard admin
+    Route::get('/', [AdminController::class, 'dashboard'])->name('dashboard');
+    Route::prefix('products')->name('products.')->group(function () {
+        // Brands routes
+        Route::get('brands/trashed', [BrandController::class, 'trashed'])->name('brands.trashed');
+        Route::post('brands/{id}/restore', [BrandController::class, 'restore'])->name('brands.restore');
+        Route::delete('brands/{id}/force-delete', [BrandController::class, 'forceDelete'])->name('brands.forceDelete');
+        Route::resource('brands', BrandController::class);
 
-Route::get('/admin-control', [AdminController::class, 'dashboard'])
-    ->middleware([IsAdmin::class])
-    ->name('admin.dashboard');
+    });
+    // Order routes
+    Route::prefix('order')->name('order.')->group(function () {
+        Route::get('trashed', [OrderController::class, 'trashed'])->name('trashed');
+        Route::post('{id}/restore', [OrderController::class, 'restore'])->name('restore');
+        Route::delete('{id}/force-delete', [OrderController::class, 'forceDelete'])->name('force-delete');
+        Route::post('{id}/update-status', [OrderController::class, 'updateOrders'])->name('updateOrders');
+        Route::get('returns', [OrderController::class, 'returnsIndex'])->name('returns');
+        Route::post('returns/{id}/process', [OrderController::class, 'processReturn'])->name('process-return');
+        Route::resource('', OrderController::class)->parameters(['' => 'order'])->names('');
+    });
+
+
+
+
+});
 
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
@@ -22,7 +45,6 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
-
 
 Route::middleware('auth')->group(function () {
     Route::get('/account/show', [AccountController::class, 'show'])->name('account.show');
@@ -36,6 +58,3 @@ Route::middleware('auth')->group(function () {
     Route::post('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
     Route::post('/profile/delete', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
-
-
-
