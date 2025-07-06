@@ -6,6 +6,13 @@
             <h1>Quản lý Bình luận Bài viết</h1>
         </div>
 
+        <form action="{{ route('admin.news-comments.index') }}" method="GET" class="mb-3 d-flex" style="max-width: 500px;">
+            <input type="text" name="keyword" value="{{ request('keyword') }}" class="form-control me-2"
+                placeholder="Tìm theo nội dung, người bình luận hoặc bài viết...">
+            <button type="submit" class="btn btn-outline-primary">Tìm</button>
+        </form>
+
+
         @if (session('success'))
             <div class="alert alert-success">{{ session('success') }}</div>
         @endif
@@ -45,19 +52,20 @@
                                     <td>
                                         {{-- Nút Ẩn / Hiện --}}
                                         <form action="{{ route('admin.news-comments.toggle', $comment->id) }}"
-                                              method="POST" class="d-inline">
+                                            method="POST" class="d-inline">
                                             @csrf
                                             @method('PATCH')
-                                            <button type="submit" class="btn btn-sm btn-{{ $comment->is_hidden ? 'secondary' : 'warning' }}"
-                                                    title="{{ $comment->is_hidden ? 'Hiện bình luận' : 'Ẩn bình luận' }}">
+                                            <button type="submit"
+                                                class="btn btn-sm btn-{{ $comment->is_hidden ? 'secondary' : 'warning' }}"
+                                                title="{{ $comment->is_hidden ? 'Hiện bình luận' : 'Ẩn bình luận' }}">
                                                 <i class="fas fa-eye-slash"></i>
                                             </button>
                                         </form>
 
                                         {{-- Nút Xoá --}}
                                         <form action="{{ route('admin.news-comments.destroy', $comment->id) }}"
-                                              method="POST" class="d-inline"
-                                              onsubmit="return confirm('Bạn có chắc muốn xoá bình luận này không?')">
+                                            method="POST" class="d-inline"
+                                            onsubmit="return confirm('Bạn có chắc muốn xoá bình luận này không?')">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="btn btn-sm btn-danger" title="Xoá">

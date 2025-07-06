@@ -39,18 +39,22 @@ class NewsController extends Controller
             'published_at' => 'nullable|date',
             'category_id' => 'nullable|exists:news_categories,category_id',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+
         ], [
             'title.required' => 'Tiêu đề là bắt buộc.',
             'content.required' => 'Nội dung là bắt buộc.',
             'author_id.required' => 'Tác giả là bắt buộc.',
             'status.required' => 'Trạng thái là bắt buộc.',
             'status.in' => 'Trạng thái không hợp lệ.',
-            'published_at.date' => 'Ngày đăng không hợp lệ.',
             'category_id.exists' => 'Danh mục được chọn không tồn tại.',
             'image.image' => 'Tệp tải lên phải là hình ảnh.',
             'image.mimes' => 'Hình ảnh phải có định dạng jpeg, png, jpg, gif hoặc webp.',
             'image.max' => 'Kích thước ảnh không được vượt quá 2MB.',
         ]);
+
+        if (empty($data['published_at']) && $data['status'] === 'published') {
+            $data['published_at'] = now();
+        }
 
 
         if ($request->hasFile('image')) {
@@ -90,7 +94,6 @@ class NewsController extends Controller
             'author_id.required' => 'Tác giả là bắt buộc.',
             'status.required' => 'Trạng thái là bắt buộc.',
             'status.in' => 'Trạng thái không hợp lệ.',
-            'published_at.date' => 'Ngày đăng không hợp lệ.',
             'category_id.exists' => 'Danh mục được chọn không tồn tại.',
             'image.image' => 'Tệp tải lên phải là hình ảnh.',
             'image.mimes' => 'Hình ảnh phải có định dạng jpeg, png, jpg, gif hoặc webp.',
@@ -104,6 +107,11 @@ class NewsController extends Controller
             $file->move(public_path('uploads/news'), $filename);
             $data['image'] = 'uploads/news/' . $filename;
         }
+
+        // Ghi đè ngày đăng là hiện tại
+        $data['published_at'] = now();
+
+        $news->update($data);
 
 
         $news->update($data);
