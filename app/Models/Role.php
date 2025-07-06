@@ -10,24 +10,37 @@ class Role extends Model
 {
     use HasFactory, SoftDeletes;
 
-    // Các cột có thể điền vào
+    // Cho phép gán các thuộc tính
     protected $fillable = ['name'];
 
-    // Đánh dấu soft delete
+    // Dùng soft delete
     protected $dates = ['deleted_at'];
 
     /**
-     * Quan hệ nhiều-nhiều với bảng users thông qua bảng trung gian user_roles.
+     * Quan hệ nhiều-nhiều với bảng users qua bảng user_roles.
      */
     public function users()
     {
-        return $this->belongsToMany(User::class, 'user_roles', 'role_id', 'user_id', 'id', 'id');
+        return $this->belongsToMany(User::class, 'user_roles', 'role_id', 'user_id');
     }
 
-    // app/Models/Role.php
+    /**
+     * Quan hệ nhiều-nhiều với bảng permissions qua bảng permission_role.
+     */
     public function permissions()
     {
-        return $this->belongsToMany(Permission::class);
+        return $this->belongsToMany(Permission::class, 'permission_role');
     }
 
+
+    /**
+     * Kiểm tra vai trò có một quyền cụ thể không
+     *
+     * @param string $permissionName
+     * @return bool
+     */
+    public function hasPermission(string $permissionName): bool
+    {
+        return $this->permissions->contains('name', $permissionName);
+    }
 }
