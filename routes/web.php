@@ -10,6 +10,7 @@ use App\Http\Controllers\Client\HomeController;
 use App\Http\Controllers\Client\AccountController;
 use App\Http\Controllers\Admin\Contacts\ContactsAdminController;
 use App\Http\Controllers\Admin\News\NewsCategoryController;
+use App\Http\Controllers\Admin\News\NewsCommentController;
 use App\Http\Controllers\Admin\News\NewsController;
 use App\Http\Controllers\Client\ProfileController;
 use App\Http\Controllers\Admin\Products\BrandController;
@@ -55,10 +56,14 @@ Route::middleware([IsAdmin::class])->prefix('admin-control')->name('admin.')->gr
     // Quản lý bài viết
     Route::resource('news', NewsController::class);
     Route::resource('news-categories', NewsCategoryController::class);
+    Route::get('/news-comments', [NewsCommentController::class, 'index'])->name('news-comments.index');
+    Route::delete('/news-comments/{id}', [NewsCommentController::class, 'destroy'])->name('news-comments.destroy');
+    Route::patch('/news-comments/{id}/toggle', [NewsCommentController::class, 'toggleVisibility'])->name('news-comments.toggle');
 
     // Quản lý liên hệ
     Route::get('contacts', [ContactsAdminController::class, 'index'])->name('contacts.index');
     Route::get('contacts/{id}', [ContactsAdminController::class, 'show'])->name('contacts.show');
+
     Route::delete('contacts/{id}', [ContactsAdminController::class, 'destroy'])->name('contacts.destroy');
     Route::prefix('order')->name('order.')->group(function () {
         Route::get('trashed', [OrderController::class, 'trashed'])->name('trashed');

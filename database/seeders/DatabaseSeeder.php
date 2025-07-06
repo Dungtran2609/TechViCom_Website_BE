@@ -68,11 +68,5 @@ class DatabaseSeeder extends Seeder
             LoginHistorySeeder::class,
         ]);
 
-
-
-
-
-
-
     }
 }

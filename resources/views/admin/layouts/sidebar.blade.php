@@ -102,6 +102,10 @@
                     <ul class="nav sub-navbar-nav">
                         <li class="sub-nav-item"><a class="sub-nav-link" href="{{ route('admin.news.index') }}">Bài viết</a></li>
                     </ul>
+                    {{-- bình luận bài viết --}}
+                    <ul class="nav sub-navbar-nav">
+                        <li class="sub-nav-item"><a class="sub-nav-link" href="{{ route('admin.news-comments.index') }}">Bình luận bài viết</a></li>
+                    </ul>
                 </div>
             </li>
 
