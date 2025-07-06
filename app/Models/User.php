@@ -1,12 +1,11 @@
 <?php
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class User extends Authenticatable
 {
@@ -37,12 +36,12 @@ class User extends Authenticatable
     public function roles(): BelongsToMany
     {
         return $this->belongsToMany(
-            Role::class,          // Model Role
-            'user_roles',         // Bảng trung gian
-            'user_id',            // Khóa ngoại trong bảng trung gian liên kết với User
-            'role_id',            // Khóa ngoại trong bảng trung gian liên kết với Role
-            'id',                 // Khóa chính trong bảng User
-            'id'                  // Khóa chính trong bảng Role
+            Role::class,  // Model Role
+            'user_roles', // Bảng trung gian
+            'user_id',    // Khóa ngoại trong bảng trung gian liên kết với User
+            'role_id',    // Khóa ngoại trong bảng trung gian liên kết với Role
+            'id',         // Khóa chính trong bảng User
+            'id'          // Khóa chính trong bảng Role
         );
     }
 
@@ -56,12 +55,25 @@ class User extends Authenticatable
     public function addresses(): HasMany
     {
         return $this->hasMany(
-            UserAddress::class,  // Model UserAddress
-            'user_id',           // Khóa ngoại trong bảng UserAddress
-            'id'                 // Khóa chính trong bảng User
+            UserAddress::class, // Model UserAddress
+            'user_id',          // Khóa ngoại trong bảng UserAddress
+            'id'                // Khóa chính trong bảng User
         );
     }
-
+/**
+ * Mối quan hệ người dùng và các địa chỉ
+ */
+    public function userAddresses()
+    {
+        return $this->hasMany(UserAddress::class);
+    }
+/**
+ * Mối quan hệ người dùng và các đơn hàng
+ */
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
+    }
     /**
      * Kiểm tra xem người dùng có vai trò cụ thể không.
      *
