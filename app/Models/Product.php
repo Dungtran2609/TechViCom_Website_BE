@@ -17,6 +17,7 @@ class Product extends Model
         'price',
         'sale_price',
         'stock',
+        'low_stock_amount',
         'short_description',
         'long_description',
         'thumbnail',

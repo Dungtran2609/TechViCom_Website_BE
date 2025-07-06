@@ -30,7 +30,7 @@ class DatabaseSeeder extends Seeder
             AttributeValueSeeder::class,
             ContactSeeder::class,
             ProductVariantSeeder::class,
-            ProductVariantsAttributeSeeder::class,
+            ProductVariantAttributeSeeder::class,
         ]);
     }
 }
