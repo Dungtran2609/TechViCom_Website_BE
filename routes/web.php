@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\Admin\BannerController;
 use App\Http\Controllers\Client\HomeController;
 use App\Http\Controllers\Client\AccountController;
 use App\Http\Controllers\Admin\News\NewsCategoryController;
@@ -23,7 +24,7 @@ use App\Http\Controllers\Admin\OrderController;
 Route::middleware([IsAdmin::class])->prefix('admin-control')->name('admin.')->group(function () {
     // Trang dashboard admin
     Route::get('/', [AdminController::class, 'dashboard'])->name('dashboard');
-
+    Route::resource('banner', BannerController::class);
     // Categories
     Route::get('products/categories/trashed', [CategoryController::class, 'trashed'])->name('products.categories.trashed');
     Route::post('products/categories/{id}/restore', [CategoryController::class, 'restore'])->name('products.categories.restore');

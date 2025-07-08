@@ -160,7 +160,7 @@
                 </a>
                 <div class="collapse" id="7">
                     <ul class="nav sub-navbar-nav">
-                        <li class="sub-nav-item"><a class="sub-nav-link" href="#">Quản lý banner</a></li>
+                        <li class="sub-nav-item"><a class="sub-nav-link" href="{{ route('admin.banner.index') }}">Quản lý banner</a></li>
                     </ul>
                 </div>
             </li>
