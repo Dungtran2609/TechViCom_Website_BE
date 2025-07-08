@@ -24,6 +24,8 @@ class Product extends Model
         'status',
         'brand_id',
         'category_id',
+        'deleted_at'
+
     ];
 
     protected $casts = [
@@ -43,10 +45,6 @@ class Product extends Model
     {
         return $this->belongsTo(Category::class);
     }
-    {
-        return $this->belongsTo(Category::class);
-    }
-
     // 👉 Danh sách tất cả ảnh phụ
     public function allImages()
     {

@@ -66,6 +66,7 @@ class DatabaseSeeder extends Seeder
 
             BannerSeeder::class,
             LoginHistorySeeder::class,
+            ContactSeeder::class,
         ]);
 
     }
