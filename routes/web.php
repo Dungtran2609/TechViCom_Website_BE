@@ -8,6 +8,9 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Client\HomeController;
 use App\Http\Controllers\Client\AccountController;
+use App\Http\Controllers\Admin\Contacts\ContactsAdminController;
+use App\Http\Controllers\Admin\News\NewsCategoryController;
+use App\Http\Controllers\Admin\News\NewsCommentController;
 use App\Http\Controllers\Admin\News\NewsController;
 use App\Http\Controllers\Client\ProfileController;
 use App\Http\Controllers\Admin\Products\BrandController;
@@ -17,6 +20,7 @@ use App\Http\Controllers\Admin\Products\CategoryController;
 use App\Http\Controllers\Admin\Products\AttributeController;
 use App\Http\Controllers\Admin\Contacts\ContactsAdminController;
 use App\Http\Controllers\Admin\Products\AttributeValueController;
+use App\Http\Controllers\Admin\OrderController;
 
 Route::middleware([IsAdmin::class])->prefix('admin-control')->name('admin.')->group(function () {
     // Trang dashboard admin
@@ -55,10 +59,14 @@ Route::middleware([IsAdmin::class])->prefix('admin-control')->name('admin.')->gr
     // Quản lý bài viết
     Route::resource('news', NewsController::class);
     Route::resource('news-categories', NewsCategoryController::class);
+    Route::get('/news-comments', [NewsCommentController::class, 'index'])->name('news-comments.index');
+    Route::delete('/news-comments/{id}', [NewsCommentController::class, 'destroy'])->name('news-comments.destroy');
+    Route::patch('/news-comments/{id}/toggle', [NewsCommentController::class, 'toggleVisibility'])->name('news-comments.toggle');
 
     // Quản lý liên hệ
     Route::get('contacts', [ContactsAdminController::class, 'index'])->name('contacts.index');
     Route::get('contacts/{id}', [ContactsAdminController::class, 'show'])->name('contacts.show');
+
     Route::delete('contacts/{id}', [ContactsAdminController::class, 'destroy'])->name('contacts.destroy');
 
     // Quản lý sản phẩm
@@ -66,6 +74,15 @@ Route::middleware([IsAdmin::class])->prefix('admin-control')->name('admin.')->gr
     Route::post('products/{id}/restore', [ProductController::class, 'restore'])->name('products.restore');
     Route::delete('products/{id}/force-delete', [ProductController::class, 'forceDelete'])->name('products.force-delete');
     Route::resource('products', ProductController::class)->names('products');
+    Route::prefix('order')->name('order.')->group(function () {
+        Route::get('trashed', [OrderController::class, 'trashed'])->name('trashed');
+        Route::post('{id}/restore', [OrderController::class, 'restore'])->name('restore');
+        Route::delete('{id}/force-delete', [OrderController::class, 'forceDelete'])->name('force-delete');
+        Route::post('{id}/update-status', [OrderController::class, 'updateOrders'])->name('updateOrders');
+        Route::get('returns', [OrderController::class, 'returnsIndex'])->name('returns');
+        Route::post('returns/{id}/process', [OrderController::class, 'processReturn'])->name('process-return');
+        Route::resource('', OrderController::class)->parameters(['' => 'order'])->names('');
+    });
 });
 
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
@@ -77,7 +94,6 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
-
 
 Route::middleware('auth')->group(function () {
     Route::get('/account/show', [AccountController::class, 'show'])->name('account.show');

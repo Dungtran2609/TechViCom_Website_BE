@@ -5,6 +5,12 @@
     <h1>Liên hệ người dùng</h1>
 </div>
 
+<form action="{{ route('admin.contacts.index') }}" method="GET" class="mb-3 d-flex" style="max-width: 400px;">
+    <input type="text" name="keyword" class="form-control me-2" value="{{ request('keyword') }}" placeholder="Tìm kiếm liên hệ...">
+    <button type="submit" class="btn btn-outline-primary">Tìm</button>
+</form>
+
+
 @if (session('success'))
     <div class="alert alert-success">
         {{ session('success') }}

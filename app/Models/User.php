@@ -61,7 +61,20 @@ class User extends Authenticatable
             'id'                 // Khóa chính trong bảng User
         );
     }
-
+    /**
+     * Mối quan hệ người dùng và các địa chỉ
+     */
+    public function userAddresses()
+    {
+        return $this->hasMany(UserAddress::class);
+    }
+    /**
+     * Mối quan hệ người dùng và các đơn hàng
+     */
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
+    }
     /**
      * Kiểm tra xem người dùng có vai trò cụ thể không.
      *

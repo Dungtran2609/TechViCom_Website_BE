@@ -45,18 +45,12 @@
             </div>
 
             <div class="row">
-                <div class="col-md-6 mb-3">
+                <div class="col-md-12 mb-3">
                     <label class="form-label fw-semibold">Trạng thái</label>
                     <select name="status" class="form-select" required>
                         <option value="published" {{ old('status') === 'published' ? 'selected' : '' }}>Đã đăng</option>
                         <option value="draft" {{ old('status') === 'draft' ? 'selected' : '' }}>Nháp</option>
                     </select>
-                </div>
-
-                <div class="col-md-6 mb-3">
-                    <label class="form-label fw-semibold">Ngày đăng</label>
-                    <input type="datetime-local" name="published_at" class="form-control"
-                        value="{{ old('published_at') }}">
                 </div>
             </div>
 
