@@ -26,7 +26,9 @@ class UserRoleSeeder extends Seeder
         if ($users->contains(3) && $roles->contains(3)) {
             $userRoles[] = ['user_id' => 3, 'role_id' => 3]; // user 3 là user
         }
-
+if ($users->contains(3) && $roles->contains(3)) {
+            $userRoles[] = ['user_id' => 13, 'role_id' => 1]; 
+        }
         if (!empty($userRoles)) {
             DB::table('user_roles')->insert($userRoles);
         }
