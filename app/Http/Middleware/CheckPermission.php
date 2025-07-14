@@ -8,14 +8,13 @@ use Illuminate\Support\Facades\Auth;
 class CheckPermission
 {
     /**
-     * Kiểm tra xem người dùng có quyền cụ thể hay không.
+     * Chỉ cho phép người dùng có vai trò 'admin' được truy cập.
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  \Closure  $next
-     * @param  mixed  ...$permissions
      * @return mixed
      */
-    public function handle($request, Closure $next, ...$permissions)
+    public function handle($request, Closure $next)
     {
         $user = Auth::user();
 
@@ -24,24 +23,14 @@ class CheckPermission
             return redirect()->route('login');
         }
 
-        // Lấy tất cả quyền từ các vai trò của người dùng
-        $userPermissions = $user->roles()
-            ->with('permissions') // eager load permissions
-            ->get()
-            ->pluck('permissions') // lấy từng danh sách permissions
-            ->flatten()            // gộp lại thành một collection
-            ->pluck('name')        // lấy tên quyền
-            ->unique()
-            ->toArray();
+        // Kiểm tra user có vai trò là 'admin' không
+        $hasAdminRole = $user->roles()->where('name', 'admin')->exists();
 
-        // Nếu người dùng có ít nhất một quyền phù hợp thì cho phép tiếp tục
-        foreach ($permissions as $permission) {
-            if (in_array($permission, $userPermissions)) {
-                return $next($request);
-            }
+        if ($hasAdminRole) {
+            return $next($request);
         }
 
-        // Không có quyền phù hợp
-        abort(403, 'Bạn không có quyền truy cập chức năng này.');
+        // Nếu không có quyền admin
+        abort(403, 'Bạn không có quyền truy cập (chỉ dành cho Admin).');
     }
 }

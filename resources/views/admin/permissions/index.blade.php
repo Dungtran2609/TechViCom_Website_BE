@@ -17,9 +17,10 @@
 
         <div class="card">
             <div class="card-body">
-                <a href="{{ route('admin.permissions.list') }}" class="btn btn-success">
-                <i class="fas fa-plus"></i> Danh sách vai trò
-            </a>
+                <a href="{{ route('admin.permissions.list') }}" class="btn btn-success mb-3">
+                    <i class="fas fa-list"></i> Danh sách vai trò
+                </a>
+
                 <div class="table-responsive">
                     <table class="table table-bordered table-hover text-center align-middle">
                         <thead class="table-light">
@@ -40,9 +41,9 @@
                                     @foreach ($roles as $role)
                                         <td>
                                             <input type="checkbox"
-                                                   name="permissions[{{ $permission->id }}][]"
-                                                   value="{{ $role->id }}"
-                                                   {{ $permission->roles->pluck('id')->contains($role->id) ? 'checked' : '' }}>
+                                                name="permissions[{{ $role->id }}][]"
+                                                value="{{ $permission->id }}"
+                                                {{ $role->permissions->pluck('id')->contains($permission->id) ? 'checked' : '' }}>
                                         </td>
                                     @endforeach
                                 </tr>
