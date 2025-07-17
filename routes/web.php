@@ -206,3 +206,14 @@ Route::middleware('auth')->group(function () {
     Route::post('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
     Route::post('/profile/delete', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
+// coupons
+use App\Http\Controllers\Admin\Coupons\CouponController;
+
+Route::prefix('admin-control')->name('admin.')->middleware(['auth'])->group(function () {
+    Route::middleware(['permission:manage_coupons'])->group(function () {
+        Route::resource('coupons', CouponController::class)->except(['show']);
+        Route::put('coupons/{id}/restore', [CouponController::class, 'restore'])->name('coupons.restore');
+        Route::delete('coupons/{id}/force-delete', [CouponController::class, 'forceDelete'])->name('coupons.forceDelete');
+    });
+});
+

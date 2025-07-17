@@ -39,11 +39,16 @@
                 </a>
                 <div class="collapse" id="1">
                     <ul class="nav sub-navbar-nav">
-                        <li class="sub-nav-item"><a class="sub-nav-link" href="{{ route('admin.products.index') }}">Danh sách sản phẩm</a></li>
-                        <li class="sub-nav-item"><a class="sub-nav-link" href="{{ route('admin.products.categories.index') }}">Danh mục</a></li>
-                        <li class="sub-nav-item"><a class="sub-nav-link" href="{{ route('admin.products.brands.index') }}">Thương hiệu</a></li>
-                        <li class="sub-nav-item"><a class="sub-nav-link" href="{{ route('admin.products.attributes.index') }}">Thuộc tính</a></li>
-                        <li class="sub-nav-item"><a class="sub-nav-link" href="{{ route('admin.products.variants.select') }}">Biến thể</a></li>
+                        <li class="sub-nav-item"><a class="sub-nav-link" href="{{ route('admin.products.index') }}">Danh
+                                sách sản phẩm</a></li>
+                        <li class="sub-nav-item"><a class="sub-nav-link"
+                                href="{{ route('admin.products.categories.index') }}">Danh mục</a></li>
+                        <li class="sub-nav-item"><a class="sub-nav-link"
+                                href="{{ route('admin.products.brands.index') }}">Thương hiệu</a></li>
+                        <li class="sub-nav-item"><a class="sub-nav-link"
+                                href="{{ route('admin.products.attributes.index') }}">Thuộc tính</a></li>
+                        <li class="sub-nav-item"><a class="sub-nav-link"
+                                href="{{ route('admin.products.variants.select') }}">Biến thể</a></li>
                     </ul>
                 </div>
             </li>
@@ -101,7 +106,8 @@
                     </ul>
                     {{-- bai viet --}}
                     <ul class="nav sub-navbar-nav">
-                        <li class="sub-nav-item"><a class="sub-nav-link" href="{{ route('admin.news.index') }}">Bài viết</a></li>
+                        <li class="sub-nav-item"><a class="sub-nav-link" href="{{ route('admin.news.index') }}">Bài
+                                viết</a></li>
                     </ul>
                 </div>
             </li>
@@ -145,11 +151,16 @@
                 </a>
                 <div class="collapse" id="6">
                     <ul class="nav sub-navbar-nav">
-                        <li class="sub-nav-item"><a class="sub-nav-link" href="#">Mã giảm giá</a></li>
-                        <li class="sub-nav-item"><a class="sub-nav-link" href="#">Chương trình</a></li>
+                        <li class="sub-nav-item">
+                            <a class="sub-nav-link" href="{{ route('admin.coupons.index') }}">Mã giảm giá</a>
+                        </li>
+                        <li class="sub-nav-item">
+                            <a class="sub-nav-link" href="#">Chương trình</a>
+                        </li>
                     </ul>
                 </div>
             </li>
+
 
 
             <!-- Hệ thống -->
