@@ -7,50 +7,86 @@ use Illuminate\Support\Facades\DB;
 
 class OrderSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        DB::table('orders')->insert([
-            [
-                'user_id'            => 1,
-                'address_id'         => 1,
-                'payment_method'     => 'credit_card',
-                'status'             => 'processing',
-                'total_amount'       => 1000000.00, // Giá trị mẫu cho tổng tiền sản phẩm
-                'final_total'        => 1100000.00, // Giá trị mẫu sau khi cộng phí vận chuyển và trừ giảm giá
-                                                    // 'shipping_fee'       => 50000.00,   // Phí vận chuyển mẫu
+        $users  = DB::table('users')->get();
+        $orders = [];
 
-                'shipping_method_id' => 1, // ID của shipping_method (giả sử đã có trong DB)
-                'coupon_id'          => 1, // ID của coupon (giả sử đã có trong DB)
-                'recipient_name'     => 'Nguyễn Văn A',
-                'recipient_phone'    => '0901234567',
-                'recipient_address'  => '123 Đường ABC, Quận 1, TP.HCM',
-                'shipped_at'         => Carbon::now()->addDays(2),
-                'created_at'         => now(),
-                'updated_at'         => now(),
-                'deleted_at'         => null, // Không xóa mềm ban đầu
-            ],
-            [
-                'user_id'            => 2,
-                'address_id'         => 2,
+        foreach ($users as $user) {
+            $address = DB::table('user_addresses')
+                ->where('user_id', $user->id)
+                ->where('is_default', true)
+                ->first();
+
+            if (! $address) {
+                continue;
+            }
+
+            $totalAmount = 500000; // giả định đơn hàng mẫu
+            $totalWeight = 1.5;    // kg
+
+            $shippingFee = 35000; // mặc định nếu GHN lỗi
+
+            try {
+                $district = DB::table('districts')->where('id', $address->district_id)->first();
+                $ward     = DB::table('wards')->where('id', $address->ward_id)->first();
+
+                $ghnDistrictId = $district->ghn_district_id ?? null;
+                $ghnWardCode   = $ward->ghn_ward_code ?? null;
+
+                if (! $ghnDistrictId || ! $ghnWardCode) {
+                    throw new \Exception("Thiếu mã GHN: district_id={$address->district_id}, ward_id={$address->ward_id}");
+                }
+
+                $ghnService = app(\App\Services\GHNService::class);
+
+                $services  = $ghnService->getAvailableServices(1489, (int) $ghnDistrictId);
+                $serviceId = $services[0]['service_id'] ?? null;
+
+                if (! $serviceId) {
+                    throw new \Exception("Không có dịch vụ GHN phù hợp");
+                }
+            
+                
+                $shippingResult = $ghnService->calculateShippingFee(
+                    $serviceId,
+                    0,
+                    1489,
+                    (int) $ghnDistrictId,
+                    $ghnWardCode,
+                    10, 10, $totalWeight * 1000, 10
+                );
+
+                $shippingFee = $shippingResult['total'] ?? $shippingFee;
+
+            } catch (\Exception $e) {
+                \Log::error("Lỗi GHN khi tạo đơn hàng user_id={$user->id}: " . $e->getMessage());
+            }
+
+            $orders[] = [
+                'user_id'            => $user->id,
+                'address_id'         => $address->id,
+                'recipient_name'     => $user->name,
+                'recipient_phone'    => $user->phone_number,
+                'recipient_address'  => $address->address_line,
+                'province_id'        => $address->province_id,
+                'district_id'        => $address->district_id,
+                'ward_id'            => $address->ward_id,
+                'total_amount'       => $totalAmount,
+                'total_weight'       => $totalWeight,
+                'coupon_id'          => null,
                 'payment_method'     => 'cod',
-                'status'             => 'pending',
-                'total_amount'       => 800000.00, // Giá trị mẫu cho tổng tiền sản phẩm
-                'final_total'        => 850000.00, // Giá trị mẫu sau khi cộng phí vận chuyển và trừ giảm giá
-                                                   // 'shipping_fee'       => 50000.00,  // Phí vận chuyển mẫu
+                'status'             => 'processing',
+                'shipping_fee'       => $shippingFee,
+                'final_total'        => $totalAmount + $shippingFee,
+                'shipping_method_id' => 1,
+                'shipped_at'         => Carbon::now()->addDays(2),
+                'created_at'         => Carbon::now(),
+                'updated_at'         => Carbon::now(),
+                'deleted_at'         => null,
+            ];
+        }
 
-                'shipping_method_id' => 2, // ID của shipping_method (giả sử đã có trong DB)
-                'coupon_id'          => 1, // Không áp dụng coupon
-                'recipient_name'     => 'Trần Thị B',
-                'recipient_phone'    => '0912345678',
-                'recipient_address'  => '456 Đường XYZ, Quận 7, TP.HCM',
-                'shipped_at'         => null,
-                'created_at'         => now(),
-                'updated_at'         => now(),
-                'deleted_at'         => null, // Không xóa mềm ban đầu
-            ],
-        ]);
+        DB::table('orders')->insert($orders);
     }
 }

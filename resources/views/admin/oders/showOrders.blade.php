@@ -26,22 +26,33 @@
                 <h5 class="card-title">Thông tin đơn hàng</h5>
                 <div class="row">
                     <div class="col-md-6">
-                        <p><strong>Khách hàng:</strong> {{ $orderData['user_name'] }}</p>
-                        <p><strong>Phương thức thanh toán:</strong> {{ $orderData['payment_method_vietnamese'] }}</p>
-                        <p><strong>Trạng thái:</strong> {{ $orderData['status_vietnamese'] }}</p>
-                        <p><strong>Ngày tạo:</strong> {{ $orderData['created_at'] }}</p>
-                        <p><strong>Ngày giao hàng:</strong> {{ $orderData['shipped_at'] ? $orderData['shipped_at']->format('d/m/Y') : 'Chưa có' }}</p>
-                    </div>
-                    <div class="col-md-6">
-                        <p><strong>Tên người nhận:</strong> {{ $orderData['recipient_name'] }}</p>
-                        <p><strong>Số điện thoại:</strong> {{ $orderData['recipient_phone'] }}</p>
-                        <p><strong>Địa chỉ giao hàng:</strong> {{ $orderData['recipient_address'] }}</p>
-                        <p><strong>Phí vận chuyển:</strong> {{ number_format($orderData['shipping_fee'] ?? 0, 2) }} VND</p>
-                        <p><strong>Phương thức vận chuyển:</strong> {{ $orderData['shipping_method_name'] ?? 'Chưa chọn' }}</p>
-                        <p><strong>Giảm giá coupon:</strong> {{ number_format($orderData['coupon_discount'] ?? 0, 2) }} VND</p>
-                        <p><strong>Mã giảm giá:</strong> {{ $orderData['coupon_code'] ?? 'Chưa áp dụng' }}</p>
-                        <p><strong>Tổng tiền cuối cùng:</strong> {{ number_format($orderData['final_total'] ?? 0, 2) }} VND</p>
-                    </div>
+    <p><strong>Tên người nhận:</strong> {{ $orderData['recipient_name'] }}</p>
+    <p><strong>Số điện thoại:</strong> {{ $orderData['recipient_phone'] }}</p>
+    <p><strong>Địa chỉ giao hàng:</strong> {{ $orderData['recipient_address'] }}</p>
+
+    {{-- Thêm hiển thị tỉnh, quận, phường --}}
+    <div class="row">
+        <div class="col-4">
+            <strong>Tỉnh:</strong>
+            {{ $orderData['province_name'] ?? ($orderData['province_id'] ?? 'Chưa có') }}
+        </div>
+        <div class="col-4">
+            <strong>Quận:</strong>
+            {{ $orderData['district_name'] ?? ($orderData['district_id'] ?? 'Chưa có') }}
+        </div>
+        <div class="col-4">
+            <strong>Phường:</strong>
+            {{ $orderData['ward_name'] ?? ($orderData['ward_id'] ?? 'Chưa có') }}
+        </div>
+    </div>
+
+    <p><strong>Phí vận chuyển:</strong> {{ number_format($orderData['shipping_fee'] ?? 0, 2) }} VND</p>
+    <p><strong>Phương thức vận chuyển:</strong> {{ $orderData['shipping_method_name'] ?? 'Chưa chọn' }}</p>
+    <p><strong>Giảm giá coupon:</strong> {{ number_format($orderData['coupon_discount'] ?? 0, 2) }} VND</p>
+    <p><strong>Mã giảm giá:</strong> {{ $orderData['coupon_code'] ?? 'Chưa áp dụng' }}</p>
+    <p><strong>Tổng tiền cuối cùng:</strong> {{ number_format($orderData['final_total'] ?? 0, 2) }} VND</p>
+</div>
+
                 </div>
 
                 <!-- Chi tiết sản phẩm -->

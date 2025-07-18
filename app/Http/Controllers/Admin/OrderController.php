@@ -6,6 +6,7 @@ use App\Models\Coupon;
 use App\Models\Order;
 use App\Models\OrderReturn;
 use App\Models\ShippingMethod;
+use App\Services\GHNService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -13,122 +14,194 @@ use Illuminate\Support\Facades\Validator;
 
 class OrderController extends Controller
 {
+    protected $ghn;
 
-    public function index(Request $request)
+    public function __construct(GHNService $ghn)
     {
-        $orders = Order::with([
-            'user',
-            'orderItems.product',
-            'orderItems.product.category',
-            'orderItems.product.brand', // Thêm quan hệ brand
-            'orderItems.productVariant',
-            'orderItems.productVariant.images',
-            'orderItems.productVariant.attributeValues',
-            'orderItems.productVariant.attributeValues.attribute',
-            'shippingMethod',
-            'coupon',
-            'returns',
-        ])
-            ->when($request->search, function ($query, $search) {
-                $query->where('id', 'like', "%{$search}%")
-                    ->orWhereHas('user', function ($q) use ($search) {
-                        $q->where('name', 'like', "%{$search}%");
-                    });
-            })
-            ->latest()
-            ->paginate(15);
+        $this->ghn = $ghn;
+    }
+    public function getShippingFee($orderId, GHNService $ghnService)
+{
+    $order = Order::with('ward', 'district')->find($orderId);
 
-        $orderData = $orders->map(function ($order) {
-            $calculatedTotalAmount = $order->orderItems->sum(function ($item) {
-                $priceToUse = $item->productVariant?->sale_price ?? $item->productVariant?->price ?? 0;
-                return ($item->quantity ?? 0) * $priceToUse;
-            });
+    if (!$order) {
+        return response()->json(['error' => 'Không tìm thấy đơn hàng'], 404);
+    }
 
-            $primaryImage = $order->orderItems->flatMap(function ($item) {
-                return $item->productVariant->images->where('is_primary', true);
-            })->first();
-            $image = $primaryImage ? $primaryImage->img_url : ($order->orderItems->first()?->productVariant?->image ?? null);
+    $fromDistrictId = config('services.ghn.from_district_id');
+    $toDistrictId   = $order->district_id;
+    $toWardCode     = $order->ward->code ?? null;
 
-            $userName       = $order->user?->name ?? 'Khách vãng lai';
-            $productNames   = $order->orderItems->pluck('product.name')->implode(', ');
-            $totalQuantity  = $order->orderItems->sum('quantity');
-            $shippingFee    = $order->shipping_fee ?? ($order->shippingMethod?->fee ?? 0);
-            $couponDiscount = $order->coupon_discount ?? $this->calculateCouponDiscount($order->coupon, $calculatedTotalAmount + $shippingFee);
-            $finalTotal     = $calculatedTotalAmount + $shippingFee - $couponDiscount;
+    if (!$toDistrictId || !$toWardCode) {
+        return response()->json(['error' => 'Thiếu thông tin địa chỉ giao hàng'], 422);
+    }
 
-            $orderItems = $order->orderItems->map(function ($item) {
-                $primaryImage = $item->productVariant->images->where('is_primary', true)->first();
-                $imageUrl     = $primaryImage ? $primaryImage->img_url : $item->productVariant?->image;
-                $attributes   = $item->productVariant->attributeValues->map(function ($attributeValue) {
-                    return [
-                        'name'  => $attributeValue->attribute->name,
-                        'value' => $attributeValue->value ?? 'Chưa xác định',
-                    ];
-                })->unique('name')->values(); // Loại bỏ lặp và giữ giá trị duy nhất
-                $priceToDisplay = $item->productVariant?->sale_price ?? $item->productVariant?->price ?? 0;
+    // Tính toán cân nặng & kích thước (giả định nếu cần)
+    $weight  = 1000; // bạn có thể tính từ order_items
+    $length  = 20;
+    $width   = 10;
+    $height  = 10;
+    $insuranceValue = $order->subtotal ?? 500000;
 
+    // Lấy dịch vụ
+    $services = $ghnService->getAvailableServices($fromDistrictId, $toDistrictId);
+    if (empty($services)) {
+        return response()->json(['error' => 'Không có dịch vụ GHN khả dụng'], 422);
+    }
+
+    $serviceId = $services[0]['service_id'];
+
+    // Tính phí ship
+    $shippingData = $ghnService->calculateShippingFee(
+        $serviceId,
+        $insuranceValue,
+        $fromDistrictId,
+        $toDistrictId,
+        $toWardCode,
+        $height,
+        $length,
+        $weight,
+        $width
+    );
+
+    return response()->json(['fee' => $shippingData['total'] ?? 0]);
+}
+public function index(Request $request)
+{
+    $orders = Order::with([
+        'user',
+        'orderItems.product',
+        'orderItems.product.category',
+        'orderItems.product.brand',
+        'orderItems.productVariant',
+        'orderItems.productVariant.images',
+        'orderItems.productVariant.attributeValues',
+        'orderItems.productVariant.attributeValues.attribute',
+        'shippingMethod',
+        'coupon',
+        'returns',
+    ])
+    ->when($request->search, function ($query, $search) {
+        $query->where('id', 'like', "%{$search}%")
+              ->orWhereHas('user', function ($q) use ($search) {
+                  $q->where('name', 'like', "%{$search}%");
+              });
+    })
+    ->latest()
+    ->paginate(15);
+
+    $orderData = $orders->map(function ($order) {
+        $provinceName = $order->province?->name ?? null;
+        $districtName = $order->district?->name ?? null;
+        $wardName     = $order->ward?->name ?? null;
+
+        $calculatedTotalAmount = $order->orderItems->sum(function ($item) {
+            $price = $item->productVariant?->sale_price ?? $item->productVariant?->price ?? 0;
+            return $item->quantity * $price;
+        });
+
+        $primaryImage = $order->orderItems->flatMap(function ($item) {
+            return $item->productVariant->images->where('is_primary', true);
+        })->first();
+        $image = $primaryImage ? $primaryImage->img_url : ($order->orderItems->first()?->productVariant?->image ?? null);
+
+        $userName     = $order->user?->name ?? 'Khách vãng lai';
+        $productNames = $order->orderItems->pluck('product.name')->implode(', ');
+        $totalQuantity = $order->orderItems->sum('quantity');
+
+        $shippingFee = $order->shipping_fee ?? 0;
+
+        $couponDiscount = $order->coupon_discount ?? (
+            $order->coupon ? $this->calculateCouponDiscount($order->coupon, $calculatedTotalAmount + $shippingFee) : 0
+        );
+
+        $finalTotal = $calculatedTotalAmount + $shippingFee - $couponDiscount;
+
+        $orderItems = $order->orderItems->map(function ($item) {
+            $primaryImage = $item->productVariant->images->where('is_primary', true)->first();
+            $imageUrl = $primaryImage ? $primaryImage->img_url : $item->productVariant?->image;
+
+            $attributes = $item->productVariant->attributeValues->map(function ($attrVal) {
                 return [
-                    'image_product' => $imageUrl,
-                    'category_name' => $item->product?->category?->name ?? 'Chưa có danh mục',
-                    'name_product'  => $item->product?->name ?? 'Sản phẩm không xác định',
-                    'brand_name'    => $item->product?->brand?->name ?? 'Chưa có thương hiệu',
-                    'weight'        => $item->productVariant?->weight ?? 0,
-                    'dimensions'    => $item->productVariant?->dimensions ?? 'N/A',
-                    'stock'         => $item->productVariant?->stock ?? 0,
-                    'quantity'      => $item->quantity,
-                    'price'         => $priceToDisplay,
-                    'attributes'    => $attributes,
-                    'id'            => $item->id,
+                    'name' => $attrVal->attribute->name,
+                    'value' => $attrVal->value ?? 'Chưa xác định',
                 ];
-            });
+            })->unique('name')->values();
 
-            $paymentMethodMap = [
-                'credit_card'   => 'Thẻ tín dụng/ghi nợ',
-                'bank_transfer' => 'Chuyển khoản ngân hàng',
-                'cod'           => 'Thanh toán khi nhận hàng',
-            ];
-            $statusMap = [
-                'pending'    => 'Đang chờ xử lý',
-                'processing' => 'Đang xử lý',
-                'shipped'    => 'Đã giao',
-                'delivered'  => 'Đã nhận',
-                'cancelled'  => 'Đã hủy',
-                'returned'   => 'Đã trả hàng',
-            ];
-
-            $shippedAt = $order->shipped_at ? Carbon::parse($order->shipped_at) : null;
+            $price = $item->productVariant?->sale_price ?? $item->productVariant?->price ?? 0;
 
             return [
-                'id'                        => $order->id,
-                'image'                     => $image,
-                'user_name'                 => $userName,
-                'product_names'             => $productNames,
-                'total_quantity'            => $totalQuantity,
-                'subtotal'                  => $calculatedTotalAmount,
-                'shipping_fee'              => $shippingFee,
-                'coupon_discount'           => $couponDiscount,
-                'final_total'               => $finalTotal,
-                'status'                    => $order->status,
-                'status_vietnamese'         => $statusMap[$order->status] ?? $order->status,
-                'created_at'                => Carbon::parse($order->created_at)->format('d/m/Y H:i'),
-                'payment_method'            => $order->payment_method,
-                'payment_method_vietnamese' => $paymentMethodMap[$order->payment_method] ?? $order->payment_method,
-                'recipient_name'            => $order->recipient_name,
-                'recipient_phone'           => $order->recipient_phone,
-                'recipient_address'         => $order->recipient_address,
-                'shipped_at'                => $shippedAt,
-                'order_items'               => $orderItems,
-                'shipping_method_name'      => $order->shippingMethod?->name ?? 'Chưa chọn',
-                'coupon_code'               => $order->coupon?->code ?? 'Chưa áp dụng',
-                'has_return_request'        => $order->returns()->where('status', 'pending')->exists(),
+                'image_product' => $imageUrl,
+                'category_name' => $item->product?->category?->name ?? 'Chưa có danh mục',
+                'name_product'  => $item->product?->name ?? 'Sản phẩm không xác định',
+                'brand_name'    => $item->product?->brand?->name ?? 'Chưa có thương hiệu',
+                'weight'        => $item->productVariant?->weight ?? 0,
+                'dimensions'    => $item->productVariant?->dimensions ?? 'N/A',
+                'stock'         => $item->productVariant?->stock ?? 0,
+                'quantity'      => $item->quantity,
+                'price'         => $price,
+                'attributes'    => $attributes,
+                'id'            => $item->id,
             ];
         });
 
-        return view('admin.oders.listOrders', [
-            'orders'     => $orderData,
-            'pagination' => $orders,
-        ]);
-    }
+        $paymentMethodMap = [
+            'credit_card'   => 'Thẻ tín dụng/ghi nợ',
+            'bank_transfer' => 'Chuyển khoản ngân hàng',
+            'cod'           => 'Thanh toán khi nhận hàng',
+        ];
+
+        $statusMap = [
+            'pending'    => 'Đang chờ xử lý',
+            'processing' => 'Đang xử lý',
+            'shipped'    => 'Đã giao',
+            'delivered'  => 'Đã nhận',
+            'cancelled'  => 'Đã hủy',
+            'returned'   => 'Đã trả hàng',
+        ];
+
+        $shippedAt = $order->shipped_at ? Carbon::parse($order->shipped_at) : null;
+
+        return [
+            'id'                        => $order->id,
+            'image'                     => $image,
+            'user_name'                 => $userName,
+            'product_names'             => $productNames,
+            'total_quantity'            => $totalQuantity,
+            'subtotal'                  => $calculatedTotalAmount,
+            'shipping_fee'              => $shippingFee,
+            'coupon_discount'           => $couponDiscount,
+            'final_total'               => $finalTotal,
+            'status'                    => $order->status,
+            'status_vietnamese'         => $statusMap[$order->status] ?? $order->status,
+            'created_at'                => Carbon::parse($order->created_at)->format('d/m/Y H:i'),
+            'payment_method'            => $order->payment_method,
+            'payment_method_vietnamese' => $paymentMethodMap[$order->payment_method] ?? $order->payment_method,
+            'recipient_name'            => $order->recipient_name,
+            'recipient_phone'           => $order->recipient_phone,
+            'recipient_address'         => $order->recipient_address,
+            'shipped_at'                => $shippedAt,
+            'order_items'               => $orderItems,
+            'shipping_method_name'      => $order->shippingMethod?->name ?? 'Chưa chọn',
+            'coupon_code'               => $order->coupon?->code ?? 'Chưa áp dụng',
+            'has_return_request'        => $order->returns()->where('status', 'pending')->exists(),
+            'province_id'               => $order->province_id ?? null,
+            'district_id'               => $order->district_id ?? null,
+            'ward_id'                   => $order->ward_id ?? null,
+            'province_name'             => $provinceName,
+            'district_name'             => $districtName,
+            'ward_name'                 => $wardName,
+        ];
+    });
+
+    return view('admin.oders.listOrders', [
+        'orders'     => $orderData,
+        'pagination' => $orders,
+    ]);
+}
+
+
+
 
     public function show($id)
     {
@@ -148,7 +221,7 @@ class OrderController extends Controller
             'returns',
         ])->findOrFail($id);
 
-        $calculatedTotalAmount = $order->orderItems->sum(function ($item) {
+        $calculatedTotalAmount = collect($order->orderItems)->sum(function ($item) {
             $priceToUse = $item->productVariant?->sale_price ?? $item->productVariant?->price ?? 0;
             return ($item->quantity ?? 0) * $priceToUse;
         });
@@ -173,9 +246,16 @@ class OrderController extends Controller
         ];
 
         $shippedAt = $order->shipped_at ? Carbon::parse($order->shipped_at) : null;
+$provinceName = DB::table('provinces')->where('id', $order->province_id)->value('name');
+$districtName = DB::table('districts')->where('id', $order->district_id)->value('name');
+$wardName     = DB::table('wards')->where('id', $order->ward_id)->value('name');
 
         $orderData = [
             'id'                        => $order->id,
+              // Truyền tên địa lý về
+        'province_name' => $provinceName,
+        'district_name' => $districtName,
+        'ward_name'     => $wardName,
             'user_name'                 => $order->user?->name ?? 'Khách vãng lai',
             'total_quantity'            => $order->orderItems->sum('quantity'),
             'subtotal'                  => $calculatedTotalAmount,
@@ -215,6 +295,7 @@ class OrderController extends Controller
                     'price'         => $priceToDisplay,
                     'attributes'    => $attributes,
                     'id'            => $item->id,
+
                 ];
             }),
             'address'                   => $order->address,
@@ -248,7 +329,7 @@ class OrderController extends Controller
             ->where('end_date', '>=', now())
             ->get();
 
-        $calculatedTotalAmount = $order->orderItems->sum(function ($item) {
+        $calculatedTotalAmount = collect($order->orderItems)->sum(function ($item) {
             $priceToUse = $item->productVariant?->sale_price ?? $item->productVariant?->price ?? 0;
             return ($item->quantity ?? 0) * $priceToUse;
         });
@@ -326,206 +407,148 @@ class OrderController extends Controller
 
         return view('admin.oders.editOrders', compact('orderData'));
     }
-    public function updateOrders(Request $request, $id)
-    {
-        $order         = Order::findOrFail($id);
-        $currentStatus = $order->status;
 
-        $data = $request->only([
-            'status',
-            'recipient_name',
-            'recipient_phone',
-            'recipient_address',
-            'payment_method',
-            'shipped_at',
-            'order_items',
-            'shipping_method_id',
-            'coupon_id',
-        ]);
 
-        $validStatuses = ['pending', 'processing', 'shipped', 'delivered', 'cancelled', 'returned'];
-        if (isset($data['status']) && ! in_array($data['status'], $validStatuses)) {
-            return redirect()->back()->with('error', 'Trạng thái không hợp lệ.');
-        }
+public function updateOrders(Request $request, $id, GHNService $ghnService)
+{
+    $order = Order::findOrFail($id);
+    $currentStatus = $order->status;
 
-        $validPaymentMethods = ['credit_card', 'bank_transfer', 'cod'];
-        if (isset($data['payment_method']) && ! in_array($data['payment_method'], $validPaymentMethods)) {
-            return redirect()->back()->with('error', 'Phương thức thanh toán không hợp lệ.');
-        }
+    $data = $request->only([
+        'status',
+        'recipient_name',
+        'recipient_phone',
+        'recipient_address',
+        'payment_method',
+        'shipped_at',
+        'order_items',
+        'shipping_method_id',
+        'coupon_id',
+        'to_district_id',
+        'to_ward_code',
+    ]);
 
-        // Chuyển đổi shipped_at từ chuỗi thành Carbon nếu có
-        if (isset($data['shipped_at']) && $data['shipped_at']) {
-            $data['shipped_at'] = Carbon::parse($data['shipped_at']);
-        }
-
-        $statusTransitions = [
-            'pending'    => ['processing', 'cancelled'],
-            'processing' => ['shipped', 'cancelled'],
-            'shipped'    => ['delivered', 'cancelled'],
-            'delivered'  => ['returned'],
-            'cancelled'  => [],
-            'returned'   => [],
-        ];
-
-        $editableFields = [];
-        switch ($currentStatus) {
-            case 'pending':
-                $editableFields = ['recipient_name', 'recipient_phone', 'recipient_address', 'payment_method', 'status', 'order_items', 'shipped_at', 'shipping_method_id', 'coupon_id'];
-                if (isset($data['status']) && ! in_array($data['status'], $statusTransitions['pending'])) {
-                    return redirect()->back()->with('error', 'Chỉ có thể chuyển trạng thái từ Đang chờ xử lý sang Đang xử lý hoặc Đã hủy.');
-                }
-                break;
-            case 'processing':
-                $editableFields = ['status'];
-                if (isset($data['status']) && ! in_array($data['status'], $statusTransitions['processing'])) {
-                    return redirect()->back()->with('error', 'Chỉ có thể chuyển trạng thái từ Đang xử lý sang Đã giao hoặc Đã hủy.');
-                }
-                if (isset($data['payment_method']) && $data['payment_method'] !== $order->payment_method) {
-                    return redirect()->back()->with('error', 'Không thể thay đổi phương thức thanh toán khi đơn hàng đã ' . ($statusMap[$currentStatus] ?? $currentStatus) . '.');
-                }
-                break;
-            case 'shipped':
-                $editableFields = ['status'];
-                if (isset($data['status']) && ! in_array($data['status'], $statusTransitions['shipped'])) {
-                    return redirect()->back()->with('error', 'Chỉ có thể chuyển trạng thái từ Đã giao sang Đã nhận hoặc Đã hủy.');
-                }
-                if (isset($data['payment_method']) && $data['payment_method'] !== $order->payment_method) {
-                    return redirect()->back()->with('error', 'Không thể thay đổi phương thức thanh toán khi đơn hàng đã ' . ($statusMap[$currentStatus] ?? $currentStatus) . '.');
-                }
-                break;
-            case 'delivered':
-                $editableFields = ['status'];
-                if (isset($data['status']) && ! in_array($data['status'], $statusTransitions['delivered'])) {
-                    return redirect()->back()->with('error', 'Chỉ có thể chuyển trạng thái từ Đã nhận sang Đã trả.');
-                }
-                if (isset($data['payment_method']) && $data['payment_method'] !== $order->payment_method) {
-                    return redirect()->back()->with('error', 'Không thể thay đổi phương thức thanh toán khi đơn hàng đã ' . ($statusMap[$currentStatus] ?? $currentStatus) . '.');
-                }
-                break;
-            case 'cancelled':
-            case 'returned':
-                $editableFields = [];
-                if (isset($data['status'])) {
-                    return redirect()->back()->with('error', 'Không thể thay đổi trạng thái của đơn hàng đã ' . ($statusMap[$currentStatus] ?? $currentStatus) . '.');
-                }
-                if (isset($data['payment_method']) && $data['payment_method'] !== $order->payment_method) {
-                    return redirect()->back()->with('error', 'Không thể thay đổi phương thức thanh toán khi đơn hàng đã ' . ($statusMap[$currentStatus] ?? $currentStatus) . '.');
-                }
-                break;
-        }
-
-        // Xác định trạng thái thanh toán để kiểm soát payment_method
-        $isPaid = in_array($currentStatus, ['delivered', 'cancelled', 'returned']);
-        if ($isPaid && isset($data['payment_method'])) {
-            unset($data['payment_method']);
-        }
-
-        // Validate dữ liệu
-        $validator = Validator::make($data, [
-            'recipient_name'         => 'nullable|string|max:255',
-            'recipient_phone'        => 'nullable|string|max:20',
-            'recipient_address'      => 'nullable|string|max:500',
-            'payment_method'         => 'nullable|in:' . implode(',', $validPaymentMethods),
-            'shipped_at'             => 'nullable|date',
-            'order_items'            => 'nullable|array',
-            'order_items.*.quantity' => 'nullable|integer|min:1',
-            'order_items.*.price'    => 'nullable|numeric|min:0',
-            'status'                 => 'nullable|in:' . implode(',', $validStatuses),
-            'shipping_method_id'     => 'nullable|exists:shipping_methods,id',
-            'coupon_id'              => 'nullable|exists:coupons,id',
-        ]);
-
-        if ($validator->fails()) {
-            return redirect()->back()->withErrors($validator)->withInput();
-        }
-
-        // Tính lại total_amount (tổng tiền sản phẩm)
-        $totalAmount = 0;
-        if (isset($data['order_items']) && is_array($data['order_items'])) {
-            foreach ($order->orderItems as $item) {
-                $itemData = collect($data['order_items'])->firstWhere('id', $item->id);
-                $quantity = $itemData['quantity'] ?? $item->quantity;
-                $price    = $itemData['price'] ?? ($item->productVariant?->sale_price ?? $item->productVariant?->price ?? 0);
-                $totalAmount += $quantity * $price;
-            }
-        } else {
-            $totalAmount = $order->orderItems->sum(function ($item) {
-                $priceToUse = $item->productVariant?->sale_price ?? $item->productVariant?->price ?? 0;
-                return ($item->quantity ?? 0) * $priceToUse;
-            });
-        }
-
-        // Lấy shipping fee từ shipping_method_id (không lưu vào DB)
-        $shippingFee = 0;
-        if (isset($data['shipping_method_id'])) {
-            $shippingMethod = ShippingMethod::find($data['shipping_method_id']);
-            if ($shippingMethod) {
-                $shippingFee               = $shippingMethod->fee;
-                $order->shipping_method_id = $shippingMethod->id; // Cập nhật khóa ngoại
-            }
-        } elseif ($order->shippingMethod) {
-            $shippingFee = $order->shippingMethod->fee;
-        }
-
-        // Lấy coupon discount từ coupon_id (không lưu vào DB)
-        $couponDiscount = 0;
-        if (isset($data['coupon_id'])) {
-            $coupon = Coupon::find($data['coupon_id']);
-            if ($coupon && $coupon->status && now()->between($coupon->start_date, $coupon->end_date)) {
-                $couponDiscount   = $this->calculateCouponDiscount($coupon, $totalAmount + $shippingFee);
-                $order->coupon_id = $coupon->id; // Cập nhật khóa ngoại
-            }
-        } elseif ($order->coupon) {
-            $couponDiscount = $this->calculateCouponDiscount($order->coupon, $totalAmount + $shippingFee);
-        }
-
-        // Tính lại final_total
-        $finalTotal = $totalAmount + $shippingFee - $couponDiscount;
-
-        // Cập nhật thông tin đơn hàng
-        $fieldsToUpdate = array_intersect(array_keys($data), $editableFields);
-        if (! empty($fieldsToUpdate) || ! empty($data['order_items']) || isset($data['shipping_method_id']) || isset($data['coupon_id'])) {
-            $order->fill(array_intersect_key($data, array_flip($editableFields)));
-        }
-
-        // Cập nhật trạng thái nếu có
-        if (in_array('status', $editableFields) && isset($data['status']) && in_array($data['status'], $statusTransitions[$currentStatus] ?? [])) {
-            $order->status = $data['status'];
-        }
-
-        // Cập nhật order_items nếu có
-        if (isset($data['order_items']) && in_array('order_items', $editableFields)) {
-            foreach ($data['order_items'] as $itemData) {
-                $orderItem = $order->orderItems()->find($itemData['id']);
-                if ($orderItem) {
-                    $orderItem->update([
-                        'quantity' => $itemData['quantity'] ?? $orderItem->quantity,
-                        'price'    => $itemData['price'] ?? $orderItem->price,
-                    ]);
-                }
-            }
-        }
-
-                                             // Chỉ cập nhật total_amount và final_total, không sử dụng shipping_fee và coupon_discount
-        $order->total_amount = $totalAmount; // Cập nhật total_amount
-        $order->final_total  = $finalTotal;  // Cập nhật final_total
-        $order->save();
-
-        $statusMap = [
-            'pending'    => 'Đang chờ xử lý',
-            'processing' => 'Đang xử lý',
-            'shipped'    => 'Đã giao',
-            'delivered'  => 'Đã nhận',
-            'cancelled'  => 'Đã hủy',
-            'returned'   => 'Đã trả hàng',
-        ];
-
-        $message = 'Đơn hàng đã được cập nhật.';
-        if (isset($data['status'])) {
-            $message .= ' Trạng thái đã chuyển sang ' . ($statusMap[$data['status']] ?? $data['status']) . '.';
-        }
-        return redirect()->route('admin.order.show', $id)->with('success', $message);
+    $validStatuses = ['pending', 'processing', 'shipped', 'delivered', 'cancelled', 'returned'];
+    if (isset($data['status']) && !in_array($data['status'], $validStatuses)) {
+        return redirect()->back()->with('error', 'Trạng thái không hợp lệ.');
     }
+
+    $validPaymentMethods = ['credit_card', 'bank_transfer', 'cod'];
+    if (isset($data['payment_method']) && !in_array($data['payment_method'], $validPaymentMethods)) {
+        return redirect()->back()->with('error', 'Phương thức thanh toán không hợp lệ.');
+    }
+
+    if (isset($data['shipped_at']) && $data['shipped_at']) {
+        $data['shipped_at'] = Carbon::parse($data['shipped_at']);
+    }
+
+    $editableFields = ['recipient_name', 'recipient_phone', 'recipient_address', 'payment_method', 'status', 'order_items', 'shipping_method_id', 'coupon_id'];
+
+    // Validate input
+    $validator = Validator::make($data, [
+        'recipient_name' => 'nullable|string|max:255',
+        'recipient_phone' => 'nullable|string|max:20',
+        'recipient_address' => 'nullable|string|max:500',
+        'payment_method' => 'nullable|in:' . implode(',', $validPaymentMethods),
+        'shipped_at' => 'nullable|date',
+        'order_items' => 'nullable|array',
+        'order_items.*.quantity' => 'nullable|integer|min:1',
+        'order_items.*.price' => 'nullable|numeric|min:0',
+        'status' => 'nullable|in:' . implode(',', $validStatuses),
+        'shipping_method_id' => 'nullable|exists:shipping_methods,id',
+        'coupon_id' => 'nullable|exists:coupons,id',
+    ]);
+
+    if ($validator->fails()) {
+        return redirect()->back()->withErrors($validator)->withInput();
+    }
+
+    // Tính lại tổng tiền sản phẩm
+    $totalAmount = 0;
+    if (isset($data['order_items']) && is_array($data['order_items'])) {
+        foreach ($order->orderItems as $item) {
+            $itemData = collect($data['order_items'])->firstWhere('id', $item->id);
+            $quantity = $itemData['quantity'] ?? $item->quantity;
+            $price = $itemData['price'] ?? ($item->productVariant?->sale_price ?? $item->productVariant?->price ?? 0);
+            $totalAmount += $quantity * $price;
+        }
+    } else {
+        $totalAmount = collect($order->orderItems)->sum(function ($item) {
+            $priceToUse = $item->productVariant?->sale_price ?? $item->productVariant?->price ?? 0;
+            return ($item->quantity ?? 0) * $priceToUse;
+        });
+    }
+
+    // Tính phí vận chuyển từ GHN
+    $shippingFee = 35000;
+    try {
+        $fromDistrictId = 1450;
+        $toDistrictId = $request->to_district_id;
+        $toWardCode = $request->to_ward_code;
+
+        if ($fromDistrictId && $toDistrictId && $toWardCode) {
+            $services = $ghnService->getAvailableServices($fromDistrictId, $toDistrictId);
+            $serviceId = $services[0]['service_id'] ?? null;
+
+            if ($serviceId) {
+                $feeData = $ghnService->calculateShippingFee(
+                    $serviceId,
+                    0,
+                    $fromDistrictId,
+                    $toDistrictId,
+                    $toWardCode,
+                    10,
+                    20,
+                    500,
+                    15
+                );
+                $shippingFee = $feeData['total'] ?? 0;
+            }
+        }
+    } catch (\Exception $e) {
+        \Log::error('Lỗi tính phí GHN: ' . $e->getMessage());
+    }
+
+    // Áp dụng giảm giá nếu có
+    $couponDiscount = 0;
+    if (isset($data['coupon_id'])) {
+        $coupon = Coupon::find($data['coupon_id']);
+        if ($coupon && $coupon->status && now()->between($coupon->start_date, $coupon->end_date)) {
+            $couponDiscount = $this->calculateCouponDiscount($coupon, $totalAmount + $shippingFee);
+            $order->coupon_id = $coupon->id;
+        }
+    } elseif ($order->coupon) {
+        $couponDiscount = $this->calculateCouponDiscount($order->coupon, $totalAmount + $shippingFee);
+    }
+
+    $finalTotal = $totalAmount + $shippingFee - $couponDiscount;
+
+    \Log::info('Tổng tiền sản phẩm: ' . $totalAmount);
+    \Log::info('Phí ship: ' . $shippingFee);
+    \Log::info('Giảm giá: ' . $couponDiscount);
+    \Log::info('Tổng tiền đơn hàng (final_total): ' . $finalTotal);
+
+    $order->fill(array_intersect_key($data, array_flip($editableFields)));
+    $order->shipping_fee = $shippingFee['total'] ?? 0;
+
+    $order->total_amount = $totalAmount;
+    $order->final_total = $finalTotal;
+    $order->save();
+
+    if (isset($data['order_items'])) {
+        foreach ($data['order_items'] as $itemData) {
+            $orderItem = $order->orderItems()->find($itemData['id']);
+            if ($orderItem) {
+                $orderItem->update([
+                    'quantity' => $itemData['quantity'] ?? $orderItem->quantity,
+                    'price' => $itemData['price'] ?? $orderItem->price,
+                ]);
+            }
+        }
+    }
+
+    return redirect()->route('admin.order.show', $id)->with('success', 'Đơn hàng đã được cập nhật.');
+}
 
     public function destroy($id)
     {
@@ -547,7 +570,7 @@ class OrderController extends Controller
         }
     }
 
-    public function trash()
+    public function trashed()
     {
         $trashedOrders = Order::onlyTrashed()->with([
             'user',
@@ -614,7 +637,7 @@ class OrderController extends Controller
             ];
         });
 
-        return view('admin.order.trashed', ['orders' => $orderData]);
+        return view('admin.oders.trashed', ['orders' => $orderData]);
     }
 
     public function restore($id)

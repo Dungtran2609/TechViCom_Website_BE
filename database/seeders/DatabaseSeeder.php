@@ -17,7 +17,8 @@ class DatabaseSeeder extends Seeder
             PermissionSeeder::class,
             UserRoleSeeder::class,
             PermissionRoleSeeder::class,
-
+ /** 👉 Thêm LocationSeeder vào đây */
+LocationSeeder::class,
             CategorySeeder::class,
             BrandSeeder::class,
 
@@ -63,6 +64,9 @@ class DatabaseSeeder extends Seeder
 
             BannerSeeder::class,
             LoginHistorySeeder::class,
+
+            
+            
         ]);
 
     }

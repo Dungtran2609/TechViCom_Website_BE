@@ -20,13 +20,20 @@ class Order extends Model
         'payment_method',
         'status',
         'total_amount',
-        'final_total',
+        'final_total', // 👈 Thêm dòng này
         'recipient_name',
         'recipient_phone',
         'recipient_address',
         'shipped_at',
-        'shipping_method_id', // Khóa ngoại cho shipping_method
-        'coupon_id',          // Khóa ngoại cho coupon
+        'shipping_method_id',
+        'coupon_id',
+'total_weight', // thêm đây
+        // mới thêm
+        'province_id',
+        'district_id',
+        'ward_id',
+        'shipping_fee',
+          
     ];
 
     /**
@@ -50,7 +57,7 @@ class Order extends Model
     }
 
     /**
-     * Mối quan hệ với bảng UserAddress (Địa chỉ giao hàng của đơn hàng)
+     * Mối quan hệ với bảng UserAddress (Địa chỉ giao hàng)
      */
     public function address()
     {
@@ -58,7 +65,7 @@ class Order extends Model
     }
 
     /**
-     * Mối quan hệ với bảng OrderItem (Các sản phẩm trong đơn hàng)
+     * Mối quan hệ với các sản phẩm trong đơn hàng
      */
     public function orderItems()
     {
@@ -66,7 +73,7 @@ class Order extends Model
     }
 
     /**
-     * Mối quan hệ với bảng ShippingMethod (Phương thức vận chuyển)
+     * Mối quan hệ với phương thức vận chuyển
      */
     public function shippingMethod()
     {
@@ -74,7 +81,7 @@ class Order extends Model
     }
 
     /**
-     * Mối quan hệ với bảng Coupon (Mã giảm giá)
+     * Mối quan hệ với coupon
      */
     public function coupon()
     {
@@ -82,7 +89,7 @@ class Order extends Model
     }
 
     /**
-     * Mối quan hệ với bảng Transaction (Thông tin giao dịch liên quan đến đơn hàng)
+     * Mối quan hệ với transaction (thanh toán)
      */
     public function transaction()
     {
@@ -90,9 +97,39 @@ class Order extends Model
     }
 
     /**
-     * Accessor để dịch phương thức thanh toán sang tiếng Việt
-     *
-     * @return string
+     * Mối quan hệ với các lần trả hàng
+     */
+    public function returns()
+    {
+        return $this->hasMany(OrderReturn::class);
+    }
+
+    /**
+     * Mối quan hệ địa lý: province
+     */
+    public function province()
+    {
+        return $this->belongsTo(Province::class, 'province_id');
+    }
+
+    /**
+     * Mối quan hệ địa lý: district
+     */
+    public function district()
+    {
+        return $this->belongsTo(District::class, 'district_id');
+    }
+
+    /**
+     * Mối quan hệ địa lý: ward
+     */
+    public function ward()
+    {
+        return $this->belongsTo(Ward::class, 'ward_id');
+    }
+
+    /**
+     * Dịch phương thức thanh toán sang tiếng Việt
      */
     public function getPaymentMethodVietnameseAttribute()
     {
@@ -100,18 +137,13 @@ class Order extends Model
             'credit_card'   => 'Thẻ tín dụng/ghi nợ',
             'bank_transfer' => 'Chuyển khoản ngân hàng',
             'cod'           => 'Thanh toán khi nhận hàng',
-
-            // COD: Cash on Delivery
-            // Thêm các phương thức khác nếu cần
         ];
 
         return $paymentMethods[$this->payment_method] ?? $this->payment_method;
     }
 
     /**
-     * Accessor để dịch trạng thái sang tiếng Việt
-     *
-     * @return string
+     * Dịch trạng thái sang tiếng Việt
      */
     public function getStatusVietnameseAttribute()
     {
@@ -122,13 +154,8 @@ class Order extends Model
             'delivered'  => 'Đã nhận',
             'cancelled'  => 'Đã hủy',
             'returned'   => 'Đã trả hàng',
-            // Thêm các trạng thái khác nếu cần
         ];
 
         return $statuses[$this->status] ?? $this->status;
-    }
-    public function returns()
-    {
-        return $this->hasMany(OrderReturn::class);
     }
 }

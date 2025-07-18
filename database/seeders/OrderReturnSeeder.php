@@ -11,10 +11,14 @@ class OrderReturnSeeder extends Seeder
      * Run the database seeds.
      */
     public function run(): void
-    {
+    {$order = DB::table('orders')->orderBy('id')->first();
+if (! $order) {
+    throw new \Exception('Không có đơn hàng nào để tạo order_return!');
+}
+
         DB::table('order_returns')->insert([
             [
-                'order_id'     => 1,
+                'order_id'    => $order->id,
                 'reason'       => 'Sản phẩm bị lỗi khi nhận',
                 'status'       => 'pending',
                 'type'         => 'return',
@@ -25,18 +29,7 @@ class OrderReturnSeeder extends Seeder
                 'updated_at'   => now(),
             ],
             [
-                'order_id'     => 2,
-                'reason'       => 'Khách đổi ý không muốn nhận nữa',
-                'status'       => 'approved',
-                'type'         => 'cancel',
-                'requested_at' => Carbon::now()->subDays(3),
-                'processed_at' => Carbon::now()->subDays(1),
-                'admin_note'   => 'Đơn đã hủy, hoàn tiền 100%',
-                'created_at'   => Carbon::now()->subDays(3),
-                'updated_at'   => Carbon::now()->subDays(1),
-            ],
-            [
-                'order_id'     => 1,
+                'order_id'    => $order->id,
                 'reason'       => 'Sai mẫu mã so với đặt hàng',
                 'status'       => 'rejected',
                 'type'         => 'return',

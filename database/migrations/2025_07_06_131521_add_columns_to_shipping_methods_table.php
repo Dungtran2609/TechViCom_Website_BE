@@ -10,7 +10,8 @@ return new class extends Migration
         Schema::table('shipping_methods', function (Blueprint $table) {
             $table->string('name');
             $table->text('description')->nullable();
-            $table->decimal('fee', 10, 2);
+            // $table->decimal('fee', 10, 2)->nullable();
+;
             $table->integer('estimated_days');
             $table->decimal('max_weight', 10, 2);
             $table->text('regions');
@@ -23,7 +24,7 @@ return new class extends Migration
             $table->dropColumn([
                 'name',
                 'description',
-                'fee',
+                
                 'estimated_days',
                 'max_weight',
                 'regions',

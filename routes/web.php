@@ -19,6 +19,8 @@ use App\Http\Controllers\Admin\Products\AttributeController;
 use App\Http\Controllers\Admin\Contacts\ContactsAdminController;
 use App\Http\Controllers\Admin\Products\AttributeValueController;
 use App\Http\Controllers\Admin\OrderController;
+// use App\Http\Controllers\Admin\ShippingController;
+
 
 
 Route::middleware([IsAdmin::class])->prefix('admin-control')->name('admin.')->group(function () {
@@ -85,15 +87,26 @@ Route::get('products/variants/select', [ProductVariantController::class, 'select
     Route::post('products/{id}/restore', [ProductController::class, 'restore'])->name('products.restore');
     Route::delete('products/{id}/force-delete', [ProductController::class, 'forceDelete'])->name('products.force-delete');
     Route::resource('products', ProductController::class)->names('products');
+    
     Route::prefix('order')->name('order.')->group(function () {
-        Route::get('trashed', [OrderController::class, 'trashed'])->name('trashed');
-        Route::post('{id}/restore', [OrderController::class, 'restore'])->name('restore');
-        Route::delete('{id}/force-delete', [OrderController::class, 'forceDelete'])->name('force-delete');
-        Route::post('{id}/update-status', [OrderController::class, 'updateOrders'])->name('updateOrders');
-        Route::get('returns', [OrderController::class, 'returnsIndex'])->name('returns');
-        Route::post('returns/{id}/process', [OrderController::class, 'processReturn'])->name('process-return');
-        Route::resource('', OrderController::class)->parameters(['' => 'order'])->names('');
-    });
+    Route::get('trashed', [OrderController::class, 'trashed'])->name('trashed');
+    Route::post('{id}/restore', [OrderController::class, 'restore'])->name('restore');
+    Route::delete('{id}/force-delete', [OrderController::class, 'forceDelete'])->name('forceDelete');
+    Route::post('{id}/update-status', [OrderController::class, 'updateOrders'])->name('updateOrders');
+    Route::get('returns', [OrderController::class, 'returnsIndex'])->name('returns');
+    Route::post('returns/{id}/process', [OrderController::class, 'processReturn'])->name('process-return');
+    Route::resource('', OrderController::class)->parameters(['' => 'order'])->names('');
+});
+
+    
+    
+    
+    
+    
+    
+    
+
+    
 });
 
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
@@ -119,3 +132,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
     Route::post('/profile/delete', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
+//🚀 TÍNH PHÍ VẬN CHUYỂN (GHN)
+// use App\Http\Controllers\ShippingController;
+// Route::post('/calculate-shipping', [ShippingController::class, 'calculateShipping']);
+
