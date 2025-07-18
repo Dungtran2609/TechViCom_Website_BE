@@ -19,7 +19,6 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'auth' => Authenticate::class,
             'auth:sanctum' => EnsureFrontendRequestsAreStateful::class,
-
             'is_admin' => IsAdmin::class,
             'permission' => CheckPermission::class,
         ]);
