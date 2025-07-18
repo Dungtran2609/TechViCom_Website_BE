@@ -39,7 +39,13 @@ class PermissionSeeder extends Seeder
                 'description' => 'Quản lý nội dung',
                 'created_at' => now(),
                 'updated_at' => now(),
-            ],
+            ],[
+    'name' => 'manage_coupons',
+    'description' => 'Quản lý mã giảm giá',
+    'created_at' => now(),
+    'updated_at' => now(),
+],
+
         ]);
     }
 }

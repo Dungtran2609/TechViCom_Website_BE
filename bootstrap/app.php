@@ -1,7 +1,9 @@
 <?php
 
 use App\Http\Middleware\IsAdmin;
-use Illuminate\Auth\Middleware\Authenticate; 
+use App\Http\Middleware\CheckPermission;
+use Illuminate\Auth\Middleware\Authenticate;
+use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful; // <-- thêm use này
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -16,8 +18,10 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'auth' => Authenticate::class,
-            'IsAdmin' => IsAdmin::class,
-            'auth:sanctum' => \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
+            'auth:sanctum' => EnsureFrontendRequestsAreStateful::class,
+
+            'is_admin' => IsAdmin::class,
+            'permission' => CheckPermission::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
