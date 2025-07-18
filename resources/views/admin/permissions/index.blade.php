@@ -8,7 +8,11 @@
         </a>
     </div>
 
-    @if (session('success'))
+    @if ($roles->contains('name', 'user'))
+        <div class="alert alert-info">
+            Vai trò <strong>user (khách hàng)</strong> bị hạn chế, không thể thực hiện các quyền quản trị.
+        </div>
+    @elseif (session('success'))
         <div class="alert alert-success">{{ session('success') }}</div>
     @endif
 
@@ -43,7 +47,8 @@
                                             <input type="checkbox"
                                                 name="permissions[{{ $role->id }}][]"
                                                 value="{{ $permission->id }}"
-                                                {{ $role->permissions->pluck('id')->contains($permission->id) ? 'checked' : '' }}>
+                                                {{ $role->permissions->pluck('id')->contains($permission->id) ? 'checked' : '' }}
+                                            >
                                         </td>
                                     @endforeach
                                 </tr>

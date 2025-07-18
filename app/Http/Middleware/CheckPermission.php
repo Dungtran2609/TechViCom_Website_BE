@@ -24,7 +24,7 @@ class CheckPermission
         }
 
         // Kiểm tra user có vai trò là 'admin' không
-        $hasAdminRole = $user->roles()->where('name', 'admin')->exists();
+        $hasAdminRole = $user->roles()->where('name', ['admin', 'staff'])->exists();
 
         if ($hasAdminRole) {
             return $next($request);

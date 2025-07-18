@@ -37,7 +37,9 @@
                                     <td>
                                         <input type="checkbox" name="roles[{{ $user->id }}][]"
                                             value="{{ $role->id }}"
-                                            {{ $user->roles->pluck('id')->contains($role->id) ? 'checked' : '' }}>
+                                            {{ $user->roles->pluck('id')->contains($role->id) ? 'checked' : '' }}
+                                            @if ($user->id == auth()->id()) disabled @endif
+                                        >
                                     </td>
                                 @endforeach
                             </tr>

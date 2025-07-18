@@ -80,13 +80,13 @@
                                                 {{ $address->is_default ? 'Mặc định' : '' }}
                                             </span>
                                             <div class="d-inline-block">
-                                                <form action="{{ route('admin.users.addresses.update', $address->address_id) }}" method="POST" class="d-inline">
+                                                <form action="{{ route('admin.users.addresses.update', ['address' => $address->id]) }}" method="POST" class="d-inline">
                                                     @csrf
                                                     @method('PUT')
                                                     <input type="hidden" name="is_default" value="1">
                                                     <button class="btn btn-sm btn-primary">Đặt mặc định</button>
                                                 </form>
-                                                <form action="{{ route('admin.users.addresses.destroy', $address->address_id) }}" method="POST" class="d-inline" onsubmit="return confirm('Bạn có chắc muốn xóa địa chỉ này?')">
+                                                <form action="{{ route('admin.users.addresses.destroy', ['address' => $address->id]) }}" method="POST" class="d-inline" onsubmit="return confirm('Bạn có chắc muốn xóa địa chỉ này?')">
                                                     @csrf
                                                     @method('DELETE')
                                                     <button class="btn btn-sm btn-danger">Xóa</button>

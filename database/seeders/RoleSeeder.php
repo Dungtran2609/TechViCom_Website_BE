@@ -19,8 +19,8 @@ class RoleSeeder extends Seeder
             ],
             [
                 'id' => 2,
-                'name' => 'editor',
-                // 'description' => 'Editor',
+                'name' => 'staff',
+                // 'description' => 'staff',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
