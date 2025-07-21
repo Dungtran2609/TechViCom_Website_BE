@@ -56,6 +56,11 @@
             <a href="{{ route('admin.banner.index') }}" class="btn btn-secondary w-100" title="Làm mới"><i class="bi bi-arrow-clockwise"></i></a>
         </div>
     </form>
+    @if(session('error'))
+        <div class="alert alert-danger">
+            {{ session('error') }}
+        </div>
+    @endif
     <div class="table-responsive">
         <table class="table table-bordered banner-table align-middle">
             <thead class="table-light">
@@ -111,12 +116,5 @@
                 @endforeach
             </tbody>
         </table>
-        <div class="d-flex justify-content-center mt-3">
-            {{ $banners->links() }}
-        </div>
-        @if($banners->count() > 5)
-            <div class="alert alert-info mt-2">Chỉ hiển thị tối đa 5 banner mới nhất.</div>
-        @endif
-    </div>
 </div>
 @endsection
