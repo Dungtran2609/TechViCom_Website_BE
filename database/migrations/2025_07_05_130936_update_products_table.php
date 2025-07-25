@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::table('products', function (Blueprint $table) {
             $table->string('slug')->unique()->after('name');
-            $table->string('sku')->unique()->after('slug');
+            $table->string('sku')->nullable()->unique()->after('slug');
             $table->enum('type', ['simple', 'variable'])->default('simple')->after('sku');
 
             $table->renameColumn('discount_price', 'sale_price');

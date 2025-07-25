@@ -39,7 +39,6 @@
                         <th>ID</th>
                         <th>Tên sản phẩm</th>
                         <th>Ảnh</th>
-                        <th>Giá</th>
                         <th>Loại</th>
                         <th>Thương hiệu</th>
                         <th>Danh mục</th>
@@ -62,16 +61,7 @@
                             @endif
                         </td>
                         <td>
-                            {{-- PHẦN SỬA 1: GIÁ --}}
-                            @if($product->sale_price && $product->sale_price < $product->price)
-                                <span class="text-danger fw-bold">{{ number_format($product->sale_price, 0, ',', '.') }} đ</span>
-                                <small class="text-muted text-decoration-line-through d-block">{{ number_format($product->price, 0, ',', '.') }} đ</small>
-                            @else
-                                <span class="fw-bold">{{ number_format($product->price, 0, ',', '.') }} đ</span>
-                            @endif
-                        </td>
-                        <td>
-                            {{-- PHẦN SỬA 2: LOẠI SẢN PHẨM (TYPE) --}}
+                            {{-- LOẠI SẢN PHẨM (TYPE) --}}
                             @if($product->type === 'simple')
                                 <span class="badge bg-primary-subtle text-primary border border-primary-subtle">
                                     <i class="fas fa-box me-1"></i>
@@ -86,7 +76,7 @@
                         </td>
                         <td>{{ $product->brand->name ?? 'Không có' }}</td>
                         <td>
-                            {{-- PHẦN SỬA 3: DANH MỤC --}}
+                            {{-- DANH MỤC --}}
                             @if($product->category)
                                 {{ $product->category->name }}
                                 @if($product->category->parent)

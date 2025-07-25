@@ -33,7 +33,6 @@ class ProductController extends Controller
         return view('admin.products.create', compact('brands', 'categories'));
     }
 
-    // Tạo SKU duy nhất dựa trên tên sản phẩm
     private function generateUniqueSku(string $name): string
     {
         $baseSku = strtoupper(substr(Str::slug($name), 0, 6));
@@ -47,27 +46,32 @@ class ProductController extends Controller
 
     public function store(ProductRequest $request)
     {
-        $validatedData = $request->validated();
+        $dataToCreate = $request->validated();
 
-        $baseSlug = Str::slug($validatedData['name']);
-        $slug = $baseSlug;
-        $i = 1;
-        while (Product::withTrashed()->where('slug', $slug)->exists()) {
-            $slug = $baseSlug . '-' . $i++;
-        }
-        $validatedData['slug'] = $slug;
-
-        if (empty($validatedData['sku'])) {
-            $validatedData['sku'] = $this->generateUniqueSku($validatedData['name']);
+        $dataToCreate['slug'] = Str::slug($dataToCreate['name']);
+        while (Product::withTrashed()->where('slug', $dataToCreate['slug'])->exists()) {
+            $dataToCreate['slug'] = Str::slug($dataToCreate['name']) . '-' . Str::lower(Str::random(4));
         }
 
         if ($request->hasFile('thumbnail')) {
-            $validatedData['thumbnail'] = $request->file('thumbnail')->store('products', 'public');
+            $dataToCreate['thumbnail'] = $request->file('thumbnail')->store('products', 'public');
         }
 
-        $validatedData['is_featured'] = $request->has('is_featured');
+        $dataToCreate['is_featured'] = $request->has('is_featured');
 
-        $product = Product::create($validatedData);
+        if ($dataToCreate['type'] === 'simple') {
+            if (empty($dataToCreate['sku'])) {
+                $dataToCreate['sku'] = $this->generateUniqueSku($dataToCreate['name']);
+            }
+        } else { // type === 'variable'
+            $dataToCreate['price'] = null;
+            $dataToCreate['stock'] = null;
+            $dataToCreate['sku'] = null;
+            $dataToCreate['sale_price'] = null;
+            $dataToCreate['low_stock_amount'] = null;
+        }
+
+        $product = Product::create($dataToCreate);
 
         if ($request->hasFile('gallery')) {
             foreach ($request->file('gallery') as $image) {
@@ -95,32 +99,37 @@ class ProductController extends Controller
 
     public function update(ProductRequest $request, Product $product)
     {
-        $validatedData = $request->validated();
+        $dataToUpdate = $request->validated();
 
         if ($request->name !== $product->name) {
-            $baseSlug = Str::slug($request->name);
-            $slug = $baseSlug;
-            $i = 1;
-            while (Product::withTrashed()->where('slug', $slug)->where('id', '!=', $product->id)->exists()) {
-                $slug = $baseSlug . '-' . $i++;
+            $dataToUpdate['slug'] = Str::slug($request->name);
+            while (Product::withTrashed()->where('slug', $dataToUpdate['slug'])->where('id', '!=', $product->id)->exists()) {
+                $dataToUpdate['slug'] = Str::slug($request->name) . '-' . Str::lower(Str::random(4));
             }
-            $validatedData['slug'] = $slug;
-        }
-
-        if (empty($validatedData['sku'])) {
-            $validatedData['sku'] = $this->generateUniqueSku($validatedData['name']);
         }
 
         if ($request->hasFile('thumbnail')) {
             if ($product->thumbnail) {
                 Storage::disk('public')->delete($product->thumbnail);
             }
-            $validatedData['thumbnail'] = $request->file('thumbnail')->store('products', 'public');
+            $dataToUpdate['thumbnail'] = $request->file('thumbnail')->store('products', 'public');
         }
 
-        $validatedData['is_featured'] = $request->has('is_featured');
+        $dataToUpdate['is_featured'] = $request->has('is_featured');
 
-        $product->update($validatedData);
+        if ($dataToUpdate['type'] === 'simple') {
+            if (empty($dataToUpdate['sku'])) {
+                $dataToUpdate['sku'] = $this->generateUniqueSku($dataToUpdate['name']);
+            }
+        } else { // type === 'variable'
+            $dataToUpdate['price'] = null;
+            $dataToUpdate['stock'] = null;
+            $dataToUpdate['sku'] = null;
+            $dataToUpdate['sale_price'] = null;
+            $dataToUpdate['low_stock_amount'] = null;
+        }
+
+        $product->update($dataToUpdate);
 
         if ($request->filled('delete_images')) {
             foreach ($request->delete_images as $id) {
@@ -154,30 +163,21 @@ class ProductController extends Controller
         return view('admin.products.trashed', compact('products'));
     }
 
-
-
     public function restore($id)
     {
-        $product = Product::onlyTrashed()->find($id);
-        if (!$product) {
-            return redirect()->route('admin.products.trashed')->with('error', 'Không tìm thấy sản phẩm.');
-        }
-
+        $product = Product::onlyTrashed()->findOrFail($id);
         $product->restore();
         return redirect()->route('admin.products.trashed')->with('success', 'Khôi phục sản phẩm thành công.');
     }
 
     public function forceDelete($id)
     {
-        $product = Product::onlyTrashed()->find($id);
-        if (!$product) {
-            return redirect()->route('admin.products.trashed')->with('error', 'Không tìm thấy sản phẩm.');
-        }
+        $product = Product::onlyTrashed()->findOrFail($id);
 
         if ($product->thumbnail) {
             Storage::disk('public')->delete($product->thumbnail);
         }
-
+        
         foreach ($product->allImages as $image) {
             Storage::disk('public')->delete($image->image_path);
         }

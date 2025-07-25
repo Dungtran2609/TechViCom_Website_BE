@@ -34,10 +34,6 @@
                                 <td>{{ $product->slug }}</td>
                             </tr>
                             <tr>
-                                <th>Mã SKU:</th>
-                                <td>{{ $product->sku ?? 'Chưa có' }}</td>
-                            </tr>
-                            <tr>
                                 <th>Loại sản phẩm:</th>
                                 <td>
                                     @if($product->type === 'simple')
@@ -47,28 +43,45 @@
                                     @endif
                                 </td>
                             </tr>
-                            <tr>
-                                <th>Giá:</th>
-                                <td>
-                                    @if($product->sale_price && $product->sale_price < $product->price)
-                                        <span class="text-danger fw-bold">{{ number_format($product->sale_price, 0, ',', '.') }} đ</span>
-                                        <small class="text-muted text-decoration-line-through ms-2">{{ number_format($product->price, 0, ',', '.') }} đ</small>
-                                    @else
-                                        <span class="fw-bold">{{ number_format($product->price, 0, ',', '.') }} đ</span>
-                                    @endif
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>Tồn kho:</th>
-                                <td>{{ $product->stock ?? '0' }}</td>
-                            </tr>
-                            <tr>
-                                <th>Cảnh báo tồn kho thấp:</th>
-                                <td>{{ $product->low_stock_amount ?? 'Không đặt' }}</td>
-                            </tr>
+                            
+                            @if($product->type === 'simple')
+                                <tr>
+                                    <th>Mã SKU:</th>
+                                    <td>{{ $product->sku ?? 'Chưa có' }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Giá:</th>
+                                    <td>
+                                        @if($product->sale_price && $product->sale_price < $product->price)
+                                            <span class="text-danger fw-bold">{{ number_format($product->sale_price, 0, ',', '.') }} đ</span>
+                                            <small class="text-muted text-decoration-line-through ms-2">{{ number_format($product->price, 0, ',', '.') }} đ</small>
+                                        @else
+                                            <span class="fw-bold">{{ number_format($product->price, 0, ',', '.') }} đ</span>
+                                        @endif
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Tồn kho:</th>
+                                    <td>{{ $product->stock ?? '0' }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Cảnh báo tồn kho thấp:</th>
+                                    <td>{{ $product->low_stock_amount ?? 'Không đặt' }}</td>
+                                </tr>
+                            @endif
+                            
                             <tr>
                                 <th>Danh mục:</th>
-                                <td>{{ $product->category->name ?? 'Không có' }}</td>
+                                <td>
+                                    @if($product->category)
+                                        {{ $product->category->name }}
+                                        @if($product->category->parent)
+                                            <span class="text-muted">, {{ $product->category->parent->name }}</span>
+                                        @endif
+                                    @else
+                                        Không có
+                                    @endif
+                                </td>
                             </tr>
                             <tr>
                                 <th>Thương hiệu:</th>
@@ -84,7 +97,6 @@
                                     @endif
                                 </td>
                             </tr>
-                            {{-- TRƯỜNG BỔ SUNG --}}
                             <tr>
                                 <th>Sản phẩm nổi bật:</th>
                                 <td>
