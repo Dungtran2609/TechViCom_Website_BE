@@ -2,161 +2,181 @@
 
 @section('content')
 <div class="container-fluid">
-    <h4 class="mb-4">Chỉnh sửa sản phẩm</h4>
-    <form action="{{ route('admin.products.update', $product->id) }}" method="POST" enctype="multipart/form-data">
+    <h4 class="mb-3">Chỉnh sửa sản phẩm: {{ $product->name }}</h4>
+
+    <form action="{{ route('admin.products.update', $product) }}" method="POST" enctype="multipart/form-data">
         @csrf
         @method('PUT')
+        {{-- Bọc toàn bộ form trong một Card duy nhất để tạo sự thống nhất --}}
+        <div class="card">
+            <div class="card-body">
+                <div class="row">
+                    {{-- CỘT BÊN TRÁI (Nội dung chính) --}}
+                    <div class="col-lg-8">
+                        {{-- Tên sản phẩm --}}
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Tên sản phẩm <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control @error('name') is-invalid @enderror" id="name" name="name" value="{{ old('name', $product->name) }}">
+                            @error('name')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                        </div>
 
-        {{-- Tên sản phẩm --}}
-        <div class="mb-3">
-            <label class="form-label">Tên sản phẩm</label>
-            <input type="text" name="name" class="form-control" value="{{ old('name', $product->name) }}">
-        </div>
+                        {{-- Mô tả ngắn --}}
+                        <div class="mb-3">
+                            <label for="short_description" class="form-label">Mô tả ngắn</label>
+                            <textarea class="form-control @error('short_description') is-invalid @enderror" id="short_description" name="short_description" rows="4">{{ old('short_description', $product->short_description) }}</textarea>
+                            @error('short_description')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                        </div>
 
-        {{-- SKU --}}
-        <div class="mb-3">
-            <label class="form-label">SKU</label>
-            <input type="text" name="sku" class="form-control" value="{{ old('sku', $product->sku) }}">
-        </div>
+                        {{-- Mô tả chi tiết --}}
+                        <div class="mb-3">
+                            <label for="long_description" class="form-label">Mô tả chi tiết</label>
+                            <textarea class="form-control @error('long_description') is-invalid @enderror" id="long_description" name="long_description" rows="8">{{ old('long_description', $product->long_description) }}</textarea>
+                            @error('long_description')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                        </div>
 
-        {{-- Loại sản phẩm --}}
-        <div class="mb-3">
-            <label class="form-label">Loại sản phẩm</label>
-            <select name="type" class="form-select" disabled>
-                <option value="simple" {{ $product->type === 'simple' ? 'selected' : '' }}>Sản phẩm đơn</option>
-                <option value="variable" {{ $product->type === 'variable' ? 'selected' : '' }}>Sản phẩm biến thể</option>
-            </select>
-            <div class="form-text text-muted">Không thể thay đổi loại sau khi tạo</div>
-        </div>
+                        {{-- Media --}}
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Media</label>
+                            {{-- Ảnh đại diện --}}
+                            <div class="mb-3">
+                                <label for="thumbnail" class="form-label">Thay đổi ảnh đại diện</label>
+                                @if($product->thumbnail)
+                                <img src="{{ asset('storage/' . $product->thumbnail) }}" alt="{{ $product->name }}" class="img-thumbnail mb-2" width="150">
+                                @endif
+                                <input type="file" class="form-control @error('thumbnail') is-invalid @enderror" id="thumbnail" name="thumbnail" accept="image/*">
+                                @error('thumbnail')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                            </div>
+                            <hr>
+                            {{-- Thư viện ảnh --}}
+                            <div class="mb-3">
+                                <label class="form-label">Thư viện ảnh</label>
+                                <div class="row g-2 mb-2">
+                                    @foreach($product->allImages as $image)
+                                    <div class="col-auto">
+                                        <div class="position-relative">
+                                            <img src="{{ asset('storage/' . $image->image_path) }}" class="img-thumbnail" width="100" alt="Gallery image">
+                                            <div class="position-absolute top-0 end-0 p-1">
+                                                <input type="checkbox" class="form-check-input" name="delete_images[]" value="{{ $image->id }}" id="delete_image_{{ $image->id }}">
+                                                <label for="delete_image_{{ $image->id }}" class="text-danger small" title="Chọn để xóa">Xóa</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    @endforeach
+                                </div>
+                                <label class="form-label">Thêm ảnh mới vào thư viện</label>
+                                <div id="galleryWrapper"></div>
+                                <button type="button" class="btn btn-sm btn-outline-primary mt-2" id="btnAddImage">Thêm ảnh</button>
+                            </div>
+                        </div>
+                    </div>
 
-        {{-- Giá --}}
-        <div class="mb-3">
-            <label class="form-label">Giá</label>
-            <input type="number" name="price" class="form-control" value="{{ old('price', $product->price) }}">
-        </div>
+                    {{-- CỘT BÊN PHẢI (Thông tin phụ & Cài đặt) --}}
+                    <div class="col-lg-4">
+                        {{-- Cài đặt giá & kho --}}
+                        <div class="mb-3">
+                            <label for="price" class="form-label">Giá <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control @error('price') is-invalid @enderror" id="price" name="price" value="{{ old('price', $product->price) }}">
+                            @error('price')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                        </div>
+                        <div class="mb-3">
+                            <label for="sale_price" class="form-label">Giá khuyến mãi</label>
+                            <input type="number" class="form-control @error('sale_price') is-invalid @enderror" id="sale_price" name="sale_price" value="{{ old('sale_price', $product->sale_price) }}">
+                            @error('sale_price')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                        </div>
+                        <div class="mb-3">
+                            <label for="stock" class="form-label">Tồn kho</label>
+                            <input type="number" class="form-control @error('stock') is-invalid @enderror" id="stock" name="stock" value="{{ old('stock', $product->stock) }}">
+                            @error('stock')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                        </div>
+                        <div class="mb-3">
+                            <label for="low_stock_amount" class="form-label">Cảnh báo khi tồn kho dưới</label>
+                            <input type="number" class="form-control @error('low_stock_amount') is-invalid @enderror" id="low_stock_amount" name="low_stock_amount" value="{{ old('low_stock_amount', $product->low_stock_amount) }}">
+                            @error('low_stock_amount')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                        </div>
 
-        {{-- Giá khuyến mãi --}}
-        <div class="mb-3">
-            <label class="form-label">Giá khuyến mãi</label>
-            <input type="number" name="sale_price" class="form-control" value="{{ old('sale_price', $product->sale_price) }}">
-        </div>
+                        <hr>
 
-        {{-- Tồn kho --}}
-        <div class="mb-3">
-            <label class="form-label">Tồn kho</label>
-            <input type="number" name="stock" class="form-control" value="{{ old('stock', $product->stock) }}">
-        </div>
+                        {{-- Cài đặt tổ chức sản phẩm --}}
+                        <div class="mb-3">
+                            <label for="sku" class="form-label">SKU</label>
+                            <input type="text" class="form-control @error('sku') is-invalid @enderror" id="sku" name="sku" value="{{ old('sku', $product->sku) }}" placeholder="Để trống để tạo tự động">
+                            @error('sku')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                        </div>
+                        <div class="mb-3">
+                            <label for="type" class="form-label">Loại sản phẩm <span class="text-danger">*</span></label>
+                            <select class="form-select @error('type') is-invalid @enderror" name="type" id="type">
+                                <option value="simple" {{ old('type', $product->type) == 'simple' ? 'selected' : '' }}>Sản phẩm đơn</option>
+                                <option value="variable" {{ old('type', $product->type) == 'variable' ? 'selected' : '' }}>Sản phẩm biến thể</option>
+                            </select>
+                            @error('type')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                        </div>
+                        <div class="mb-3">
+                            <label for="category_id" class="form-label">Danh mục <span class="text-danger">*</span></label>
+                            <select class="form-select @error('category_id') is-invalid @enderror" name="category_id" id="category_id">
+                                <option value="">-- Chọn danh mục --</option>
+                                @foreach ($categories as $category)
+                                <option value="{{ $category->id }}" {{ old('category_id', $product->category_id) == $category->id ? 'selected' : '' }}>{{ $category->name }}</option>
+                                @endforeach
+                            </select>
+                            @error('category_id')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                        </div>
+                        <div class="mb-3">
+                            <label for="brand_id" class="form-label">Thương hiệu</label>
+                            <select class="form-select @error('brand_id') is-invalid @enderror" name="brand_id" id="brand_id">
+                                <option value="">-- Chọn thương hiệu --</option>
+                                @foreach ($brands as $brand)
+                                <option value="{{ $brand->id }}" {{ old('brand_id', $product->brand_id) == $brand->id ? 'selected' : '' }}>{{ $brand->name }}</option>
+                                @endforeach
+                            </select>
+                            @error('brand_id')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                        </div>
 
-        {{-- Cảnh báo tồn kho --}}
-        <div class="mb-3">
-            <label class="form-label">Cảnh báo tồn kho dưới</label>
-            <input type="number" name="low_stock_amount" class="form-control" value="{{ old('low_stock_amount', $product->low_stock_amount) }}">
-        </div>
+                        <hr>
 
-        {{-- Danh mục --}}
-        <div class="mb-3">
-            <label class="form-label">Danh mục</label>
-            <select name="category_id" class="form-select">
-                @foreach ($categories as $category)
-                    <option value="{{ $category->id }}" {{ $product->category_id == $category->id ? 'selected' : '' }}>
-                        {{ $category->name }}
-                    </option>
-                @endforeach
-            </select>
-        </div>
-
-        {{-- Thương hiệu --}}
-        <div class="mb-3">
-            <label class="form-label">Thương hiệu</label>
-            <select name="brand_id" class="form-select">
-                @foreach ($brands as $brand)
-                    <option value="{{ $brand->id }}" {{ $product->brand_id == $brand->id ? 'selected' : '' }}>
-                        {{ $brand->name }}
-                    </option>
-                @endforeach
-            </select>
-        </div>
-
-        {{-- Trạng thái --}}
-        <div class="mb-3">
-            <label class="form-label">Trạng thái</label>
-            <select name="status" class="form-select">
-                <option value="active" {{ $product->status === 'active' ? 'selected' : '' }}>Hiển thị</option>
-                <option value="inactive" {{ $product->status === 'inactive' ? 'selected' : '' }}>Ẩn</option>
-            </select>
-        </div>
-
-        {{-- Ảnh đại diện --}}
-        <div class="mb-3">
-            <label class="form-label">Ảnh đại diện</label><br>
-            @if ($product->thumbnail)
-                <img src="{{ asset('storage/' . $product->thumbnail) }}" style="max-height: 120px;" class="img-thumbnail mb-2">
-            @endif
-            <input type="file" name="thumbnail" class="form-control">
-        </div>
-
-{{-- Ảnh phụ --}}
-<div class="mb-3">
-    <label class="form-label fw-bold">Ảnh phụ khác</label>
-    <div id="existingImages">
-        @foreach ($product->allImages as $index => $image)
-            <div class="mb-2 d-flex align-items-center gap-2">
-                <img src="{{ asset('storage/' . $image->image_path) }}" class="img-thumbnail" style="height: 80px;">
-                
-                {{-- Ảnh thay thế --}}
-                <input type="file" name="existing_images[{{ $image->id }}]" class="form-control" accept="image/*">
-
-                {{-- Nút xoá ảnh --}}
-                <div class="form-check">
-                    <input type="checkbox" name="delete_images[]" value="{{ $image->id }}" class="form-check-input">
-                    <label class="form-check-label">Xoá</label>
+                        {{-- Cài đặt hiển thị --}}
+                        <div class="mb-3">
+                            <label for="status" class="form-label">Trạng thái <span class="text-danger">*</span></label>
+                            <select class="form-select @error('status') is-invalid @enderror" name="status" id="status">
+                                <option value="active" {{ old('status', $product->status) == 'active' ? 'selected' : '' }}>Hiển thị</option>
+                                <option value="inactive" {{ old('status', $product->status) == 'inactive' ? 'selected' : '' }}>Ẩn</option>
+                            </select>
+                            @error('status')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" role="switch" id="is_featured" name="is_featured" value="1" {{ old('is_featured', $product->is_featured) ? 'checked' : '' }}>
+                            <label class="form-check-label" for="is_featured">Sản phẩm nổi bật</label>
+                        </div>
+                    </div>
                 </div>
             </div>
-        @endforeach
-    </div>
-
-    <hr>
-
-    <label class="form-label">Thêm ảnh mới</label>
-    <div id="galleryWrapper"></div>
-    <button type="button" class="btn btn-sm btn-primary mt-2" id="btnAddImage">Thêm ảnh</button>
-</div>
-
-        {{-- Mô tả ngắn --}}
-        <div class="mb-3">
-            <label class="form-label">Mô tả ngắn</label>
-            <textarea name="short_description" class="form-control" rows="3">{{ old('short_description', $product->short_description) }}</textarea>
         </div>
 
-        {{-- Mô tả chi tiết --}}
-        <div class="mb-3">
-            <label class="form-label">Mô tả chi tiết</label>
-            <textarea name="long_description" class="form-control" rows="5">{{ old('long_description', $product->long_description) }}</textarea>
-        </div>
-
-        <div class="d-flex justify-content-end">
-            <a href="{{ route('admin.products.index') }}" class="btn btn-secondary me-2">Quay lại</a>
-            <button type="submit" class="btn btn-primary">Cập nhật</button>
+        {{-- Nút hành động --}}
+        <div class="mt-4 d-flex justify-content-end gap-2">
+            <a href="{{ route('admin.products.index') }}" class="btn btn-secondary">Quay lại</a>
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save"></i> Cập nhật
+            </button>
         </div>
     </form>
 </div>
 @endsection
+
 @push('scripts')
 <script>
-    document.getElementById('btnAddImage').addEventListener('click', function () {
+    document.getElementById('btnAddImage').addEventListener('click', function(e) {
+        e.preventDefault();
         const wrapper = document.getElementById('galleryWrapper');
         const div = document.createElement('div');
         div.classList.add('d-flex', 'align-items-center', 'mb-2', 'gallery-item');
-
         div.innerHTML = `
             <input type="file" name="gallery[]" class="form-control me-2" accept="image/*">
-            <button type="button" class="btn btn-danger btn-sm btnRemoveImage">Xoá</button>
+            <button type="button" class="btn btn-danger btn-sm btnRemoveImage">Xóa</button>
         `;
-
         wrapper.appendChild(div);
     });
 
-    document.addEventListener('click', function (e) {
+    document.addEventListener('click', function(e) {
         if (e.target.classList.contains('btnRemoveImage')) {
             e.preventDefault();
             e.target.closest('.gallery-item').remove();

@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class ProductRequest extends FormRequest
 {
@@ -18,21 +19,23 @@ class ProductRequest extends FormRequest
         return [
             'name' => 'required|string|max:255',
             'slug' => 'nullable|string|max:255|unique:products,slug,' . $productId,
-            'sku' => 'required|string|max:100|unique:products,sku,' . $productId,  // thêm đây
-            'type' => 'in:simple,variable',
-
+            'sku' => [
+                'nullable',
+                'string',
+                'max:100',
+                Rule::unique('products')->ignore($productId),
+            ],
+            'type' => 'required|in:simple,variable',
             'price' => 'required|numeric|min:0',
             'sale_price' => 'nullable|numeric|min:0|lte:price',
             'stock' => 'required|integer|min:0',
             'low_stock_amount' => 'nullable|integer|min:0',
-
             'thumbnail' => $this->isMethod('post')
                 ? 'required|image|mimes:jpeg,png,jpg,webp|max:2048'
                 : 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
-
             'short_description' => 'nullable|string|max:1000',
             'long_description' => 'nullable|string',
-
+            'is_featured' => 'nullable|boolean',
             'status' => 'required|in:active,inactive',
             'brand_id' => 'required|exists:brands,id',
             'category_id' => 'required|exists:categories,id',
@@ -44,9 +47,10 @@ class ProductRequest extends FormRequest
         return [
             'name.required' => 'Tên sản phẩm không được để trống.',
             'slug.unique' => 'Slug đã tồn tại. Vui lòng chọn slug khác.',
-            'sku.required' => 'Mã SKU là bắt buộc.',
-            'sku.unique' => 'Mã SKU đã tồn tại. Vui lòng chọn mã khác.',
+            'sku.unique' => 'Mã SKU bạn nhập đã tồn tại. Vui lòng chọn mã khác.',
             'sku.max' => 'Mã SKU không được dài quá 100 ký tự.',
+            'type.required' => 'Vui lòng chọn loại sản phẩm.',
+            'type.in' => 'Loại sản phẩm không hợp lệ.',
             'price.required' => 'Giá sản phẩm không được để trống.',
             'price.numeric' => 'Giá phải là số.',
             'stock.required' => 'Tồn kho không được để trống.',

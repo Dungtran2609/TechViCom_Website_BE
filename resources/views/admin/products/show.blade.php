@@ -20,66 +20,90 @@
                 </div>
                 <div class="card-body">
                     <table class="table">
-                        <tr>
-                            <th style="width: 200px;">ID sản phẩm:</th>
-                            <td>{{ $product->id }}</td>
-                        </tr>
-                        <tr>
-                            <th>Tên sản phẩm:</th>
-                            <td>{{ $product->name }}</td>
-                        </tr>
-                        <tr>
-                            <th>Slug:</th>
-                            <td>{{ $product->slug }}</td>
-                        </tr>
-                        <tr>
-                            <th>Mã SKU:</th>
-                            <td>{{ $product->sku ?? 'Không có' }}</td>
-                        </tr>
-                        <tr>
-                            <th>Loại sản phẩm:</th>
-                            <td>
-                                @if ($product->type === 'simple')
-                                    Sản phẩm đơn thể
-                                @elseif ($product->type === 'variable')
-                                    Sản phẩm có biến thể
-                                @else
-                                    Không xác định
-                                @endif
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>Giá:</th>
-                            <td>{{ number_format($product->price) }} đ</td>
-                        </tr>
-                        <tr>
-                            <th>Giá khuyến mãi:</th>
-                            <td>{{ number_format($product->sale_price) }} đ</td>
-                        </tr>
-                        <tr>
-                            <th>Tồn kho:</th>
-                            <td>{{ $product->stock }}</td>
-                        </tr>
-                        <tr>
-                            <th>Cảnh báo khi tồn kho dưới:</th>
-                            <td>{{ $product->low_stock_amount }}</td>
-                        </tr>
-                        <tr>
-                            <th>Danh mục:</th>
-                            <td>{{ $product->category->name ?? 'Không có' }}</td>
-                        </tr>
-                        <tr>
-                            <th>Thương hiệu:</th>
-                            <td>{{ $product->brand->name ?? 'Không có' }}</td>
-                        </tr>
-                        <tr>
-                            <th>Trạng thái:</th>
-                            <td>
-                                <span class="badge bg-{{ $product->status === 'active' ? 'success' : 'secondary' }}">
-                                    {{ $product->status === 'active' ? 'Hiển thị' : 'Ẩn' }}
-                                </span>
-                            </td>
-                        </tr>
+                        <tbody>
+                            <tr>
+                                <th style="width: 200px;">ID sản phẩm:</th>
+                                <td>#{{ $product->id }}</td>
+                            </tr>
+                            <tr>
+                                <th>Tên sản phẩm:</th>
+                                <td>{{ $product->name }}</td>
+                            </tr>
+                            <tr>
+                                <th>Slug:</th>
+                                <td>{{ $product->slug }}</td>
+                            </tr>
+                            <tr>
+                                <th>Mã SKU:</th>
+                                <td>{{ $product->sku ?? 'Chưa có' }}</td>
+                            </tr>
+                            <tr>
+                                <th>Loại sản phẩm:</th>
+                                <td>
+                                    @if($product->type === 'simple')
+                                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle"><i class="fas fa-box me-1"></i>Sản phẩm đơn</span>
+                                    @else
+                                        <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle"><i class="fas fa-boxes-stacked me-1"></i>Sản phẩm biến thể</span>
+                                    @endif
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Giá:</th>
+                                <td>
+                                    @if($product->sale_price && $product->sale_price < $product->price)
+                                        <span class="text-danger fw-bold">{{ number_format($product->sale_price, 0, ',', '.') }} đ</span>
+                                        <small class="text-muted text-decoration-line-through ms-2">{{ number_format($product->price, 0, ',', '.') }} đ</small>
+                                    @else
+                                        <span class="fw-bold">{{ number_format($product->price, 0, ',', '.') }} đ</span>
+                                    @endif
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Tồn kho:</th>
+                                <td>{{ $product->stock ?? '0' }}</td>
+                            </tr>
+                            <tr>
+                                <th>Cảnh báo tồn kho thấp:</th>
+                                <td>{{ $product->low_stock_amount ?? 'Không đặt' }}</td>
+                            </tr>
+                            <tr>
+                                <th>Danh mục:</th>
+                                <td>{{ $product->category->name ?? 'Không có' }}</td>
+                            </tr>
+                            <tr>
+                                <th>Thương hiệu:</th>
+                                <td>{{ $product->brand->name ?? 'Không có' }}</td>
+                            </tr>
+                            <tr>
+                                <th>Trạng thái:</th>
+                                <td>
+                                    @if($product->status === 'active')
+                                        <span class="badge bg-success-subtle text-success">Hiển thị</span>
+                                    @else
+                                        <span class="badge bg-danger-subtle text-danger">Ẩn</span>
+                                    @endif
+                                </td>
+                            </tr>
+                            {{-- TRƯỜNG BỔ SUNG --}}
+                            <tr>
+                                <th>Sản phẩm nổi bật:</th>
+                                <td>
+                                    @if($product->is_featured)
+                                        <span class="badge bg-info-subtle text-info">Có</span>
+                                    @else
+                                        <span class="badge bg-secondary-subtle text-secondary">Không</span>
+                                    @endif
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Ngày tạo:</th>
+                                <td class="text-muted">{{ $product->created_at->format('H:i, d/m/Y') }}</td>
+                            </tr>
+                             <tr>
+                                <th>Lần cập nhật cuối:</th>
+                                <td class="text-muted">{{ $product->updated_at->format('H:i, d/m/Y') }}</td>
+                            </tr>
+                        </tbody>
                     </table>
                 </div>
             </div>
@@ -92,10 +116,13 @@
                     </div>
                     <div class="card-body">
                         @if ($product->short_description)
-                            <p><strong>Mô tả ngắn:</strong> {{ $product->short_description }}</p>
+                            <h6 class="text-muted">Mô tả ngắn</h6>
+                            <p>{{ $product->short_description }}</p>
                         @endif
                         @if ($product->long_description)
-                            <p><strong>Mô tả chi tiết:</strong><br>{!! nl2br(e($product->long_description)) !!}</p>
+                            @if($product->short_description)<hr>@endif
+                            <h6 class="text-muted">Mô tả chi tiết</h6>
+                            <div>{!! $product->long_description !!}</div>
                         @endif
                     </div>
                 </div>
@@ -114,26 +141,26 @@
                         <img src="{{ asset('storage/' . $product->thumbnail) }}" 
                              alt="{{ $product->name }}" 
                              class="img-fluid rounded mb-3" 
-                             style="max-height: 200px;">
+                             style="max-height: 250px;">
                     @else
-                        <p class="text-muted">Chưa có ảnh.</p>
+                        <p class="text-muted">Chưa có ảnh đại diện.</p>
                     @endif
                 </div>
             </div>
 
             {{-- Ảnh phụ --}}
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5 class="card-title mb-0">Ảnh phụ</h5>
+            @if($product->allImages->isNotEmpty())
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Thư viện ảnh</h5>
+                    </div>
+                    <div class="card-body d-flex flex-wrap gap-2">
+                        @foreach ($product->allImages as $img)
+                            <img src="{{ asset('storage/' . $img->image_path) }}" class="img-thumbnail" style="width: 100px; height: 100px; object-fit: cover;" alt="Ảnh phụ">
+                        @endforeach
+                    </div>
                 </div>
-                <div class="card-body d-flex flex-wrap gap-2">
-                    @forelse ($product->allImages as $img)
-                        <img src="{{ asset('storage/' . $img->image_path) }}" class="img-thumbnail" style="width: 100px;">
-                    @empty
-                        <p class="text-muted">Không có ảnh phụ.</p>
-                    @endforelse
-                </div>
-            </div>
+            @endif
 
             {{-- Thao tác nhanh --}}
             <div class="card mb-4">
@@ -142,15 +169,14 @@
                 </div>
                 <div class="card-body">
                     <div class="d-grid gap-2">
-                        <a href="{{ route('admin.products.edit', $product->id) }}" class="btn btn-warning">
+                        <a href="{{ route('admin.products.edit', $product->id) }}" class="btn btn-primary">
                             <i class="fas fa-edit"></i> Chỉnh sửa
                         </a>
-                        <form action="{{ route('admin.products.destroy', $product->id) }}" method="POST">
+                        <form action="{{ route('admin.products.destroy', $product->id) }}" method="POST" onsubmit="return confirm('Bạn có chắc muốn chuyển sản phẩm này vào thùng rác?');">
                             @csrf
                             @method('DELETE')
-                            <button type="submit" class="btn btn-danger w-100"
-                                onclick="return confirm('Bạn có chắc chắn muốn xoá sản phẩm này?')">
-                                <i class="fas fa-trash"></i> Xoá sản phẩm
+                            <button type="submit" class="btn btn-outline-danger w-100">
+                                <i class="fas fa-trash"></i> Chuyển vào thùng rác
                             </button>
                         </form>
                     </div>
