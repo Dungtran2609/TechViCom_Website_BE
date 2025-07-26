@@ -2,12 +2,12 @@
     <!-- Sidebar Logo -->
     <div class="logo-box">
         <a href="{{ route('admin.dashboard') }}" class="logo-dark">
-            <img src="{{ asset('admin/images/logo-sm.png') }}" class="logo-sm" alt="logo sm">
-            <img src="{{ asset('admin/images/logo-dark.png') }}" class="logo-lg" alt="logo dark">
+            <img src="{{ asset('admin/images/logo_techvicom.png') }}" class="logo-sm" alt="logo sm">
+            <img src="{{ asset('admin/images/logo_techvicom.png') }}" class="logo-lg" alt="logo dark">
         </a>
         <a href="{{ route('admin.dashboard') }}" class="logo-light">
-            <img src="{{ asset('admin/images/logo-sm.png') }}" class="logo-sm" alt="logo sm">
-            <img src="{{ asset('admin/images/logo-light.png') }}" class="logo-lg" alt="logo light">
+            <img src="{{ asset('admin/images/logo_techvicom.png') }}" class="logo-sm" alt="logo sm">
+            <img src="{{ asset('admin/images/logo_techvicom.png') }}" class="logo-lg" alt="logo light">
         </a>
     </div>
 
