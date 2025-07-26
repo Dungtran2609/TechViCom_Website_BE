@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Admin;
 
+use Illuminate\Validation\Rule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class BrandRequest extends FormRequest
@@ -13,8 +14,15 @@ class BrandRequest extends FormRequest
 
     public function rules(): array
     {
+        $brandId = $this->route('brand') ? $this->route('brand')->id : null;
+
         return [
-            'name' => 'required|string|max:100',
+            'name' => [
+                'required',
+                'string',
+                'max:100',
+                Rule::unique('brands', 'name')->ignore($brandId),
+            ],
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
             'slug' => 'nullable|string|max:100',
             'description' => 'nullable|string',
@@ -28,10 +36,11 @@ class BrandRequest extends FormRequest
             'name.required' => 'Tên thương hiệu không được để trống.',
             'name.string' => 'Tên thương hiệu phải là chuỗi ký tự.',
             'name.max' => 'Tên thương hiệu không được vượt quá 100 ký tự.',
-
+            'name.unique' => 'Tên thương hiệu này đã tồn tại.',
             'image.image' => 'Tệp tải lên phải là hình ảnh.',
             'image.mimes' => 'Ảnh phải có định dạng: jpeg, png, jpg, gif, svg hoặc webp.',
             'image.max' => 'Kích thước ảnh không được vượt quá 2MB.',
+
 
             'slug.string' => 'Slug phải là chuỗi ký tự.',
             'slug.max' => 'Slug không được vượt quá 100 ký tự.',

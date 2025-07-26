@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin\Products;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\BrandRequest; 
 use App\Models\Brand;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -31,25 +32,21 @@ class BrandController extends Controller
         return view('admin.products.brands.create');
     }
 
-    public function store(Request $request)
+    public function store(BrandRequest $request)
     {
-        $request->validate([
-            'name' => 'required|max:255',
-            'image' => 'nullable|image|max:2048',
-            'description' => 'nullable',
-            'status' => 'required|boolean'
-        ]);
+        $validatedData = $request->validated();
 
-        $imagePath = $request->hasFile('image')
-            ? $request->file('image')->store('brands', 'public')
-            : null;
+        $imagePath = null;
+        if ($request->hasFile('image')) {
+            $imagePath = $request->file('image')->store('brands', 'public');
+        }
 
         Brand::create([
-            'name' => $request->name,
-            'slug' => Str::slug($request->name),
+            'name' => $validatedData['name'],
+            'slug' => Str::slug($validatedData['name']),
             'image' => $imagePath,
-            'description' => $request->description,
-            'status' => $request->status,
+            'description' => $validatedData['description'],
+            'status' => $validatedData['status'],
         ]);
 
         return redirect()->route('admin.products.brands.index')
@@ -66,28 +63,24 @@ class BrandController extends Controller
         return view('admin.products.brands.edit', compact('brand'));
     }
 
-    public function update(Request $request, Brand $brand)
+    public function update(BrandRequest $request, Brand $brand)
     {
-        $request->validate([
-            'name' => 'required|max:255',
-            'image' => 'nullable|image|max:2048',
-            'description' => 'nullable',
-            'status' => 'required|boolean'
-        ]);
+        $validatedData = $request->validated();
 
+        $imagePath = $brand->image;
         if ($request->hasFile('image')) {
             if ($brand->image) {
                 Storage::disk('public')->delete($brand->image);
             }
-            $brand->image = $request->file('image')->store('brands', 'public');
+            $imagePath = $request->file('image')->store('brands', 'public');
         }
 
         $brand->update([
-            'name' => $request->name,
-            'slug' => Str::slug($request->name),
-            'image' => $brand->image,
-            'description' => $request->description,
-            'status' => $request->status,
+            'name' => $validatedData['name'],
+            'slug' => Str::slug($validatedData['name']),
+            'image' => $imagePath,
+            'description' => $validatedData['description'],
+            'status' => $validatedData['status'],
         ]);
 
         return redirect()->route('admin.products.brands.index')
@@ -136,4 +129,5 @@ class BrandController extends Controller
 
         return redirect()->route('admin.products.brands.trashed')->with('success', 'Đã xoá vĩnh viễn thương hiệu.');
     }
+   
 }
