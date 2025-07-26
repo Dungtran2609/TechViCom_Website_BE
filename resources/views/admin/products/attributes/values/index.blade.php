@@ -35,22 +35,35 @@
         <div class="card-header bg-light fw-bold">Thêm giá trị mới</div>
         <div class="card-body">
             <form action="{{ route('admin.products.attributes.values.store', $attribute->id) }}" method="POST"
-                class="row g-3 align-items-end">
+                class="row align-items-end g-3">
                 @csrf
                 <div class="col-md-4">
-                    <label class="form-label">Tên giá trị</label>
-                    <input type="text" name="value" class="form-control" placeholder="Nhập giá trị thuộc tính...">
+                    <label for="value" class="form-label">Tên giá trị</label>
+                    <input type="text" name="value" id="value" class="form-control @error('value') is-invalid @enderror"
+                        placeholder="Nhập giá trị thuộc tính..." value="{{ old('value') }}">
+                    @error('value')
+                        <div class="invalid-feedback">
+                            {{ $message }}
+                        </div>
+                    @enderror
                 </div>
 
                 @if ($attribute->type === 'color')
                     <div class="col-md-2">
-                        <label class="form-label">Mã màu</label>
-                        <input type="color" name="color_code" class="form-control form-control-color" value="#000000">
+                        <label for="color_code" class="form-label">Mã màu</label>
+                        <input type="color" name="color_code" id="color_code"
+                            class="form-control form-control-color @error('color_code') is-invalid @enderror"
+                            value="{{ old('color_code', '#000000') }}">
+                        @error('color_code')
+                            <div class="invalid-feedback">
+                                {{ $message }}
+                            </div>
+                        @enderror
                     </div>
                 @endif
 
                 <div class="col-md-2">
-                    <button type="submit" class="btn btn-primary">
+                    <button type="submit" class="btn btn-primary w-100">
                         <i class="fas fa-plus"></i> Thêm
                     </button>
                 </div>
@@ -88,7 +101,7 @@
                                     <div class="d-flex justify-content-center gap-2">
                                         <a href="{{ route('admin.products.attributes.values.edit', ['attribute' => $attribute->id, 'value' => $val->id]) }}"
                                             class="btn btn-sm btn-outline-primary" title="Sửa">
-                                           <iconify-icon icon="solar:pen-2-broken" class="align-middle fs-18"></iconify-icon>
+                                            <iconify-icon icon="solar:pen-2-broken" class="align-middle fs-18"></iconify-icon>
                                         </a>
 
                                         <form action="{{ route('admin.products.attributes.values.destroy', $val->id) }}"

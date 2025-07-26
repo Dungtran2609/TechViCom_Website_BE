@@ -50,10 +50,11 @@
                                 <td class="fw-semibold">{{ $attribute->name }}</td>
                                 <td>{{ ucfirst($attribute->type) }}</td>
                                 <td>{{ $attribute->slug }}</td>
-                                <td>{{ $attribute->description ?? '-' }}</td>
+                                <td>{{ $attribute->description ?? 'Chưa có' }}</td>
                                 <td>
                                     <div class="d-flex gap-2">
-                                        <a href="{{ route('admin.products.attributes.values.index', $attribute->id) }}" class="btn btn-light btn-sm" title="Xem giá trị">
+                                        <a href="{{ route('admin.products.attributes.values.index', $attribute->id) }}"
+                                            class="btn btn-light btn-sm" title="Xem giá trị">
                                             <iconify-icon icon="solar:eye-broken" class="align-middle fs-18"></iconify-icon>
                                         </a>
                                         <a href="{{ route('admin.products.attributes.edit', $attribute) }}"
