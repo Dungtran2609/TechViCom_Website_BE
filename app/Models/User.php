@@ -88,4 +88,9 @@ class User extends Authenticatable
         }
         return $this->roles()->where('name', $roles)->exists();
     }
+
+    public function productComments()
+    {
+        return $this->hasMany(ProductComment::class);
+    }
 }

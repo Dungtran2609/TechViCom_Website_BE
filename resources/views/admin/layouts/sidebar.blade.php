@@ -121,7 +121,6 @@
                 </div>
             </li>
 
-
             <!-- Đánh giá -->
             <li class="nav-item">
                 <a class="nav-link menu-arrow" href="#5" data-bs-toggle="collapse">
@@ -130,8 +129,8 @@
                 </a>
                 <div class="collapse" id="5">
                     <ul class="nav sub-navbar-nav">
-                        <li class="sub-nav-item"><a class="sub-nav-link" href="#">Bình luận</a></li>
-                        <li class="sub-nav-item"><a class="sub-nav-link" href="#">Phản hồi</a></li>
+                        <li class="sub-nav-item"><a class="sub-nav-link" href="{{ route('admin.products.comments.products-with-comments') }}">Bình luận</a></li>
+                        {{-- <li class="sub-nav-item"><a class="sub-nav-link" href="#">Phản hồi</a></li> --}}
                     </ul>
                 </div>
             </li>

@@ -20,6 +20,7 @@ use App\Http\Controllers\Admin\Products\AttributeController;
 use App\Http\Controllers\Admin\Contacts\ContactsAdminController;
 use App\Http\Controllers\Admin\Products\AttributeValueController;
 use App\Http\Controllers\Admin\OrderController;
+use App\Http\Controllers\Admin\Products\ProductCommentAdminController;
 
 Route::middleware([IsAdmin::class])->prefix('admin-control')->name('admin.')->group(function () {
     // Trang dashboard admin
@@ -82,6 +83,18 @@ Route::middleware([IsAdmin::class])->prefix('admin-control')->name('admin.')->gr
         Route::post('returns/{id}/process', [OrderController::class, 'processReturn'])->name('process-return');
         Route::resource('', OrderController::class)->parameters(['' => 'order'])->names('');
     });
+
+    // Quản lý bình luận/đánh giá sản phẩm
+    Route::prefix('product-comments')->name('products.comments.')->group(function () {
+        Route::get('/products-with-comments', [\App\Http\Controllers\Admin\Products\ProductCommentAdminController::class, 'productsWithComments'])->name('products-with-comments');
+        Route::get('/', [\App\Http\Controllers\Admin\Products\ProductCommentAdminController::class, 'index'])->name('index');
+        Route::get('/{id}', [\App\Http\Controllers\Admin\Products\ProductCommentAdminController::class, 'show'])->name('show');
+        Route::get('/{id}/edit', [\App\Http\Controllers\Admin\Products\ProductCommentAdminController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [\App\Http\Controllers\Admin\Products\ProductCommentAdminController::class, 'update'])->name('update');
+        Route::delete('/{id}', [\App\Http\Controllers\Admin\Products\ProductCommentAdminController::class, 'destroy'])->name('destroy');
+        Route::patch('/{id}/approve', [\App\Http\Controllers\Admin\Products\ProductCommentAdminController::class, 'approve'])->name('approve');
+        Route::patch('/{id}/toggle', [\App\Http\Controllers\Admin\Products\ProductCommentAdminController::class, 'toggleStatus'])->name('toggle');
+    });
 });
 
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
@@ -106,3 +119,5 @@ Route::middleware('auth')->group(function () {
     Route::post('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
     Route::post('/profile/delete', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
+
+Route::post('/product-comments/{id}/reply', [ProductCommentAdminController::class, 'reply'])->name('products.comments.reply');
