@@ -5,35 +5,27 @@ use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\Admin\BannerController;
+use App\Http\Controllers\Admin\Contacts\ContactsAdminController;
 use App\Http\Controllers\Client\HomeController;
 use App\Http\Controllers\Client\AccountController;
-use App\Http\Controllers\Client\ProfileController;
-
-use App\Http\Controllers\Admin\News\NewsController;
 use App\Http\Controllers\Admin\News\NewsCategoryController;
-
-use App\Http\Controllers\Admin\Products\CategoryController;
+use App\Http\Controllers\Admin\News\NewsCommentController;
+use App\Http\Controllers\Admin\News\NewsController;
+use App\Http\Controllers\Client\ProfileController;
 use App\Http\Controllers\Admin\Products\BrandController;
+use App\Http\Controllers\Admin\Products\ProductController;
+use App\Http\Controllers\Admin\Products\CategoryController;
 use App\Http\Controllers\Admin\Products\AttributeController;
 use App\Http\Controllers\Admin\Products\AttributeValueController;
-use App\Http\Controllers\Admin\Products\ProductController;
+use App\Http\Controllers\Admin\OrderController;
+use App\Http\Controllers\Admin\Products\ProductCommentAdminController;
 use App\Http\Controllers\Admin\Products\ProductVariantController;
 
-use App\Http\Controllers\Admin\Contacts\ContactsAdminController;
-
-use App\Http\Controllers\Admin\Users\PermissionController;
-use App\Http\Controllers\Admin\Users\RoleController;
-use App\Http\Controllers\Admin\Users\UserController;
-
-use App\Http\Controllers\Admin\OrderController;
-use App\Http\Controllers\Admin\Coupons\CouponController;
-
-use App\Http\Middleware\CheckRole;
-use App\Http\Middleware\CheckPermission;
 
 Route::middleware([IsAdmin::class])->prefix('admin-control')->name('admin.')->group(function () {
     Route::get('/', [AdminController::class, 'dashboard'])->name('dashboard');
-
+    Route::resource('banner', BannerController::class);
     // Categories
     Route::get('products/categories/trashed', [CategoryController::class, 'trashed'])->name('products.categories.trashed');
     Route::post('products/categories/{id}/restore', [CategoryController::class, 'restore'])->name('products.categories.restore');
@@ -85,83 +77,21 @@ Route::middleware([IsAdmin::class])->prefix('admin-control')->name('admin.')->gr
     // News
     Route::resource('news', NewsController::class);
     Route::resource('news-categories', NewsCategoryController::class);
+    Route::get('/news-comments', [NewsCommentController::class, 'index'])->name('news-comments.index');
+    Route::delete('/news-comments/{id}', [NewsCommentController::class, 'destroy'])->name('news-comments.destroy');
+    Route::patch('/news-comments/{id}/toggle', [NewsCommentController::class, 'toggleVisibility'])->name('news-comments.toggle');
 
     // Contacts
     Route::get('contacts', [ContactsAdminController::class, 'index'])->name('contacts.index');
     Route::get('contacts/{id}', [ContactsAdminController::class, 'show'])->name('contacts.show');
+
     Route::delete('contacts/{id}', [ContactsAdminController::class, 'destroy'])->name('contacts.destroy');
 
-    // Users Management
-    Route::prefix('users')->name('users.')->group(function () {
-        Route::get('/', [UserController::class, 'index'])->name('index');
-        Route::get('/admins', [UserController::class, 'admins'])->name('admins');
-        Route::get('/staffs', [UserController::class, 'staffs'])->name('staffs');
-        Route::get('/customers', [UserController::class, 'customers'])->name('customers');
-
-        Route::get('/create', [UserController::class, 'create'])->name('create');
-        Route::post('/', [UserController::class, 'store'])->name('store');
-        Route::get('/{user}/edit', [UserController::class, 'edit'])->name('edit');
-        Route::put('/{user}', [UserController::class, 'update'])->name('update');
-        Route::get('/{user}', [UserController::class, 'show'])->name('show');
-        Route::delete('/{user}', [UserController::class, 'destroy'])->name('destroy');
-
-        Route::get('/trashed', [UserController::class, 'trashed'])->name('trashed');
-        Route::post('/{id}/restore', [UserController::class, 'restore'])->name('restore');
-        Route::delete('/{id}/force-delete', [UserController::class, 'forceDelete'])->name('forceDelete');
-
-        Route::get('/{user}/addresses', [UserController::class, 'addresses'])->name('addresses.index');
-        Route::post('/{user}/addresses', [UserController::class, 'addAddress'])->name('addresses.store');
-        Route::put('/addresses/{address}', [UserController::class, 'updateAddress'])->name('addresses.update');
-        Route::delete('/addresses/{address}', [UserController::class, 'deleteAddress'])->name('addresses.destroy');
-    });
-
-    // Roles
-    Route::prefix('roles')->name('roles.')->group(function () {
-        Route::get('trashed', [RoleController::class, 'trashed'])->name('trashed');
-        Route::post('{id}/restore', [RoleController::class, 'restore'])->name('restore');
-        Route::delete('{id}/force-delete', [RoleController::class, 'forceDelete'])->name('force-delete');
-        Route::get('list', [RoleController::class, 'list'])->name('list');
-        Route::post('update-users', [RoleController::class, 'updateUsers'])->name('updateUsers');
-
-        Route::middleware(CheckPermission::class . ':assign_permission')
-            ->get('{role}/permissions', [PermissionController::class, 'permissions'])->name('permissions.edit');
-        Route::middleware(CheckPermission::class . ':assign_permission')
-            ->put('{role}/permissions', [PermissionController::class, 'updatePermissions'])->name('permissions.update');
-
-        Route::resource('/', RoleController::class)->parameters(['' => 'role']);
-    });
-
-    // Permissions
-    Route::prefix('permissions')->name('permissions.')->group(function () {
-        Route::middleware(CheckPermission::class . ':view_permission')
-            ->get('/', [PermissionController::class, 'index'])->name('index');
-        Route::middleware(CheckPermission::class . ':view_permission')
-            ->get('/list', [PermissionController::class, 'list'])->name('list');
-
-        Route::middleware(CheckPermission::class . ':create_permission')
-            ->get('/create', [PermissionController::class, 'create'])->name('create');
-        Route::middleware(CheckPermission::class . ':create_permission')
-            ->post('/', [PermissionController::class, 'store'])->name('store');
-
-        Route::middleware(CheckPermission::class . ':edit_permission')
-            ->get('/{permission}/edit', [PermissionController::class, 'edit'])->name('edit');
-        Route::middleware(CheckPermission::class . ':edit_permission')
-            ->put('/{permission}', [PermissionController::class, 'update'])->name('update');
-
-        Route::middleware(CheckPermission::class . ':delete_permission')
-            ->delete('/{permission}', [PermissionController::class, 'destroy'])->name('destroy');
-        Route::middleware(CheckPermission::class . ':assign_permission')
-            ->post('/update-roles', [PermissionController::class, 'updateRoles'])->name('updateRoles');
-
-        Route::middleware(CheckPermission::class . ':delete_permission')
-            ->get('/trashed', [PermissionController::class, 'trashed'])->name('trashed');
-        Route::middleware(CheckPermission::class . ':delete_permission')
-            ->post('/{id}/restore', [PermissionController::class, 'restore'])->name('restore');
-        Route::middleware(CheckPermission::class . ':delete_permission')
-            ->delete('/{id}/force-delete', [PermissionController::class, 'forceDelete'])->name('forceDelete');
-    });
-
-    // Orders
+    // Quản lý sản phẩm
+    Route::get('products/trashed', [ProductController::class, 'trashed'])->name('products.trashed');
+    Route::post('products/{id}/restore', [ProductController::class, 'restore'])->name('products.restore');
+    Route::delete('products/{id}/force-delete', [ProductController::class, 'forceDelete'])->name('products.force-delete');
+    Route::resource('products', ProductController::class)->names('products');
     Route::prefix('order')->name('order.')->group(function () {
         Route::get('trashed', [OrderController::class, 'trashed'])->name('trashed');
         Route::post('{id}/restore', [OrderController::class, 'restore'])->name('restore');
@@ -172,15 +102,19 @@ Route::middleware([IsAdmin::class])->prefix('admin-control')->name('admin.')->gr
         Route::resource('', OrderController::class)->parameters(['' => 'order'])->names('');
     });
 
-    // Coupons (permission protected)
-    Route::middleware(['permission:manage_coupons'])->group(function () {
-        Route::resource('coupons', CouponController::class)->except(['show']);
-        Route::put('coupons/{id}/restore', [CouponController::class, 'restore'])->name('coupons.restore');
-        Route::delete('coupons/{id}/force-delete', [CouponController::class, 'forceDelete'])->name('coupons.forceDelete');
+    // Quản lý bình luận/đánh giá sản phẩm
+    Route::prefix('product-comments')->name('products.comments.')->group(function () {
+        Route::get('/products-with-comments', [ProductCommentAdminController::class, 'productsWithComments'])->name('products-with-comments');
+        Route::get('/', [ProductCommentAdminController::class, 'index'])->name('index');
+        Route::get('/{id}', [ProductCommentAdminController::class, 'show'])->name('show');
+        Route::get('/{id}/edit', [ProductCommentAdminController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [ProductCommentAdminController::class, 'update'])->name('update');
+        Route::delete('/{id}', [ProductCommentAdminController::class, 'destroy'])->name('destroy');
+        Route::patch('/{id}/approve', [ProductCommentAdminController::class, 'approve'])->name('approve');
+        Route::patch('/{id}/toggle', [ProductCommentAdminController::class, 'toggleStatus'])->name('toggle');
     });
 });
 
-// Auth
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
@@ -200,3 +134,5 @@ Route::middleware('auth')->group(function () {
     Route::post('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
     Route::post('/profile/delete', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
+
+Route::post('/product-comments/{id}/reply', [ProductCommentAdminController::class, 'reply'])->name('products.comments.reply');

@@ -51,7 +51,7 @@
                 <input type="text" class="form-control" value="{{ auth()->user()->name }}" disabled>
                 <input type="hidden" name="author_id" value="{{ auth()->id() }}">
             </div>
-            
+
             {{-- Ảnh hiện tại --}}
             <div class="mb-3">
                 <label class="form-label">🖼️ Ảnh hiện tại</label><br>
@@ -87,10 +87,11 @@
                 </div>
 
                 <div class="col-md-6 mb-3">
-                    <label class="form-label">📅 Ngày đăng</label>
-                    <input type="datetime-local" name="published_at" class="form-control"
-                        value="{{ old('published_at', optional($news->published_at)->format('Y-m-d\TH:i')) }}">
+                    <label class="form-label fw-semibold">📅 Ngày đăng</label>
+                    <input type="text" class="form-control"
+                        value="{{ optional($news->published_at)->format('d/m/Y H:i') }}" readonly>
                 </div>
+
             </div>
 
             {{-- Nút hành động --}}
