@@ -1,10 +1,10 @@
 <?php
+
 namespace Database\Seeders;
-use App\Models\Coupon;
-use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
 use Illuminate\Database\Seeder;
+use App\Models\Coupon;
+use App\Models\User;
 
 class DatabaseSeeder extends Seeder
 {
@@ -13,15 +13,15 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-
         $this->call([
             UserSeeder::class,
             RoleSeeder::class,
             PermissionSeeder::class,
             UserRoleSeeder::class,
             PermissionRoleSeeder::class,
- /** 👉 Thêm LocationSeeder vào đây */
-LocationSeeder::class,
+
+            // 👇 Thêm seeders đầy đủ
+            LocationSeeder::class,
             CategorySeeder::class,
             BrandSeeder::class,
 
@@ -35,7 +35,6 @@ LocationSeeder::class,
             AttributeSeeder::class,
             AttributeValueSeeder::class,
             ProductVariantAttributeSeeder::class,
-
 
             TagSeeder::class,
             ProductTagSeeder::class,
@@ -68,13 +67,6 @@ LocationSeeder::class,
 
             BannerSeeder::class,
             LoginHistorySeeder::class,
-
-            
-            
-
-     CouponSeeder::class, 
-
         ]);
-
     }
 }
