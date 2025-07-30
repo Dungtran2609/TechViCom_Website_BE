@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -41,6 +40,14 @@ class ProductVariant extends Model
     {
         return $this->hasMany(ProductVariantAttribute::class);
     }
+    /**
+     * Mối quan hệ với bảng AttributeValue (Giá trị thuộc tính của biến thể)
+     */
+    public function attributeValues()
+    {
+        return $this->belongsToMany(AttributeValue::class, 'product_variants_attributes', 'product_variant_id', 'attribute_value_id')
+            ->withTimestamps();
+    }
 
     /**
      * Mối quan hệ với bảng WarehouseInventory (Kho của các biến thể sản phẩm)
@@ -51,20 +58,20 @@ class ProductVariant extends Model
     }
 
     /**
-     * Mối quan hệ với bảng ProductAllImages (Hình ảnh của biến thể sản phẩm)
+     * Mối quan hệ với bảng images (Hình ảnh của biến thể sản phẩm)
      */
     public function images()
     {
         return $this->hasMany(ProductAllImage::class);
     }
     public function attributesValue()
-{
-    return $this->belongsToMany(
-        AttributeValue::class,
-        'product_variants_attributes',
-        'product_variant_id',
-        'attribute_value_id'
-    )->withTimestamps()->with('attribute'); // thêm để lấy tên thuộc tính gốc (Color, Size)
-}
+    {
+        return $this->belongsToMany(
+            AttributeValue::class,
+            'product_variants_attributes',
+            'product_variant_id',
+            'attribute_value_id'
+        )->withTimestamps()->with('attribute'); // thêm để lấy tên thuộc tính gốc (Color, Size)
+    }
 
 }
