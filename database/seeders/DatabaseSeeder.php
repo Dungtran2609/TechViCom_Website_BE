@@ -1,7 +1,10 @@
 <?php
+
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use App\Models\Coupon;
+use App\Models\User;
 
 class DatabaseSeeder extends Seeder
 {
@@ -17,6 +20,8 @@ class DatabaseSeeder extends Seeder
             UserRoleSeeder::class,
             PermissionRoleSeeder::class,
 
+            // 👇 Thêm seeders đầy đủ
+            LocationSeeder::class,
             CategorySeeder::class,
             BrandSeeder::class,
 
