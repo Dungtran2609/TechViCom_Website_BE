@@ -56,6 +56,25 @@ class Product extends Model
         return $this->hasMany(ProductVariant::class);
     }
     // 👉 Quan hệ tới các biến thể sản phẩm
-    
+    public function getDisplayPriceAttribute()
+{
+    if ($this->type === 'simple') {
+        return $this->price
+            ? number_format($this->price, 0, ',', '.') . ' đ'
+            : 'Chưa có giá';
+    }
+
+    if ($this->variants->count()) {
+        $min = $this->variants->min('price');
+        $max = $this->variants->max('price');
+
+        return ($min && $max)
+            ? 'Từ ' . number_format($min, 0, ',', '.') . ' đ - ' . number_format($max, 0, ',', '.') . ' đ'
+            : 'Chưa có giá';
+    }
+
+    return 'Chưa có giá';
+}
+
 
 }

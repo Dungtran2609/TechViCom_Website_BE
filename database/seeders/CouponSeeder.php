@@ -14,7 +14,7 @@ class CouponSeeder extends Seeder
         DB::table('coupons')->insert([
             [
                 'code'                => 'DISCOUNT10',
-                'discount_type'       => 'percentage',
+                'discount_type'       => 'percent',
                 'value'               => 10.00,
                 'max_discount_amount' => 100000.00,
                 'min_order_value'     => 500000.00,

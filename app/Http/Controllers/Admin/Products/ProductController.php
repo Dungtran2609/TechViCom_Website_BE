@@ -36,50 +36,60 @@ class ProductController extends Controller
     }
 
     public function store(ProductRequest $request)
-    {
-        // Sinh slug gốc
-        $baseSlug = Str::slug($request->name);
-        $slug = $baseSlug;
-        $i = 1;
-
-        // Kiểm tra slug đã tồn tại chưa, nếu có thì thêm hậu tố -1, -2, ...
-        while (Product::withTrashed()->where('slug', $slug)->exists()) {
-            $slug = $baseSlug . '-' . $i++;
-        }
-
-        $thumbnailPath = $request->hasFile('thumbnail')
-            ? $request->file('thumbnail')->store('products', 'public')
-            : null;
-
-        $product = Product::create([
-            'name' => $request->name,
-            'slug' => $slug, // dùng slug đã kiểm tra duy nhất
-            'sku' => $request->sku,
-            'type' => $request->type,
-            'price' => $request->price,
-            'sale_price' => $request->sale_price,
-            'stock' => $request->stock,
-            'low_stock_amount' => $request->low_stock_amount,
-            'thumbnail' => $thumbnailPath,
-            'short_description' => $request->short_description,
-            'long_description' => $request->long_description,
-            'status' => $request->status,
-            'brand_id' => $request->brand_id,
-            'category_id' => $request->category_id,
-        ]);
-
-        // Xử lý ảnh phụ nếu có
-        if ($request->hasFile('gallery')) {
-            foreach ($request->file('gallery') as $image) {
-                $path = $image->store('products/gallery', 'public');
-                $product->allImages()->create([
-                    'image_path' => $path
-                ]);
-            }
-        }
-
-        return redirect()->route('admin.products.index')->with('success', 'Sản phẩm đã được thêm thành công.');
+{
+    // Sinh slug duy nhất
+    $baseSlug = Str::slug($request->name);
+    $slug = $baseSlug;
+    $i = 1;
+    while (Product::withTrashed()->where('slug', $slug)->exists()) {
+        $slug = $baseSlug . '-' . $i++;
     }
+
+    $thumbnailPath = $request->hasFile('thumbnail')
+        ? $request->file('thumbnail')->store('products', 'public')
+        : null;
+
+    $productData = [
+        'name' => $request->name,
+        'slug' => $slug,
+        'sku' => $request->sku,
+        'type' => $request->type,
+        'thumbnail' => $thumbnailPath,
+        'short_description' => $request->short_description,
+        'long_description' => $request->long_description,
+        'status' => $request->status,
+        'brand_id' => $request->brand_id,
+        'category_id' => $request->category_id,
+        'price' => null,
+        'sale_price' => null,
+        'stock' => null,
+        'low_stock_amount' => null,
+    ];
+
+    // Nếu là sản phẩm đơn thì gán giá trị từ request
+    if ($request->type === 'simple') {
+        $productData['price'] = $request->price;
+        $productData['sale_price'] = $request->sale_price;
+        $productData['stock'] = $request->stock;
+        $productData['low_stock_amount'] = $request->low_stock_amount;
+    }
+
+    $product = Product::create($productData);
+
+    // Xử lý ảnh phụ (gallery)
+    if ($request->hasFile('gallery')) {
+        foreach ($request->file('gallery') as $image) {
+            $path = $image->store('products/gallery', 'public');
+            $product->allImages()->create([
+                'image_path' => $path
+            ]);
+        }
+    }
+
+    return redirect()->route('admin.products.index')->with('success', 'Sản phẩm đã được thêm thành công.');
+}
+
+
 
     public function show(Product $product)
     {
@@ -196,4 +206,5 @@ class ProductController extends Controller
         $product->forceDelete();
         return redirect()->route('admin.products.trashed')->with('success', 'Đã xoá vĩnh viễn sản phẩm.');
     }
+    
 }

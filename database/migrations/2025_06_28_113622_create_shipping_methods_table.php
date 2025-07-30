@@ -12,7 +12,7 @@ class CreateShippingMethodsTable extends Migration
             $table->id();
             $table->string('name');
             $table->text('description')->nullable();
-            $table->decimal('fee', 10, 2);
+            $table->decimal('fee', 10, 2)->default(0);
             $table->integer('estimated_days');
             $table->decimal('max_weight', 10, 2);
             $table->text('regions');

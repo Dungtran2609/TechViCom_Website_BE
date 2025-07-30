@@ -61,7 +61,8 @@
                                     <span class="text-muted">Không có ảnh</span>
                                 @endif
                             </td>
-                            <td>{{ number_format($product->price, 0, ',', '.') }} đ</td>
+<td>{{ $product->display_price }}</td>
+
                             <td>
                                 <span class="badge {{ $product->type === 'simple' ? 'bg-secondary' : 'bg-warning text-dark' }} text-capitalize">
                                     {{ $product->type === 'simple' ? 'Sản phẩm đơn' : 'Sản phẩm biến thể' }}

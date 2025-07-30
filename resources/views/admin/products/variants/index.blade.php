@@ -25,9 +25,16 @@
         </div>
     </div>
 
+    @if ($product->type === 'simple' && $variants->count() > 0)
+    <div class="alert alert-info mb-3">
+        Sản phẩm đơn chỉ được thêm 1 biến thể.
+    </div>
+@else
     <a href="{{ route('admin.products.variants.create', $product->id) }}" class="btn btn-primary mb-3">
         + Thêm biến thể
     </a>
+@endif
+
 
     @if ($variants->isEmpty())
         <div class="alert alert-warning">Chưa có biến thể nào.</div>

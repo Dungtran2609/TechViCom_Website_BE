@@ -16,7 +16,7 @@ class ShippingMethodSeeder extends Seeder
                 'id'             => 1,
                 'name'           => 'GHN - Giao hàng nhanh',
                 'description'    => 'Dự kiến giao hàng trong 1-2 ngày làm việc',
-                // 'fee'         => null, // nếu dùng API tính phí động thì không cần lưu ở đây
+                'fee' => 30000.00,
                 'estimated_days' => 2,
                 'max_weight'     => 10000, // đơn vị gram (10kg)
                 'regions'        => 'Toàn quốc',

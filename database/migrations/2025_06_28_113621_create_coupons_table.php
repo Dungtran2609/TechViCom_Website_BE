@@ -11,7 +11,7 @@ class CreateCouponsTable extends Migration
         Schema::create('coupons', function (Blueprint $table) {
             $table->id();
             $table->string('code')->unique();
-            $table->enum('discount_type', ['percent', 'amount']);
+            $table->enum('discount_type', ['percent', 'fixed'])->default('percent');
             $table->decimal('value', 10, 2);
             $table->decimal('max_discount_amount', 10, 2)->nullable();
             $table->decimal('min_order_value', 10, 2)->nullable();
