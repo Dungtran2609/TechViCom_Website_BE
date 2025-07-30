@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\API\V1;
+namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Models\Product;
@@ -12,7 +12,7 @@ class ProductApiController extends Controller
         $products = Product::with(['brand', 'category', 'allImages'])
             ->where('status', 'active')
             ->orderByDesc('id')
-            ->get();
+            ->paginate(10);
 
         return response()->json($products);
     }

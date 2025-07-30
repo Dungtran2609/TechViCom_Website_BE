@@ -1,8 +1,8 @@
 <?php
 
-use App\Http\Controllers\API\V1\BrandApiController;
-use App\Http\Controllers\API\V1\CategoryApiController;
-use App\Http\Controllers\API\V1\ProductApiController;
+use App\Http\Controllers\Api\V1\BrandApiController;
+use App\Http\Controllers\Api\V1\CategoryApiController;
+use App\Http\Controllers\Api\V1\ProductApiController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
