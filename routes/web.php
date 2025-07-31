@@ -17,6 +17,7 @@ use App\Http\Controllers\Admin\Products\CategoryController;
 use App\Http\Controllers\Admin\Products\AttributeController;
 use App\Http\Controllers\Admin\Contacts\ContactsAdminController;
 use App\Http\Controllers\Admin\Products\AttributeValueController;
+use App\Http\Controllers\Admin\Products\ProductVariantController;
 
 Route::middleware([IsAdmin::class])->prefix('admin-control')->name('admin.')->group(function () {
     // Trang dashboard admin
@@ -51,7 +52,17 @@ Route::middleware([IsAdmin::class])->prefix('admin-control')->name('admin.')->gr
         Route::put('values/{value}', [AttributeValueController::class, 'update'])->name('values.update');
         Route::delete('values/{value}', [AttributeValueController::class, 'destroy'])->name('values.destroy');
     });
-
+// Product Variants
+    Route::get('products/variants/select', [ProductVariantController::class, 'selectProduct'])->name('products.variants.select');
+    Route::prefix('products')->name('products.')->group(function () {
+        Route::get('variants/{variant}', [ProductVariantController::class, 'show'])->name('variants.show');
+        Route::get('{product}/variants', [ProductVariantController::class, 'index'])->name('variants.index');
+        Route::get('{product}/variants/create', [ProductVariantController::class, 'create'])->name('variants.create');
+        Route::post('{product}/variants', [ProductVariantController::class, 'store'])->name('variants.store');
+        Route::get('variants/{variant}/edit', [ProductVariantController::class, 'edit'])->name('variants.edit');
+        Route::put('variants/{variant}', [ProductVariantController::class, 'update'])->name('variants.update');
+        Route::delete('variants/{variant}', [ProductVariantController::class, 'destroy'])->name('variants.destroy');
+    });
     // Quản lý bài viết
     Route::resource('news', NewsController::class);
     Route::resource('news-categories', NewsCategoryController::class);

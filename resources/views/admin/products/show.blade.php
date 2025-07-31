@@ -43,22 +43,37 @@
                                     @endif
                                 </td>
                             </tr>
-                            
-                            @if($product->type === 'simple')
-                                <tr>
-                                    <th>Mã SKU:</th>
-                                    <td>{{ $product->sku ?? 'Chưa có' }}</td>
-                                </tr>
-                                <tr>
-                                    <th>Giá:</th>
-                                    <td>
+
+                            <tr>
+                                <th>Giá:</th>
+                                <td>
+                                    @if($product->type === 'simple')
                                         @if($product->sale_price && $product->sale_price < $product->price)
                                             <span class="text-danger fw-bold">{{ number_format($product->sale_price, 0, ',', '.') }} đ</span>
                                             <small class="text-muted text-decoration-line-through ms-2">{{ number_format($product->price, 0, ',', '.') }} đ</small>
                                         @else
                                             <span class="fw-bold">{{ number_format($product->price, 0, ',', '.') }} đ</span>
                                         @endif
-                                    </td>
+                                    @else
+                                        @php
+                                            $minPrice = $product->variants->min('price');
+                                            $maxPrice = $product->variants->max('price');
+                                        @endphp
+                                        @if($minPrice && $maxPrice && $minPrice != $maxPrice)
+                                            <span class="fw-bold">Từ {{ number_format($minPrice, 0, ',', '.') }} đ - {{ number_format($maxPrice, 0, ',', '.') }} đ</span>
+                                        @elseif($minPrice)
+                                            <span class="fw-bold">{{ number_format($minPrice, 0, ',', '.') }} đ</span>
+                                        @else
+                                            <span class="text-muted">Chưa có giá</span>
+                                        @endif
+                                    @endif
+                                </td>
+                            </tr>
+
+                            @if($product->type === 'simple')
+                                <tr>
+                                    <th>Mã SKU:</th>
+                                    <td>{{ $product->sku ?? 'Chưa có' }}</td>
                                 </tr>
                                 <tr>
                                     <th>Tồn kho:</th>

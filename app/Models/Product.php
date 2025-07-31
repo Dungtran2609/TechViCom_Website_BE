@@ -51,5 +51,26 @@ class Product extends Model
     {
         return $this->hasMany(ProductAllImage::class);
     }
+    public function variants()
+    {
+        return $this->hasMany(ProductVariant::class);
+    }
+    // 👉 Quan hệ tới các biến thể sản phẩm
+    public function getDisplayPriceAttribute()
+{
+    if ($this->type === 'simple') {
+        return $this->sale_price && $this->sale_price < $this->price
+            ? $this->sale_price
+            : $this->price;
+    }
+    if ($this->variants->count()) {
+        $min = $this->variants->min('price');
+        $max = $this->variants->max('price');
+        return ($min && $max && $min != $max)
+            ? ['min' => $min, 'max' => $max]
+            : $min;
+    }
+    return null;
+}
     
 }

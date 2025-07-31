@@ -83,19 +83,23 @@
 
                         <div class="col-lg-4">
                             <div class="mb-3">
-                                <label for="type" class="form-label">Loại sản phẩm <span
-                                        class="text-danger">*</span></label>
-                                <select class="form-select @error('type') is-invalid @enderror" name="type"
-                                    id="type">
-                                    <option value="simple" {{ old('type', $product->type) == 'simple' ? 'selected' : '' }}>
-                                        Sản phẩm đơn</option>
-                                    <option value="variable"
-                                        {{ old('type', $product->type) == 'variable' ? 'selected' : '' }}>Sản phẩm biến thể
+                                <label for="type" class="form-label">Loại sản phẩm <span class="text-danger">*</span></label>
+                                <select class="form-select @error('type') is-invalid @enderror" name="type" id="type">
+                                    <option value="simple" 
+                                        @if ($product->type == 'variable' && isset($product->variants) && $product->variants->count() > 1) disabled @endif
+                                        {{ old('type', $product->type) == 'simple' ? 'selected' : '' }}>
+                                        Sản phẩm đơn
                                     </option>
+                                    <option value="variable" {{ old('type', $product->type) == 'variable' ? 'selected' : '' }}>Sản phẩm biến thể</option>
                                 </select>
                                 @error('type')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
+                                @if ($product->type == 'variable' && isset($product->variants) && $product->variants->count() > 1)
+                                    <div class="alert alert-warning mt-2">
+                                        Sản phẩm đang có nhiều hơn 1 biến thể, không thể chuyển sang sản phẩm đơn!
+                                    </div>
+                                @endif
                             </div>
 
                             <div class="simple-product-fields">
