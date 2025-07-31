@@ -29,11 +29,10 @@ class User extends Authenticatable
     /**
      * Quan hệ nhiều-nhiều với bảng roles thông qua bảng user_roles.
      */
-    public function roles()
+    public function roles(): BelongsToMany
     {
         return $this->belongsToMany(Role::class, 'user_roles', 'user_id', 'role_id');
     }
-
 
     /**
      * Quan hệ một-nhiều với bảng user_addresses.
@@ -52,28 +51,30 @@ class User extends Authenticatable
     public function hasRole(string|array $roles): bool
     {
         if (is_array($roles)) {
-            return $this->roles()->whereIn('name', $roles)->exists(); // ✅ dùng name
+            return $this->roles()->whereIn('slug', $roles)->exists(); // ✅ dùng slug
         }
 
-        return $this->roles()->where('name', $roles)->exists(); // ✅ dùng name
+        return $this->roles()->where('slug', $roles)->exists(); // ✅ dùng slug
     }
 
     /**
      * Kiểm tra xem người dùng có phải admin không.
      */
-    public function isAdmin()
+    public function isAdmin(): bool
     {
-        return $this->roles()->where('name', 'admin')->exists();
+        return $this->hasRole('admin');
     }
-
 
     /**
      * Kiểm tra xem người dùng có quyền cụ thể không (thông qua các vai trò).
+     *
+     * @param string $permissionSlug
+     * @return bool
      */
-    public function hasPermission($permissionName)
+    public function hasPermission(string $permissionSlug): bool
     {
         foreach ($this->roles as $role) {
-            if ($role->permissions->contains('name', $permissionName)) {
+            if ($role->permissions->contains('slug', $permissionSlug)) { // ✅ dùng slug
                 return true;
             }
         }
