@@ -20,10 +20,64 @@ class OrderApiController extends Controller
         return response()->json(Order::all());
     }
 
-    public function show(Order $order)
+    public function show($id)
     {
-        return response()->json($order);
+        $order = Order::with([
+            'orderItems.productVariant.images',
+            'orderItems.productVariant.attributeValues.attribute',
+            'orderItems.product',
+            'province',
+            'district',
+            'ward',
+            'coupon',
+        ])->findOrFail($id);
+
+        $items = $order->orderItems->map(function ($item) {
+            $variant = $item->productVariant;
+            $image = $variant->images->where('is_primary', true)->first()?->img_url ?? null;
+            $variantName = $variant->attributeValues->map(fn($val) => $val->value)->implode(' - ');
+
+            $unitPrice = $variant->sale_price ?? $variant->price ?? 0;
+            return [
+                'id' => $item->id,
+                'product_name' => $item->product->name ?? 'Không xác định',
+                'product_image' => $image,
+                'variant_name' => $variantName,
+                'quantity' => $item->quantity,
+                'unit_price' => $unitPrice,
+                'total_price' => $item->quantity * $unitPrice,
+            ];
+        });
+
+        $response = [
+            'id' => $order->id,
+            'status' => $order->status,
+            'created_at' => $order->created_at,
+            'updated_at' => $order->updated_at,
+            'shipped_at' => $order->shipped_at,
+            'recipient_name' => $order->recipient_name,
+            'recipient_phone' => $order->recipient_phone,
+            'recipient_address' => $order->recipient_address,
+            'province_name' => DB::table('provinces')->where('id', $order->province_id)->value('name'),
+            'district_name' => DB::table('districts')->where('id', $order->district_id)->value('name'),
+            'ward_name' => DB::table('wards')->where('id', $order->ward_id)->value('name'),
+            'shipping_fee' => $order->shipping_fee ?? 0,
+            'total_amount' => $order->orderItems->sum(function ($i) {
+                $price = $i->productVariant->sale_price ?? $i->productVariant->price ?? 0;
+                return $price * $i->quantity;
+            }),
+            'final_total' => $order->final_total,
+            'total_weight' => $order->orderItems->sum(fn($i) => $i->productVariant->weight * $i->quantity),
+            'payment_method' => $order->payment_method,
+            'coupon_id' => $order->coupon?->code,
+            'items' => $items,
+        ];
+
+        return response()->json($response);
     }
+   
+   
+   
 
     public function update(Request $request, Order $order)
     {
