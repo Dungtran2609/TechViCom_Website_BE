@@ -27,7 +27,7 @@ class Order extends Model
         'shipped_at',
         'shipping_method_id',
         'coupon_id',
-'total_weight', // thêm đây
+        'total_weight', // thêm đây
         // mới thêm
         'province_id',
         'district_id',
@@ -71,10 +71,22 @@ class Order extends Model
     {
         return $this->hasMany(OrderItem::class);
     }
+    
+    
+    
+    
 
     /**
      * Mối quan hệ với phương thức vận chuyển
      */
+    // app/Models/Order.php
+    public function getShippingFeeAttribute()
+    {
+        return $this->final_total >= 3000000 ? 0 : 60000;
+    }
+
+
+
     public function shippingMethod()
     {
         return $this->belongsTo(ShippingMethod::class, 'shipping_method_id');

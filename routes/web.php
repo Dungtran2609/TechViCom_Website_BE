@@ -98,7 +98,7 @@ Route::middleware([IsAdmin::class])->prefix('admin-control')->name('admin.')->gr
     Route::prefix('order')->name('order.')->group(function () {
         Route::get('trashed', [OrderController::class, 'trashed'])->name('trashed');
         Route::post('{id}/restore', [OrderController::class, 'restore'])->name('restore');
-        Route::delete('{id}/force-delete', [OrderController::class, 'forceDelete'])->name('force-delete');
+        Route::delete('{id}/force-delete', [OrderController::class, 'forceDelete'])->name('forceDelete');
         Route::post('{id}/update-status', [OrderController::class, 'updateOrders'])->name('updateOrders');
         Route::get('returns', [OrderController::class, 'returnsIndex'])->name('returns');
         Route::post('returns/{id}/process', [OrderController::class, 'processReturn'])->name('process-return');

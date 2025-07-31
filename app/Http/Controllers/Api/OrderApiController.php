@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\DB;
 
 class OrderApiController extends Controller
 {
+
     public function index()
     {
         return response()->json(Order::all());
@@ -49,33 +50,29 @@ class OrderApiController extends Controller
             'data' => $order,
         ]);
     }
-
     public function destroy($id)
     {
-        $order = Order::find($id);
-
-        if (!$order) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Không tìm thấy đơn hàng',
-            ], 404);
-        }
-
         try {
+            $order = Order::findOrFail($id);
+            $allowedStatuses = ['cancelled', 'returned', 'delivered'];
+
+            if (!in_array($order->status, $allowedStatuses)) {
+                return response()->json([
+                    'error' => 'Chỉ có thể xóa đơn hàng khi trạng thái là Đã hủy, Đã trả hàng hoặc Đã giao.'
+                ], 400);
+            }
+
             $order->delete();
-            return response()->json([
-                'status' => true,
-                'message' => 'Đơn hàng đã được xóa mềm',
-                'data' => $order,
-            ]);
+            return response()->json(['message' => 'Đơn hàng đã được xóa mềm.']);
         } catch (\Exception $e) {
             return response()->json([
-                'status' => false,
-                'message' => 'Đã xảy ra lỗi khi xóa đơn hàng',
-                'error' => $e->getMessage(),
+                'error' => 'Có lỗi xảy ra khi xóa đơn hàng: ' . $e->getMessage()
             ], 500);
         }
     }
+
+
+
 
     public function apiUserOrders(Request $request): JsonResponse
     {
