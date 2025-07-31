@@ -105,11 +105,11 @@ Route::middleware(['auth', IsAdmin::class])->prefix('admin-control')->name('admi
 
     // Roles
     Route::prefix('roles')->middleware(CheckRole::class . ':admin')->name('roles.')->group(function () {
-        Route::resource('/', RoleController::class)->parameters(['' => 'role']);
+        Route::get('list', [RoleController::class, 'list'])->name('list');
+        Route::resource('', RoleController::class)->parameters(['' => 'role']);
         Route::get('trashed', [RoleController::class, 'trashed'])->name('trashed');
         Route::post('{id}/restore', [RoleController::class, 'restore'])->name('restore');
         Route::delete('{id}/force-delete', [RoleController::class, 'forceDelete'])->name('force-delete');
-        Route::get('list', [RoleController::class, 'list'])->name('list');
         Route::post('update-users', [RoleController::class, 'updateUsers'])->name('updateUsers');
     });
 
