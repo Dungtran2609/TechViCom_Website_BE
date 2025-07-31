@@ -1,5 +1,5 @@
 <?php
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
@@ -15,9 +15,11 @@ use Illuminate\Support\Facades\DB;
 class OrderApiController extends Controller
 {
 
-    public function index()
+    public function index(Request $request)
     {
-        return response()->json(Order::all());
+        $user = $request->user(); // từ token
+        $orders = Order::with('orderItems')->get(); // đã có with('items') chưa?
+        return response()->json($orders);
     }
 
     public function show($id)
