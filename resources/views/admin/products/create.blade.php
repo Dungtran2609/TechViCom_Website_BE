@@ -26,7 +26,7 @@
                         <div class="mb-3">
                             <label for="sku" class="form-label">SKU</label>
                             <input type="text" class="form-control @error('sku') is-invalid @enderror"
-                                id="sku" name="sku" value="{{ old('sku') }}">
+                                   id="sku" name="sku" value="{{ old('sku') }}">
                             @error('sku')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -60,8 +60,9 @@
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
-                                                {{-- Giá gốc --}}
-                        <div class="mb-3">
+
+                        {{-- Giá gốc --}}
+                        <div class="mb-3" id="price_wrapper">
                             <label for="price" class="form-label">Giá <span class="text-danger">*</span></label>
                             <input type="number" class="form-control @error('price') is-invalid @enderror"
                                    id="price" name="price" value="{{ old('price') }}">
@@ -70,9 +71,9 @@
                             @enderror
                         </div>
 
-                        {{-- Giá khuyến mãi --}}                       {{-- Giá gốc --}}
-                        <div class="mb-3">
-                            <label for="sale_price" class="form-label">Giá khuyến mãi<span class="text-danger">*</span></label>
+                        {{-- Giá khuyến mãi --}}
+                        <div class="mb-3" id="sale_price_wrapper">
+                            <label for="sale_price" class="form-label">Giá khuyến mãi</label>
                             <input type="number" class="form-control @error('sale_price') is-invalid @enderror"
                                    id="sale_price" name="sale_price" value="{{ old('sale_price') }}">
                             @error('sale_price')
@@ -81,7 +82,7 @@
                         </div>
 
                         {{-- Tồn kho --}}
-                        <div class="mb-3">
+                        <div class="mb-3" id="stock_wrapper">
                             <label for="stock" class="form-label">Tồn kho</label>
                             <input type="number" class="form-control @error('stock') is-invalid @enderror"
                                    id="stock" name="stock" value="{{ old('stock') }}">
@@ -90,15 +91,16 @@
                             @enderror
                         </div>
 
-                        {{-- Cảnh báo tồn kho thấp --}}
-                        <div class="mb-3">
-                            <label for="low_stock_amount" class="form-label">Cảnh báo khi tồn kho dưới mức</label>
-                            <input type="number" class="form-control @error('low_stock_amount') is-invalid @enderror"
-                                   id="low_stock_amount" name="low_stock_amount" value="{{ old('low_stock_amount') }}">
-                            @error('low_stock_amount')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
+                        {{-- Tồn kho dưới mức --}}
+<div class="mb-3" id="low_stock_wrapper">
+    <label for="low_stock" class="form-label">Tồn kho dưới mức</label>
+    <input type="number" class="form-control @error('low_stock') is-invalid @enderror"
+           id="low_stock" name="low_stock" value="{{ old('low_stock') }}">
+    @error('low_stock')
+        <div class="invalid-feedback">{{ $message }}</div>
+    @enderror
+</div>
+
 
                         {{-- Danh mục --}}
                         <div class="mb-3">
@@ -183,6 +185,7 @@
 
 @push('scripts')
 <script>
+    // Thêm ảnh phụ
     document.getElementById('btnAddImage').addEventListener('click', function (e) {
         e.preventDefault();
 
@@ -198,11 +201,31 @@
         wrapper.appendChild(div);
     });
 
+    // Xóa ảnh phụ
     document.addEventListener('click', function (e) {
         if (e.target.classList.contains('btnRemoveImage')) {
             e.preventDefault();
             e.target.closest('.gallery-item').remove();
         }
     });
+
+    // Ẩn/hiện trường giá khi thay đổi loại sản phẩm
+    function togglePriceFields() {
+        const type = document.getElementById('type').value;
+        const isVariable = type === 'variable';
+
+        const toggleDisplay = (id, show) => {
+            const el = document.getElementById(id);
+            if (el) el.style.display = show ? '' : 'none';
+        };
+
+        toggleDisplay('price_wrapper', !isVariable);
+        toggleDisplay('sale_price_wrapper', !isVariable);
+        toggleDisplay('stock_wrapper', !isVariable);
+        toggleDisplay('low_stock_wrapper', !isVariable);
+    }
+
+    document.addEventListener('DOMContentLoaded', togglePriceFields);
+    document.getElementById('type').addEventListener('change', togglePriceFields);
 </script>
 @endpush

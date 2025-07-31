@@ -1,3 +1,4 @@
+
 @extends('admin.layouts.app') {{-- layout của bạn có header/footer --}}
 
 @section('title', '403 - Không có quyền truy cập')
@@ -11,3 +12,4 @@
     </div>
 </div>
 @endsection
+

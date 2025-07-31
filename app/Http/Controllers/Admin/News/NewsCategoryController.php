@@ -8,9 +8,17 @@ use Illuminate\Http\Request;
 
 class NewsCategoryController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-         $categories = NewsCategory::orderBy('created_at', 'desc')->paginate(10);
+        $query = NewsCategory::query();
+
+        // Nếu có từ khóa tìm kiếm
+        if ($request->filled('keyword')) {
+            $query->where('name', 'like', '%' . $request->keyword . '%');
+        }
+
+        $categories = $query->orderByDesc('created_at')->paginate(10);
+
         return view('admin.news.news_categories.index', compact('categories'));
     }
 

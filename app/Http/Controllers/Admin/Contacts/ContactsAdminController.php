@@ -8,11 +8,25 @@ use App\Models\Contact;
 
 class ContactsAdminController extends Controller
 {
-    public function index()
+
+    public function index(Request $request)
     {
-        $contacts = Contact::latest()->paginate(10); // dùng paginate()
+        $query = Contact::query();
+
+        if ($request->filled('keyword')) {
+            $keyword = $request->keyword;
+            $query->where(function ($q) use ($keyword) {
+                $q->where('name', 'like', '%' . $keyword . '%')
+                    ->orWhere('email', 'like', '%' . $keyword . '%')
+                    ->orWhere('message', 'like', '%' . $keyword . '%');
+            });
+        }
+
+        $contacts = $query->latest()->paginate(10);
+
         return view('admin.contacts.index', compact('contacts'));
     }
+
 
     public function show($id)
     {

@@ -12,32 +12,34 @@ class ProductRequest extends FormRequest
     }
 
     public function rules(): array
-    {
-        $productId = $this->route('product')?->id;
+{
+    $productId = $this->route('product')?->id;
+    $type = $this->input('type', 'simple');
 
-        return [
-            'name' => 'required|string|max:255',
-            'slug' => 'nullable|string|max:255|unique:products,slug,' . $productId,
-            'sku' => 'required|string|max:100|unique:products,sku,' . $productId,  // thêm đây
-            'type' => 'in:simple,variable',
+    return [
+        'name' => 'required|string|max:255',
+        'slug' => 'nullable|string|max:255|unique:products,slug,' . $productId,
+        'type' => 'in:simple,variable',
 
-            'price' => 'required|numeric|min:0',
-            'sale_price' => 'nullable|numeric|min:0|lte:price',
-            'stock' => 'required|integer|min:0',
-            'low_stock_amount' => 'nullable|integer|min:0',
+        'sku' => $type === 'simple' ? 'required|string|max:100|unique:products,sku,' . $productId : 'nullable|string|max:100',
+        'price' => $type === 'simple' ? 'required|numeric|min:0' : 'nullable|numeric|min:0',
+        'sale_price' => 'nullable|numeric|min:0|lte:price',
+        'stock' => $type === 'simple' ? 'required|integer|min:0' : 'nullable|integer|min:0',
+        'low_stock_amount' => 'nullable|integer|min:0',
 
-            'thumbnail' => $this->isMethod('post')
-                ? 'required|image|mimes:jpeg,png,jpg,webp|max:2048'
-                : 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+        'thumbnail' => $this->isMethod('post')
+            ? 'required|image|mimes:jpeg,png,jpg,webp|max:2048'
+            : 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
 
-            'short_description' => 'nullable|string|max:1000',
-            'long_description' => 'nullable|string',
+        'short_description' => 'nullable|string|max:1000',
+        'long_description' => 'nullable|string',
 
-            'status' => 'required|in:active,inactive',
-            'brand_id' => 'required|exists:brands,id',
-            'category_id' => 'required|exists:categories,id',
-        ];
-    }
+        'status' => 'required|in:active,inactive',
+        'brand_id' => 'required|exists:brands,id',
+        'category_id' => 'required|exists:categories,id',
+    ];
+}
+
 
     public function messages(): array
     {

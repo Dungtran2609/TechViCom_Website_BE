@@ -3,55 +3,36 @@
 @section('title', 'Chi tiết biến thể')
 
 @section('content')
-<div class="container">
-    <h2>Chi tiết biến thể của: {{ $product->name }}</h2>
+<div class="container py-4">
+    <h2 class="mb-4 h4">Chi tiết biến thể của: <strong>{{ $product->name }}</strong></h2>
+    
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <p><strong>SKU:</strong> {{ $variant->sku }}</p>
+            <p><strong>Giá:</strong> {{ number_format($variant->price) }} đ</p>
+            <p><strong>Giá khuyến mãi:</strong> {{ number_format($variant->sale_price) }} đ</p>
+            <p><strong>Tồn kho:</strong> {{ $variant->stock }}</p>
+            <p><strong>Trọng lượng:</strong> {{ $variant->weight ?? 'Chưa có' }} kg</p>
+            <p><strong>Kích thước:</strong> {{ $variant->dimensions ?? 'Chưa có' }}</p>
 
-    <div class="mb-3">
-        <label>SKU:</label>
-        <p>{{ $variant->sku }}</p>
+            <p><strong>Ảnh:</strong><br>
+                @if ($variant->image)
+                    <img src="{{ asset('storage/' . $variant->image) }}" class="img-thumbnail mt-2" style="width: 100px; height: 100px;">
+                @else
+                    <span class="text-muted fst-italic">Không có ảnh</span>
+                @endif
+            </p>
+
+            <p><strong>Thuộc tính:</strong><br>
+                @foreach ($attributes as $attr)
+                    <span class="badge bg-secondary me-1 mb-1">
+                        {{ $attr->attribute->name }}: {{ $attr->value }}
+                    </span>
+                @endforeach
+            </p>
+
+            <a href="{{ route('admin.products.variants.index', $product->id) }}" class="btn btn-secondary mt-3">← Quay lại</a>
+        </div>
     </div>
-
-    <div class="mb-3">
-        <label>Giá:</label>
-        <p>{{ number_format($variant->price) }} đ</p>
-    </div>
-
-    <div class="mb-3">
-        <label>Giá khuyến mãi:</label>
-        <p>{{ number_format($variant->sale_price) }} đ</p>
-    </div>
-
-    <div class="mb-3">
-        <label>Tồn kho:</label>
-        <p>{{ $variant->stock }}</p>
-    </div>
-
-    <div class="mb-3">
-        <label>Trọng lượng:</label>
-        <p>{{ $variant->weight ?? 'Chưa có' }} kg</p>
-    </div>
-
-    <div class="mb-3">
-        <label>Kích thước:</label>
-        <p>{{ $variant->dimensions ?? 'Chưa có' }}</p>
-    </div>
-
-    <div class="mb-3">
-        <label>Ảnh:</label><br>
-        @if ($variant->image)
-            <img src="{{ asset('storage/' . $variant->image) }}" width="100">
-        @else
-            <p>Không có ảnh</p>
-        @endif
-    </div>
-
-    <div class="mb-3">
-        <label>Thuộc tính:</label><br>
-        @foreach ($attributes as $attr)
-            <span class="badge bg-secondary">{{ $attr->attribute->name }}: {{ $attr->value }}</span>
-        @endforeach
-    </div>
-
-    <a href="{{ route('admin.products.variants.index', $product->id) }}" class="btn btn-secondary">Quay lại</a>
 </div>
 @endsection

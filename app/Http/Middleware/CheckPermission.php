@@ -3,33 +3,34 @@
 namespace App\Http\Middleware;
 
 use Closure;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class CheckPermission
 {
     /**
-     * Middleware kiểm tra xem user có quyền cụ thể không
+     * Middleware kiểm tra xem user có quyền cụ thể không.
+     *
+     * Cách dùng trong route:
+     * Route::middleware('checkPermission:assign_permission')->group(...)
      *
      * @param \Illuminate\Http\Request $request
-     * @param \Closure $next
-     * @param string $permission Tên quyền cần kiểm tra (ví dụ: 'assign_permission')
-     * @return mixed
+     * @param \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response) $next
+     * @param string $permission Tên quyền cần kiểm tra (theo `name`)
+     * @return \Symfony\Component\HttpFoundation\Response
      */
-    public function handle($request, Closure $next, $permission)
+    public function handle(Request $request, Closure $next, string $permission)
     {
         $user = Auth::user();
 
-        // Nếu chưa đăng nhập
         if (!$user) {
             return redirect()->route('login');
         }
 
-        // Kiểm tra người dùng có quyền được yêu cầu không
-        if ($user->hasPermission($permission)) {
-            return $next($request);
+        if (!$user->hasPermission($permission)) {
+            abort(403, 'Bạn không có quyền truy cập: ' . $permission);
         }
 
-        // Nếu không có quyền, từ chối truy cập
-        abort(403, 'Bạn không có quyền truy cập: ' . $permission);
+        return $next($request);
     }
 }

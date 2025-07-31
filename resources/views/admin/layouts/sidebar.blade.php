@@ -11,24 +11,20 @@
         </a>
     </div>
 
-
     <!-- Menu Toggle Button -->
     <button type="button" class="button-sm-hover" aria-label="Show Full Sidebar">
         <iconify-icon icon="solar:double-alt-arrow-right-bold-duotone" class="button-sm-hover-icon"></iconify-icon>
     </button>
 
-
     <div class="scrollbar" data-simplebar>
         <ul class="navbar-nav" id="navbar-nav">
-
-
+            <!-- Tổng quan -->
             <li class="nav-item">
                 <a class="nav-link" href="{{ route('admin.dashboard') }}">
                     <span class="nav-icon"><iconify-icon icon="solar:widget-5-bold-duotone"></iconify-icon></span>
                     <span class="nav-text"> Tổng quan </span>
                 </a>
             </li>
-
 
             <!-- Sản phẩm -->
             <li class="nav-item">
@@ -39,20 +35,14 @@
                 </a>
                 <div class="collapse" id="1">
                     <ul class="nav sub-navbar-nav">
-                        <li class="sub-nav-item"><a class="sub-nav-link" href="{{ route('admin.products.index') }}">Danh
-                                sách sản phẩm</a></li>
-                        <li class="sub-nav-item"><a class="sub-nav-link"
-                                href="{{ route('admin.products.categories.index') }}">Danh mục</a></li>
-                        <li class="sub-nav-item"><a class="sub-nav-link"
-                                href="{{ route('admin.products.brands.index') }}">Thương hiệu</a></li>
-                        <li class="sub-nav-item"><a class="sub-nav-link"
-                                href="{{ route('admin.products.attributes.index') }}">Thuộc tính</a></li>
-                        <li class="sub-nav-item"><a class="sub-nav-link"
-                                href="{{ route('admin.products.variants.select') }}">Biến thể</a></li>
+                        <li class="sub-nav-item"><a class="sub-nav-link" href="{{ route('admin.products.index') }}">Danh sách sản phẩm</a></li>
+                        <li class="sub-nav-item"><a class="sub-nav-link" href="{{ route('admin.products.categories.index') }}">Danh mục</a></li>
+                        <li class="sub-nav-item"><a class="sub-nav-link" href="{{ route('admin.products.brands.index') }}">Thương hiệu</a></li>
+                        <li class="sub-nav-item"><a class="sub-nav-link" href="{{ route('admin.products.attributes.index') }}">Thuộc tính</a></li>
+                        <li class="sub-nav-item"><a class="sub-nav-link" href="{{ route('admin.products.variants.select') }}">Biến thể</a></li>
                     </ul>
                 </div>
             </li>
-
 
             <!-- Người dùng -->
             <li class="nav-item">
@@ -62,19 +52,12 @@
                 </a>
                 <div class="collapse" id="user-management">
                     <ul class="nav sub-navbar-nav">
-                        <li class="sub-nav-item">
-                            <a class="sub-nav-link" href="{{ route('admin.users.admins') }}">Admin</a>
-                        </li>
-                        <li class="sub-nav-item">
-                            <a class="sub-nav-link" href="{{ route('admin.users.staffs') }}">Nhân viên</a>
-                        </li>
-                        <li class="sub-nav-item">
-                            <a class="sub-nav-link" href="{{ route('admin.users.customers') }}">Người dùng</a>
-                        </li>
+                        <li class="sub-nav-item"><a class="sub-nav-link" href="{{ route('admin.users.admins') }}">Admin</a></li>
+                        <li class="sub-nav-item"><a class="sub-nav-link" href="{{ route('admin.users.staffs') }}">Nhân viên</a></li>
+                        <li class="sub-nav-item"><a class="sub-nav-link" href="{{ route('admin.users.customers') }}">Người dùng</a></li>
                     </ul>
                 </div>
             </li>
-
 
             <!-- Đơn hàng -->
             <li class="nav-item">
@@ -84,12 +67,11 @@
                 </a>
                 <div class="collapse" id="3">
                     <ul class="nav sub-navbar-nav">
-                        <li class="sub-nav-item"><a class="sub-nav-link" href="#">Đơn hàng</a></li>
-                        <li class="sub-nav-item"><a class="sub-nav-link" href="#">Hủy/Đổi trả</a></li>
+                        <li class="sub-nav-item"><a class="sub-nav-link" href="{{ route('admin.order.index') }}">Đơn hàng</a></li>
+                        <li class="sub-nav-item"><a class="sub-nav-link" href="{{ route('admin.order.returns') }}">Hủy/Đổi trả</a></li>
                     </ul>
                 </div>
             </li>
-
 
             <!-- Bài viết -->
             <li class="nav-item">
@@ -97,22 +79,16 @@
                     <span class="nav-icon"><iconify-icon icon="mdi:post-outline"></iconify-icon></span>
                     <span class="nav-text"> Quản lý bài viết </span>
                 </a>
-
                 <div class="collapse" id="4">
-                    {{-- danh mục bai viet --}}
                     <ul class="nav sub-navbar-nav">
-                        <li class="sub-nav-item"><a class="sub-nav-link"
-                                href="{{ route('admin.news-categories.index') }}">Danh mục bài viết</a></li>
-                    </ul>
-                    {{-- bai viet --}}
-                    <ul class="nav sub-navbar-nav">
-                        <li class="sub-nav-item"><a class="sub-nav-link" href="{{ route('admin.news.index') }}">Bài
-                                viết</a></li>
+                        <li class="sub-nav-item"><a class="sub-nav-link" href="{{ route('admin.news-categories.index') }}">Danh mục bài viết</a></li>
+                        <li class="sub-nav-item"><a class="sub-nav-link" href="{{ route('admin.news.index') }}">Bài viết</a></li>
+                        <li class="sub-nav-item"><a class="sub-nav-link" href="{{ route('admin.news-comments.index') }}">Bình luận bài viết</a></li>
                     </ul>
                 </div>
             </li>
 
-            {{-- Liên hệ --}}
+            <!-- Liên hệ -->
             <li class="nav-item">
                 <a class="nav-link menu-arrow" href="#9" data-bs-toggle="collapse">
                     <span class="nav-icon"><iconify-icon icon="mdi:message-text-outline"></iconify-icon></span>
@@ -120,13 +96,10 @@
                 </a>
                 <div class="collapse" id="9">
                     <ul class="nav sub-navbar-nav">
-                        <li class="sub-nav-item"><a class="sub-nav-link"
-                                href="{{ route('admin.contacts.index') }}">Người dùng</a>
-                        </li>
+                        <li class="sub-nav-item"><a class="sub-nav-link" href="{{ route('admin.contacts.index') }}">Người dùng</a></li>
                     </ul>
                 </div>
             </li>
-
 
             <!-- Đánh giá -->
             <li class="nav-item">
@@ -137,11 +110,9 @@
                 <div class="collapse" id="5">
                     <ul class="nav sub-navbar-nav">
                         <li class="sub-nav-item"><a class="sub-nav-link" href="#">Bình luận</a></li>
-                        <li class="sub-nav-item"><a class="sub-nav-link" href="#">Phản hồi</a></li>
                     </ul>
                 </div>
             </li>
-
 
             <!-- Khuyến mãi -->
             <li class="nav-item">
@@ -151,31 +122,11 @@
                 </a>
                 <div class="collapse" id="6">
                     <ul class="nav sub-navbar-nav">
-                        <li class="sub-nav-item">
-                            <a class="sub-nav-link" href="{{ route('admin.coupons.index') }}">Mã giảm giá</a>
-                        </li>
-                        <li class="sub-nav-item">
-                            <a class="sub-nav-link" href="#">Chương trình</a>
-                        </li>
+                        <li class="sub-nav-item"><a class="sub-nav-link" href="{{ route('admin.coupons.index') }}">Mã giảm giá</a></li>
+                        <li class="sub-nav-item"><a class="sub-nav-link" href="#">Chương trình</a></li>
                     </ul>
                 </div>
             </li>
-
-
-
-            <!-- Hệ thống -->
-            <li class="nav-item">
-                <a class="nav-link menu-arrow" href="#7" data-bs-toggle="collapse">
-                    <span class="nav-icon"><iconify-icon icon="mdi:cog-outline"></iconify-icon></span>
-                    <span class="nav-text"> Cấu hình hệ thống </span>
-                </a>
-                <div class="collapse" id="7">
-                    <ul class="nav sub-navbar-nav">
-                        <li class="sub-nav-item"><a class="sub-nav-link" href="#">Quản lý banner</a></li>
-                    </ul>
-                </div>
-            </li>
-
 
             <!-- Phân quyền -->
             <li class="nav-item">
@@ -185,11 +136,21 @@
                 </a>
                 <div class="collapse" id="8">
                     <ul class="nav sub-navbar-nav">
-                        <li class="sub-nav-item"><a class="sub-nav-link" href="{{ route('admin.roles.index') }}">Vai
-                                trò</a></li>
-                        <li class="sub-nav-item"><a class="sub-nav-link"
-                                href="{{ route('admin.permissions.index') }}">Phân quyền chi tiết</a>
-                        </li>
+                        <li class="sub-nav-item"><a class="sub-nav-link" href="{{ route('admin.roles.index') }}">Vai trò</a></li>
+                        <li class="sub-nav-item"><a class="sub-nav-link" href="{{ route('admin.permissions.index') }}">Phân quyền chi tiết</a></li>
+                    </ul>
+                </div>
+            </li>
+
+            <!-- Cấu hình -->
+            <li class="nav-item">
+                <a class="nav-link menu-arrow" href="#7" data-bs-toggle="collapse">
+                    <span class="nav-icon"><iconify-icon icon="mdi:cog-outline"></iconify-icon></span>
+                    <span class="nav-text"> Cấu hình hệ thống </span>
+                </a>
+                <div class="collapse" id="7">
+                    <ul class="nav sub-navbar-nav">
+                        <li class="sub-nav-item"><a class="sub-nav-link" href="{{ route('admin.banner.index') }}">Quản lý banner</a></li>
                     </ul>
                 </div>
             </li>

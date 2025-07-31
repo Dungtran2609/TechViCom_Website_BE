@@ -43,7 +43,7 @@ class User extends Authenticatable
     }
 
     /**
-     * Kiểm tra xem người dùng có vai trò cụ thể không.
+     * Kiểm tra xem người dùng có vai trò cụ thể không (theo slug).
      *
      * @param string|array $roles
      * @return bool
@@ -51,14 +51,14 @@ class User extends Authenticatable
     public function hasRole(string|array $roles): bool
     {
         if (is_array($roles)) {
-            return $this->roles()->whereIn('slug', $roles)->exists(); // ✅ dùng slug
+            return $this->roles()->whereIn('slug', $roles)->exists();
         }
 
-        return $this->roles()->where('slug', $roles)->exists(); // ✅ dùng slug
+        return $this->roles()->where('slug', $roles)->exists();
     }
 
     /**
-     * Kiểm tra xem người dùng có phải admin không.
+     * Kiểm tra xem người dùng có phải admin không (theo slug 'admin').
      */
     public function isAdmin(): bool
     {
@@ -68,13 +68,13 @@ class User extends Authenticatable
     /**
      * Kiểm tra xem người dùng có quyền cụ thể không (thông qua các vai trò).
      *
-     * @param string $permissionSlug
+     * @param string $permissionName
      * @return bool
      */
-    public function hasPermission(string $permissionSlug): bool
+    public function hasPermission(string $permissionName): bool
     {
         foreach ($this->roles as $role) {
-            if ($role->permissions->contains('slug', $permissionSlug)) { // ✅ dùng slug
+            if ($role->permissions->contains('name', $permissionName)) {
                 return true;
             }
         }

@@ -6,6 +6,7 @@ use App\Http\Middleware\CheckPermission;
 use App\Http\Middleware\CheckRole;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\Admin\BannerController;
 use App\Http\Controllers\Client\HomeController;
 use App\Http\Controllers\Client\AccountController;
 use App\Http\Controllers\Client\ProfileController;
@@ -22,12 +23,14 @@ use App\Http\Controllers\Admin\Users\RoleController;
 use App\Http\Controllers\Admin\Users\PermissionController;
 use App\Http\Controllers\Admin\Contacts\ContactsAdminController;
 use App\Http\Controllers\Admin\Coupons\CouponController;
+use App\Http\Controllers\Admin\News\NewsCommentController;
+use App\Http\Controllers\Admin\OrderController;
 
-// Admin routes
+// --- Admin routes ---
 Route::middleware(['auth', IsAdmin::class])->prefix('admin-control')->name('admin.')->group(function () {
     Route::get('/', [AdminController::class, 'dashboard'])->name('dashboard');
 
-    // --- Quản lý sản phẩm ---
+    // Products
     Route::resource('products/categories', CategoryController::class)->names('products.categories');
     Route::get('products/categories/trashed', [CategoryController::class, 'trashed'])->name('products.categories.trashed');
     Route::post('products/categories/{id}/restore', [CategoryController::class, 'restore'])->name('products.categories.restore');
@@ -70,16 +73,16 @@ Route::middleware(['auth', IsAdmin::class])->prefix('admin-control')->name('admi
     Route::post('products/{id}/restore', [ProductController::class, 'restore'])->name('products.restore');
     Route::delete('products/{id}/force-delete', [ProductController::class, 'forceDelete'])->name('products.force-delete');
 
-    // --- Tin tức ---
+    // News
     Route::resource('news', NewsController::class);
     Route::resource('news-categories', NewsCategoryController::class);
 
-    // --- Liên hệ ---
+    // Contacts
     Route::get('contacts', [ContactsAdminController::class, 'index'])->name('contacts.index');
     Route::get('contacts/{id}', [ContactsAdminController::class, 'show'])->name('contacts.show');
     Route::delete('contacts/{id}', [ContactsAdminController::class, 'destroy'])->name('contacts.destroy');
 
-    // --- Quản lý người dùng (chỉ admin) ---
+    // Users
     Route::prefix('users')->middleware(CheckRole::class . ':admin')->name('users.')->group(function () {
         Route::get('/', [UserController::class, 'index'])->name('index');
         Route::get('/admins', [UserController::class, 'admins'])->name('admins');
@@ -94,13 +97,9 @@ Route::middleware(['auth', IsAdmin::class])->prefix('admin-control')->name('admi
         Route::get('/trashed', [UserController::class, 'trashed'])->name('trashed');
         Route::post('/{id}/restore', [UserController::class, 'restore'])->name('restore');
         Route::delete('/{id}/force-delete', [UserController::class, 'forceDelete'])->name('forceDelete');
-        Route::get('/{user}/addresses', [UserController::class, 'addresses'])->name('addresses.index');
-        Route::post('/{user}/addresses', [UserController::class, 'addAddress'])->name('addresses.store');
-        Route::put('/addresses/{address}', [UserController::class, 'updateAddress'])->name('addresses.update');
-        Route::delete('/addresses/{address}', [UserController::class, 'deleteAddress'])->name('addresses.destroy');
     });
 
-    // --- Quản lý vai trò (chỉ admin) ---
+    // Roles
     Route::prefix('roles')->middleware(CheckRole::class . ':admin')->name('roles.')->group(function () {
         Route::resource('/', RoleController::class)->parameters(['' => 'role']);
         Route::get('trashed', [RoleController::class, 'trashed'])->name('trashed');
@@ -108,11 +107,9 @@ Route::middleware(['auth', IsAdmin::class])->prefix('admin-control')->name('admi
         Route::delete('{id}/force-delete', [RoleController::class, 'forceDelete'])->name('force-delete');
         Route::get('list', [RoleController::class, 'list'])->name('list');
         Route::post('update-users', [RoleController::class, 'updateUsers'])->name('updateUsers');
-        Route::get('{role}/permissions', [PermissionController::class, 'permissions'])->name('permissions.edit');
-        Route::put('{role}/permissions', [PermissionController::class, 'updatePermissions'])->name('permissions.update');
     });
 
-    // --- Quản lý phân quyền (chỉ admin) ---
+    // Permissions
     Route::prefix('permissions')->middleware(CheckRole::class . ':admin')->name('permissions.')->group(function () {
         Route::get('/', [PermissionController::class, 'index'])->name('index');
         Route::get('/list', [PermissionController::class, 'list'])->name('list');
@@ -121,26 +118,50 @@ Route::middleware(['auth', IsAdmin::class])->prefix('admin-control')->name('admi
         Route::get('/{permission}/edit', [PermissionController::class, 'edit'])->name('edit');
         Route::put('/{permission}', [PermissionController::class, 'update'])->name('update');
         Route::delete('/{permission}', [PermissionController::class, 'destroy'])->name('destroy');
-        Route::post('/update-roles', [PermissionController::class, 'updateRoles'])->name('updateRoles');
         Route::get('/trashed', [PermissionController::class, 'trashed'])->name('trashed');
         Route::post('/{id}/restore', [PermissionController::class, 'restore'])->name('restore');
         Route::delete('/{id}/force-delete', [PermissionController::class, 'forceDelete'])->name('forceDelete');
+
+        // 👇 Thêm dòng này để fix lỗi:
+        Route::post('/update-roles', [PermissionController::class, 'updateRoles'])->name('updateRoles');
     });
 
-    // --- Quản lý mã giảm giá (theo permission cụ thể) ---
+
+    // Coupons
     Route::prefix('coupons')->middleware(CheckPermission::class . ':manage_coupons')->name('coupons.')->group(function () {
         Route::resource('/', CouponController::class)->parameters(['' => 'coupon'])->except(['show']);
         Route::put('{id}/restore', [CouponController::class, 'restore'])->name('restore');
         Route::delete('{id}/force-delete', [CouponController::class, 'forceDelete'])->name('forceDelete');
     });
+
+    Route::prefix('order')->name('order.')->group(function () {
+        Route::get('trashed', [OrderController::class, 'trashed'])->name('trashed');
+        Route::post('{id}/restore', [OrderController::class, 'restore'])->name('restore');
+        Route::delete('{id}/force-delete', [OrderController::class, 'forceDelete'])->name('force-delete');
+        Route::post('{id}/update-status', [OrderController::class, 'updateOrders'])->name('updateOrders');
+        Route::get('returns', [OrderController::class, 'returnsIndex'])->name('returns');
+        Route::post('returns/{id}/process', [OrderController::class, 'processReturn'])->name('process-return');
+        Route::resource('', OrderController::class)->parameters(['' => 'order'])->names('');
+    });
+
+    // News
+    Route::resource('news', NewsController::class);
+    Route::resource('news-categories', NewsCategoryController::class);
+    Route::get('/news-comments', [NewsCommentController::class, 'index'])->name('news-comments.index');
+    Route::delete('/news-comments/{id}', [NewsCommentController::class, 'destroy'])->name('news-comments.destroy');
+    Route::patch('/news-comments/{id}/toggle', [NewsCommentController::class, 'toggleVisibility'])->name('news-comments.toggle');
+
+    Route::resource('banner', BannerController::class);
 });
 
-// --- Public routes ---
+// --- Auth routes ---
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+// --- Public route ---
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
 // --- Authenticated user routes ---

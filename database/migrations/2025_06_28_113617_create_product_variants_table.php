@@ -28,3 +28,4 @@ class CreateProductVariantsTable extends Migration
         Schema::dropIfExists('product_variants');
     }
 }
+
