@@ -5,9 +5,9 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\OrderApiController;
 use App\Http\Controllers\Api\ShippingController;
 Route::prefix('v1')->group(function () {
-    // Đăng ký, đăng nhập
-    // Route::post('register', [AuthController::class, 'register']);
-    // Route::post('login', [AuthController::class, 'login']);
+    
+    
+    
     Route::prefix('order')->group(function () {
         // Đơn hàng đã xoá
         Route::get('/trashed', [OrderApiController::class, 'trashed']);
@@ -27,12 +27,12 @@ Route::prefix('v1')->group(function () {
         Route::put('/{order}', [OrderApiController::class, 'update']);
         Route::delete('/{order}', [OrderApiController::class, 'destroy']);
     });
-    // Các route cần xác thực
-    // Route::middleware('auth:sanctum')->group(function () {
-        // Thông tin tài khoản đang đăng nhập
-        // Route::get('me', [UserController::class, 'me']);
+    
+    
+    
+    
 
-        // Đăng xuất
-        // Route::post('logout', [AuthController::class, 'logout']);
-    // });
+    
+    
+    
 });
