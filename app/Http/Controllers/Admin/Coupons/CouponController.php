@@ -12,11 +12,19 @@ use App\Http\Requests\Admin\Coupons\DeleteCouponRequest;
 
 class CouponController extends Controller
 {
-    public function index()
-    {
-        $coupons = Coupon::withTrashed()->latest()->get();
-        return view('admin.coupons.index', compact('coupons'));
+    public function index(Request $request)
+{
+    $query = Coupon::withTrashed()->latest();
+
+    if ($request->filled('keyword')) {
+        $query->where('code', 'like', '%' . $request->keyword . '%');
     }
+
+    $coupons = $query->get();
+
+    return view('admin.coupons.index', compact('coupons'));
+}
+
 
     public function create()
     {
