@@ -10,15 +10,16 @@ use Symfony\Component\HttpFoundation\Response;
 class IsAdmin
 {
     /**
-     * Handle an incoming request.
-     *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     * Middleware cho phép user có vai trò admin hoặc staff vào trang quản trị.
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (!Auth::check() || !Auth::user()->isAdmin()) {
-            abort(403, 'Bạn không có quyền truy cập trang này.');
+        $user = Auth::user();
+
+        if (!$user || (! $user->hasRole('admin') && ! $user->hasRole('staff'))) {
+            return response()->view('errors.403', [], 403); // Trả về view 403
         }
+
         return $next($request);
     }
 }

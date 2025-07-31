@@ -6,12 +6,26 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class PermissionRequest extends FormRequest
 {
+    /**
+     * Kiểm tra xem người dùng có quyền thực hiện hành động này không.
+     */
     public function authorize(): bool
     {
-        // Bạn có thể tùy chỉnh quyền ở đây (true để cho phép mọi request)
-        return true;
+        // Kiểm tra theo phương thức HTTP để phân quyền tạo/sửa
+        if ($this->isMethod('POST')) {
+            return auth()->check() && auth()->user()->can('create_permission');
+        }
+
+        if ($this->isMethod('PUT') || $this->isMethod('PATCH')) {
+            return auth()->check() && auth()->user()->can('edit_permission');
+        }
+
+        return false;
     }
 
+    /**
+     * Quy tắc validate cho quyền (permission)
+     */
     public function rules(): array
     {
         $permissionId = $this->route('permission')?->id ?? null;
@@ -22,6 +36,9 @@ class PermissionRequest extends FormRequest
         ];
     }
 
+    /**
+     * Thông báo lỗi tuỳ chỉnh
+     */
     public function messages(): array
     {
         return [

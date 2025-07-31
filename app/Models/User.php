@@ -29,7 +29,7 @@ class User extends Authenticatable
     /**
      * Quan hệ nhiều-nhiều với bảng roles thông qua bảng user_roles.
      */
-    public function roles(): BelongsToMany
+    public function roles()
     {
         return $this->belongsToMany(Role::class, 'user_roles', 'user_id', 'role_id');
     }
@@ -61,18 +61,19 @@ class User extends Authenticatable
     /**
      * Kiểm tra xem người dùng có phải admin không.
      */
-    public function isAdmin(): bool
+    public function isAdmin()
     {
-        return $this->hasRole(['admin', 'staff']);
+        return $this->roles()->where('name', 'admin')->exists();
     }
+
 
     /**
      * Kiểm tra xem người dùng có quyền cụ thể không (thông qua các vai trò).
      */
-    public function hasPermission(string $permissionName): bool
+    public function hasPermission($permissionName)
     {
         foreach ($this->roles as $role) {
-            if ($role->hasPermission($permissionName)) {
+            if ($role->permissions->contains('name', $permissionName)) {
                 return true;
             }
         }

@@ -45,6 +45,7 @@ class UserRequest extends FormRequest
             'email.unique' => 'Email đã tồn tại trong hệ thống.',
             'password.required' => 'Mật khẩu là bắt buộc.',
             'password.min' => 'Mật khẩu phải có ít nhất :min ký tự.',
+            'phone_number.max' => 'Số điện thoại không được vượt quá :max ký tự.',
             'roles.required' => 'Vui lòng chọn ít nhất một vai trò.',
             'roles.*.exists' => 'Vai trò không hợp lệ.',
         ];

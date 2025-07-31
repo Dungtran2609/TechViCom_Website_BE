@@ -8,29 +8,28 @@ use Illuminate\Support\Facades\Auth;
 class CheckPermission
 {
     /**
-     * Chỉ cho phép người dùng có vai trò 'admin' được truy cập.
+     * Middleware kiểm tra xem user có quyền cụ thể không
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Closure  $next
+     * @param \Illuminate\Http\Request $request
+     * @param \Closure $next
+     * @param string $permission Tên quyền cần kiểm tra (ví dụ: 'assign_permission')
      * @return mixed
      */
-    public function handle($request, Closure $next)
+    public function handle($request, Closure $next, $permission)
     {
         $user = Auth::user();
 
-        // Nếu chưa đăng nhập, chuyển về trang login
+        // Nếu chưa đăng nhập
         if (!$user) {
             return redirect()->route('login');
         }
 
-        // Kiểm tra user có vai trò là 'admin' không
-        $hasAdminRole = $user->roles()->where('name', ['admin', 'staff'])->exists();
-
-        if ($hasAdminRole) {
+        // Kiểm tra người dùng có quyền được yêu cầu không
+        if ($user->hasPermission($permission)) {
             return $next($request);
         }
 
-        // Nếu không có quyền admin
-        abort(403, 'Bạn không có quyền truy cập (chỉ dành cho Admin).');
+        // Nếu không có quyền, từ chối truy cập
+        abort(403, 'Bạn không có quyền truy cập: ' . $permission);
     }
 }
