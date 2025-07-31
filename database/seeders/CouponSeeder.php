@@ -24,5 +24,3 @@ class CouponSeeder extends Seeder
         ]);
     }
 }
-
-}
