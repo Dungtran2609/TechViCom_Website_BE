@@ -1,7 +1,8 @@
 <?php
 
 use App\Http\Middleware\IsAdmin;
-use Illuminate\Auth\Middleware\Authenticate; 
+use App\Http\Middleware\CheckPermission;
+use Illuminate\Auth\Middleware\Authenticate;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -15,7 +16,8 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'auth' => Authenticate::class,
-            'IsAdmin' => IsAdmin::class,
+            'is_admin' => IsAdmin::class,
+            'permission' => CheckPermission::class, // ✅ Alias này trỏ về middleware của bạn
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
