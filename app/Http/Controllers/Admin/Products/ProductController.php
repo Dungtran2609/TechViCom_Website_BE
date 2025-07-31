@@ -80,8 +80,10 @@ class ProductController extends Controller
             }
         }
 
-        return redirect()->route('admin.products.index')->with('success', 'Sản phẩm đã được thêm thành công.');
-    }
+    return redirect()->route('admin.products.index')->with('success', 'Sản phẩm đã được thêm thành công.');
+}
+
+
 
     public function show(Product $product)
     {
@@ -185,4 +187,5 @@ class ProductController extends Controller
         $product->forceDelete();
         return redirect()->route('admin.products.trashed')->with('success', 'Đã xoá vĩnh viễn sản phẩm.');
     }
+    
 }

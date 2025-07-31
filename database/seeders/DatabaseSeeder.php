@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use App\Models\Coupon;
+use App\Models\User;
 
 class DatabaseSeeder extends Seeder
 {
@@ -13,22 +13,60 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        $this->call([ 
+        $this->call([
             UserSeeder::class,
-            CategorySeeder::class,
-            NewsCategorySeeder::class,
-            NewsSeeder::class,
-            NewsCommentSeeder::class,
-            LoginHistorySeeder::class,
-            ProductSeeder::class,
             RoleSeeder::class,
             PermissionSeeder::class,
             UserRoleSeeder::class,
             PermissionRoleSeeder::class,
+
+            // 👇 Thêm seeders đầy đủ
+            LocationSeeder::class,
+            CategorySeeder::class,
             BrandSeeder::class,
+
+            NewsCategorySeeder::class,
+            NewsSeeder::class,
+            NewsCommentSeeder::class,
+
+            ProductSeeder::class,
+            ProductVariantSeeder::class,
+
             AttributeSeeder::class,
             AttributeValueSeeder::class,
-            ContactSeeder::class,
+            ProductVariantAttributeSeeder::class,
+
+            TagSeeder::class,
+            ProductTagSeeder::class,
+            ProductCommentSeeder::class,
+            ProductViewSeeder::class,
+            ProductAllImageSeeder::class,
+
+            WarehouseSeeder::class,
+            WarehouseInventorySeeder::class,
+
+            UserAddressSeeder::class,
+            ShippingMethodSeeder::class,
+            CouponSeeder::class,
+
+            OrderSeeder::class,
+            OrderItemSeeder::class,
+            OrderReturnSeeder::class,
+
+            TransactionSeeder::class,
+            WishlistSeeder::class,
+
+            ActivityLogSeeder::class,
+            ReportTopProductSeeder::class,
+            ReportSalesDailySeeder::class,
+            ReportUserActivitySeeder::class,
+            SettingSeeder::class,
+
+            NotificationSeeder::class,
+            UserNotificationSeeder::class,
+
+            BannerSeeder::class,
+            LoginHistorySeeder::class,
         ]);
     }
 }

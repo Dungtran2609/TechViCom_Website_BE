@@ -26,7 +26,7 @@ class NewsComment extends Model
      */
     public function user()
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(User::class, 'id');
     }
 
     /**
@@ -34,6 +34,7 @@ class NewsComment extends Model
      */
     public function news()
     {
-        return $this->belongsTo(News::class);
+        return $this->belongsTo(\App\Models\News::class, 'news_id', 'id');
+
     }
 }

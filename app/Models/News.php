@@ -5,7 +5,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\NewsComment; 
+use App\Models\NewsComment;
 
 class News extends Model
 {
@@ -45,5 +45,10 @@ class News extends Model
     public function category()
     {
         return $this->belongsTo(NewsCategory::class, 'category_id', 'category_id');
+    }
+
+    public function visibleComments()
+    {
+        return $this->hasMany(NewsComment::class)->where('is_hidden', false);
     }
 }

@@ -121,7 +121,6 @@
                     </div>
                 </div>
 
-
                 <!-- Search -->
                 <form class="app-search d-none d-md-block ms-2">
                     <div class="position-relative">
