@@ -12,11 +12,11 @@ class CreateProductVariantsTable extends Migration
         $table->id();
         $table->foreignId('product_id')->constrained()->onDelete('cascade');
         $table->string('sku')->unique();
-        $table->decimal('price', 10, 2);
+        $table->decimal('price', 10, 2)->nullable();
         $table->decimal('sale_price', 10, 2)->nullable();
         $table->decimal('weight', 10, 2)->nullable(); // cho phép null
         $table->string('dimensions')->nullable();     // cho phép null
-        $table->integer('stock');
+        $table->integer('stock')->nullable();
         $table->string('image')->nullable();
         $table->timestamps();
     });
@@ -28,4 +28,3 @@ class CreateProductVariantsTable extends Migration
         Schema::dropIfExists('product_variants');
     }
 }
-

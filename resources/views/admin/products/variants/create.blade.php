@@ -12,36 +12,42 @@
             <form action="{{ route('admin.products.variants.store', $product->id) }}" method="POST" enctype="multipart/form-data">
                 @csrf
 
-                <div class="mb-3">
-                    <label class="form-label">Giá <span class="text-danger">*</span></label>
-                    <input type="number" name="price" class="form-control" required>
-                </div>
+                @if ($errors->any())
+                    <div class="alert alert-danger">
+                        <ul class="mb-0">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
 
-                <div class="mb-3">
-                    <label class="form-label">Giá khuyến mãi</label>
-                    <input type="number" name="sale_price" class="form-control">
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label">Số lượng tồn kho <span class="text-danger">*</span></label>
-                    <input type="number" name="stock" class="form-control" required>
-                </div>
-
+                @if ($product->type === 'variable')
+                    <div class="mb-3">
+                        <label class="form-label">Giá <span class="text-danger">*</span></label>
+                        <input type="number" name="price" class="form-control" value="{{ old('price') }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Giá khuyến mãi</label>
+                        <input type="number" name="sale_price" class="form-control" value="{{ old('sale_price') }}">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Số lượng tồn kho <span class="text-danger">*</span></label>
+                        <input type="number" name="stock" class="form-control" value="{{ old('stock') }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Ảnh</label>
+                        <input type="file" name="image" class="form-control">
+                    </div>
+                @endif
                 <div class="mb-3">
                     <label class="form-label">Khối lượng (gram)</label>
-                    <input type="number" name="weight" step="0.01" class="form-control">
+                    <input type="number" name="weight" step="0.01" class="form-control" value="{{ old('weight') }}">
                 </div>
-
                 <div class="mb-3">
                     <label class="form-label">Kích thước (VD: 10x20x5 cm)</label>
-                    <input type="text" name="dimensions" class="form-control">
+                    <input type="text" name="dimensions" class="form-control" value="{{ old('dimensions') }}">
                 </div>
-
-                <div class="mb-3">
-                    <label class="form-label">Ảnh</label>
-                    <input type="file" name="image" class="form-control">
-                </div>
-
                 <!-- Chọn thuộc tính động -->
                 <div class="mb-3">
                     <label class="form-label">Chọn thuộc tính</label>

@@ -13,8 +13,11 @@ class AttributeValueRequest extends FormRequest
 
     public function rules(): array
     {
+
+        $id = optional($this->route('attribute_value'))->id;
+
         return [
-            'value' => 'required|string|max:100',
+            'value' => 'required|string|max:100|unique:attribute_values,value,' . $id,
             'color_code' => 'nullable|string|max:20|regex:/^#[0-9a-fA-F]{3,6}$/',
         ];
     }
@@ -24,6 +27,7 @@ class AttributeValueRequest extends FormRequest
         return [
             'value.required'     => 'Vui lòng nhập giá trị thuộc tính.',
             'value.string'       => 'Giá trị phải là chuỗi ký tự.',
+            'value.unique'       => 'Giá trị này đã tồn tại.',
             'value.max'          => 'Giá trị không được vượt quá 100 ký tự.',
 
             'color_code.string'  => 'Mã màu phải là chuỗi ký tự.',

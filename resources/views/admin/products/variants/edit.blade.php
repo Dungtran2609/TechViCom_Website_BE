@@ -12,44 +12,79 @@
                 @csrf
                 @method('PUT')
 
-                <div class="mb-3">
-                    <label class="form-label">Giá <span class="text-danger">*</span></label>
-                    <input type="number" name="price" class="form-control" value="{{ $variant->price }}" required>
-                </div>
+                @if ($errors->any())
+                    <div class="alert alert-danger">
+                        <ul class="mb-0">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
 
-                <div class="mb-3">
-                    <label class="form-label">Giá khuyến mãi</label>
-                    <input type="number" name="sale_price" class="form-control" value="{{ $variant->sale_price }}">
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label">Số lượng tồn kho <span class="text-danger">*</span></label>
-                    <input type="number" name="stock" class="form-control" value="{{ $variant->stock }}" required>
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label">Khối lượng (gram)</label>
-                    <input type="number" name="weight" class="form-control" step="0.01" value="{{ $variant->weight }}">
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label">Kích thước</label>
-                    <input type="text" name="dimensions" class="form-control" value="{{ $variant->dimensions }}">
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label">Ảnh hiện tại:</label><br>
-                    @if ($variant->image)
-                        <img src="{{ asset('storage/' . $variant->image) }}" width="80" class="img-thumbnail mb-2"><br>
-                    @else
-                        <span class="text-muted">Không có ảnh</span>
-                    @endif
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label">Ảnh mới (nếu muốn thay):</label>
-                    <input type="file" name="image" class="form-control">
-                </div>
+                @if ($product->type === 'variable')
+                    <div class="mb-3">
+                        <label class="form-label">Giá <span class="text-danger">*</span></label>
+                        <input type="number" name="price" class="form-control" value="{{ old('price', $variant->price) }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Giá khuyến mãi</label>
+                        <input type="number" name="sale_price" class="form-control" value="{{ old('sale_price', $variant->sale_price) }}">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Số lượng tồn kho <span class="text-danger">*</span></label>
+                        <input type="number" name="stock" class="form-control" value="{{ old('stock', $variant->stock) }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Khối lượng (gram)</label>
+                        <input type="number" name="weight" class="form-control" step="0.01" value="{{ old('weight', $variant->weight) }}">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Kích thước</label>
+                        <input type="text" name="dimensions" class="form-control" value="{{ old('dimensions', $variant->dimensions) }}">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Ảnh hiện tại:</label><br>
+                        @if ($variant->image)
+                            <img src="{{ asset('storage/' . $variant->image) }}" width="80" class="img-thumbnail mb-2"><br>
+                        @else
+                            <span class="text-muted">Không có ảnh</span>
+                        @endif
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Ảnh mới (nếu muốn thay):</label>
+                        <input type="file" name="image" class="form-control">
+                    </div>
+                @else
+                    <div class="mb-3">
+                        <label class="form-label">Giá</label>
+                        <input type="number" class="form-control" value="{{ $product->price }}" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Giá khuyến mãi</label>
+                        <input type="number" class="form-control" value="{{ $product->sale_price }}" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Số lượng tồn kho</label>
+                        <input type="number" class="form-control" value="{{ $product->stock }}" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Ảnh sản phẩm</label><br>
+                        @if ($product->thumbnail)
+                            <img src="{{ asset('storage/' . $product->thumbnail) }}" width="80" class="img-thumbnail mb-2"><br>
+                        @else
+                            <span class="text-muted">Không có ảnh</span>
+                        @endif
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Thuộc tính</label><br>
+                        @foreach ($variant->attributesValue as $attrVal)
+                            <span class="badge bg-secondary mb-1">
+                                {{ $attrVal->attribute->name }}: {{ $attrVal->value }}
+                            </span>
+                        @endforeach
+                    </div>
+                @endif
 
                 <div id="attribute-values-container">
                     @foreach ($variant->attributesValue as $attrVal)

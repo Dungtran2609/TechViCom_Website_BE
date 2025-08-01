@@ -11,6 +11,9 @@ use App\Http\Controllers\Api\ShippingController;
 use App\Http\Controllers\Api\V1\NewsController;
 
 Route::prefix('v1')->group(function () {
+    // 📦 Biến thể sản phẩm (public, không cần đăng nhập)
+    Route::get('product-variants', [\App\Http\Controllers\Api\V1\ProductVariantApiController::class, 'index']);
+    Route::get('product-variants/{id}', [\App\Http\Controllers\Api\V1\ProductVariantApiController::class, 'show']);
     // ✅ Đăng ký & Đăng nhập
     Route::post('register', [AuthController::class, 'register']);
     Route::post('login', [AuthController::class, 'login']);
@@ -67,5 +70,27 @@ Route::prefix('v1')->group(function () {
         Route::delete('/{order}', [OrderApiController::class, 'destroy']);
     });
 
-    
+    // 📦 Sản phẩm (public, không cần đăng nhập)
+    Route::get('products', [\App\Http\Controllers\Api\V1\ProductApiController::class, 'index']);
+    Route::get('products/{id}', [\App\Http\Controllers\Api\V1\ProductApiController::class, 'show']);
+    // categories
+    Route::get('categories', [\App\Http\Controllers\Api\V1\CategoryApiController::class, 'index']);
+    Route::get('categories/{id}', [\App\Http\Controllers\Api\V1\CategoryApiController::class, 'show']);
+    // brands
+
+    // �🚚 Tính phí vận chuyển
+    // Route::post('/shipping-fee/{orderId}', [ShippingController::class, 'calculateShipping']);
+
+    // 📢 Banner (public)
+    Route::get('banners', [\App\Http\Controllers\Api\V1\BannerApiController::class, 'index']);
+    Route::get('banners/{id}', [\App\Http\Controllers\Api\V1\BannerApiController::class, 'show']);
+
+    // 📰 News (public)
+    Route::get('news', [\App\Http\Controllers\Api\V1\NewsApiController::class, 'index']);
+    Route::get('news/{id}', [\App\Http\Controllers\Api\V1\NewsApiController::class, 'show']);
+
+    // 🎟️ Voucher (public)
+
+    Route::get('coupons', [\App\Http\Controllers\Api\V1\CouponApiController::class, 'index']);
+    Route::get('coupons/{id}', [\App\Http\Controllers\Api\V1\CouponApiController::class, 'show']);
 });

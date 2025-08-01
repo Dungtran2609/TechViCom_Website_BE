@@ -11,11 +11,15 @@ use Illuminate\Http\JsonResponse;
 class ProductController extends Controller
 {
     public function show($id)
-    {
-        $product = Product::with('category')->findOrFail($id);
+{
+    $product = Product::with('category')->findOrFail($id);
+    $createdAtFormatted = $product->created_at
+        ? $product->created_at->format('d/m/Y')
+        : null;
 
-        return view('client.product.show', compact('product'));
-    }
+    return view('client.product.show', compact('product', 'createdAtFormatted'));
+}
+
 
     // API Methods for React Frontend
     public function apiIndex(Request $request): JsonResponse

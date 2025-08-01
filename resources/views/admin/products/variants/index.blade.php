@@ -57,13 +57,33 @@
                             <td>
                                 @if ($variant->image)
                                     <img src="{{ asset('storage/' . $variant->image) }}" class="img-thumbnail" style="width: 60px; height: 60px;">
+                                @elseif ($product->type === 'simple' && $product->thumbnail)
+                                    <img src="{{ asset('storage/' . $product->thumbnail) }}" class="img-thumbnail" style="width: 60px; height: 60px;">
                                 @else
                                     <span class="text-muted fst-italic">Không có ảnh</span>
                                 @endif
                             </td>
-                            <td>{{ number_format($variant->price) }} đ</td>
-                            <td>{{ number_format($variant->sale_price) }} đ</td>
-                            <td>{{ $variant->stock }}</td>
+                            <td>
+                                @if ($product->type === 'simple')
+                                    {{ number_format($product->price) }} đ
+                                @else
+                                    {{ number_format($variant->price) }} đ
+                                @endif
+                            </td>
+                            <td>
+                                @if ($product->type === 'simple')
+                                    {{ number_format($product->sale_price) }} đ
+                                @else
+                                    {{ number_format($variant->sale_price) }} đ
+                                @endif
+                            </td>
+                            <td>
+                                @if ($product->type === 'simple')
+                                    {{ $product->stock }}
+                                @else
+                                    {{ $variant->stock }}
+                                @endif
+                            </td>
                             <td>
                                 @foreach ($variant->attributesValue as $attrVal)
                                     <span class="badge bg-secondary mb-1">

@@ -5,6 +5,13 @@
     <div class="card-body">
         <h4 class="mb-4">Chỉnh sửa mã: {{ $coupon->code }}</h4>
 
+        @if(session('success'))
+            <div class="alert alert-success">{{ session('success') }}</div>
+        @endif
+        @if(session('error'))
+            <div class="alert alert-danger">{{ session('error') }}</div>
+        @endif
+
         <form action="{{ route('admin.coupons.update', $coupon->id) }}" method="POST">
             @csrf
             @method('PUT')

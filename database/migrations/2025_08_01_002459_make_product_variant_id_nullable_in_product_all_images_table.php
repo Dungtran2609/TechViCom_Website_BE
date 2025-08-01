@@ -11,8 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('roles', function (Blueprint $table) {
-            $table->string('slug')->after('name');
+        Schema::table('product_all_images', function (Blueprint $table) {
+            $table->unsignedBigInteger('product_variant_id')->nullable()->change();
         });
     }
 
@@ -21,8 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('roles', function (Blueprint $table) {
-            $table->dropColumn('slug');
+        Schema::table('product_all_images', function (Blueprint $table) {
+            $table->unsignedBigInteger('product_variant_id')->nullable(false)->change();
         });
     }
 };

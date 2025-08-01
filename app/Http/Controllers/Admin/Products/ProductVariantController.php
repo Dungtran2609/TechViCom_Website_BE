@@ -46,32 +46,62 @@ class ProductVariantController extends Controller
     // Lưu biến thể mới
     public function store(Request $request, Product $product)
     {
-        $request->validate([
-            'price' => 'required|numeric',
-            'sale_price' => 'nullable|numeric',
-            'stock' => 'required|integer',
-            'image' => 'nullable|image|max:2048',
-            'attribute_values' => 'required|array|min:1',
-        ]);
+        if ($product->type === 'variable') {
+            $request->validate([
+                'price' => 'required|numeric',
+                'sale_price' => 'nullable|numeric',
+                'stock' => 'required|integer',
+                'image' => 'nullable|image|max:2048',
+                'attribute_values' => 'required|array|min:1',
+            ]);
 
-        // Upload ảnh nếu có
-        $imagePath = null;
-        if ($request->hasFile('image')) {
-            $imagePath = $request->file('image')->store('variants', 'public');
+            // Kiểm tra trùng thuộc tính biến thể
+            $newValues = collect($request->attribute_values)->sort()->values()->toArray();
+            $isDuplicate = false;
+            foreach ($product->variants as $variant) {
+                $existingValues = $variant->attributesValue->pluck('id')->sort()->values()->toArray();
+                if ($newValues == $existingValues) {
+                    $isDuplicate = true;
+                    break;
+                }
+            }
+            if ($isDuplicate) {
+                return redirect()->back()->withInput()->withErrors(['attribute_values' => 'Biến thể với thuộc tính này đã tồn tại!']);
+            }
+
+            // Upload ảnh nếu có
+            $imagePath = null;
+            if ($request->hasFile('image')) {
+                $imagePath = $request->file('image')->store('variants', 'public');
+            }
+
+            // Tạo biến thể
+            $variant = ProductVariant::create([
+                'product_id' => $product->id,
+                'sku' => strtoupper('SKU-' . uniqid()),
+                'price' => $request->price,
+                'sale_price' => $request->sale_price,
+                'stock' => $request->stock,
+                'weight' => $request->weight ?? 0,
+                'dimensions' => $request->dimensions ?? '',
+                'image' => $imagePath,
+            ]);
+        } else {
+            $request->validate([
+                'attribute_values' => 'required|array|min:1',
+            ]);
+            // Tạo biến thể chỉ với thuộc tính, các trường còn lại để null hoặc mặc định
+            $variant = ProductVariant::create([
+                'product_id' => $product->id,
+                'sku' => strtoupper('SKU-' . uniqid()),
+                'price' => null,
+                'sale_price' => null,
+                'stock' => null,
+                'weight' => null,
+                'dimensions' => null,
+                'image' => null,
+            ]);
         }
-
-        // Tạo biến thể
-        $variant = ProductVariant::create([
-            'product_id' => $product->id,
-            'sku' => strtoupper('SKU-' . uniqid()),
-            'price' => $request->price,
-            'sale_price' => $request->sale_price,
-            'stock' => $request->stock,
-            'weight' => $request->weight ?? 0,
-            'dimensions' => $request->dimensions ?? '',
-            'image' => $imagePath,
-        ]);
-
 
         // Gắn thuộc tính
         foreach ($request->attribute_values as $valueId) {
@@ -98,33 +128,56 @@ class ProductVariantController extends Controller
     // Cập nhật biến thể
     public function update(Request $request, ProductVariant $variant)
     {
-        $request->validate([
-            'price' => 'required|numeric',
-            'sale_price' => 'nullable|numeric',
-            'stock' => 'required|integer',
-            'weight' => 'nullable|numeric',
-            'dimensions' => 'nullable|string',
-            'image' => 'nullable|image|max:2048',
-            'attribute_values' => 'required|array|min:1',
-        ]);
+        $product = $variant->product;
+        if ($product->type === 'variable') {
+            $request->validate([
+                'price' => 'required|numeric',
+                'sale_price' => 'nullable|numeric',
+                'stock' => 'required|integer',
+                'weight' => 'nullable|numeric',
+                'dimensions' => 'nullable|string',
+                'image' => 'nullable|image|max:2048',
+                'attribute_values' => 'required|array|min:1',
+            ]);
 
-        $data = [
-            'price' => $request->price,
-            'sale_price' => $request->sale_price,
-            'stock' => $request->stock,
-            'weight' => $request->weight ?? 0,
-            'dimensions' => $request->dimensions ?? '',
-        ];
-
-        if ($request->hasFile('image')) {
-            // Xóa ảnh cũ nếu có
-            if ($variant->image) {
-                Storage::disk('public')->delete($variant->image);
+            // Kiểm tra trùng thuộc tính biến thể (loại trừ chính biến thể đang sửa)
+            $newValues = collect($request->attribute_values)->sort()->values()->toArray();
+            $isDuplicate = false;
+            foreach ($product->variants as $otherVariant) {
+                if ($otherVariant->id == $variant->id) continue;
+                $existingValues = $otherVariant->attributesValue->pluck('id')->sort()->values()->toArray();
+                if ($newValues == $existingValues) {
+                    $isDuplicate = true;
+                    break;
+                }
             }
-            $data['image'] = $request->file('image')->store('variants', 'public');
-        }
+            if ($isDuplicate) {
+                return redirect()->back()->withInput()->withErrors(['attribute_values' => 'Biến thể với thuộc tính này đã tồn tại!']);
+            }
 
-        $variant->update($data);
+            $data = [
+                'price' => $request->price,
+                'sale_price' => $request->sale_price,
+                'stock' => $request->stock,
+                'weight' => $request->weight ?? 0,
+                'dimensions' => $request->dimensions ?? '',
+            ];
+
+            if ($request->hasFile('image')) {
+                // Xóa ảnh cũ nếu có
+                if ($variant->image) {
+                    Storage::disk('public')->delete($variant->image);
+                }
+                $data['image'] = $request->file('image')->store('variants', 'public');
+            }
+
+            $variant->update($data);
+        } else {
+            $request->validate([
+                'attribute_values' => 'required|array|min:1',
+            ]);
+            // Không cập nhật các trường giá, tồn kho, ảnh... chỉ cập nhật thuộc tính
+        }
 
         // Cập nhật các giá trị thuộc tính
         ProductVariantAttribute::where('product_variant_id', $variant->id)->delete();
