@@ -8,11 +8,24 @@ use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\UserController;
 use App\Http\Controllers\Api\V1\OrderApiController;
 use App\Http\Controllers\Api\ShippingController;
+use App\Http\Controllers\Api\V1\NewsController;
 
 Route::prefix('v1')->group(function () {
     // ✅ Đăng ký & Đăng nhập
     Route::post('register', [AuthController::class, 'register']);
     Route::post('login', [AuthController::class, 'login']);
+
+    // 📰 News API (public)
+    Route::prefix('news')->group(function () {
+        Route::get('/', [NewsController::class, 'index']);
+        Route::get('/featured', [NewsController::class, 'featured']);
+        Route::get('/{id}', [NewsController::class, 'show']);
+        Route::get('/{id}/comments', [NewsController::class, 'comments']);
+    });
+
+    // 📂 News Categories API (public)
+    Route::get('news-categories', [NewsController::class, 'categories']);
+    Route::get('news-categories/{categoryId}/news', [NewsController::class, 'newsByCategory']);
 
     // 🔐 Các route cần xác thực
     Route::middleware('auth:sanctum')->group(function () {
@@ -21,6 +34,14 @@ Route::prefix('v1')->group(function () {
 
         // 🔓 Đăng xuất
         Route::post('logout', [AuthController::class, 'logout']);
+
+        // 📰 News API (cần auth)
+        Route::prefix('news')->group(function () {
+            Route::post('/', [NewsController::class, 'store']);
+            Route::put('/{id}', [NewsController::class, 'update']);
+            Route::delete('/{id}', [NewsController::class, 'destroy']);
+            Route::post('/{id}/comments', [NewsController::class, 'addComment']);
+        });
 
         // 📦 Quản lý đơn hàng cho người dùng
         Route::get('user/orders', [OrderApiController::class, 'apiUserOrders']);
@@ -46,6 +67,5 @@ Route::prefix('v1')->group(function () {
         Route::delete('/{order}', [OrderApiController::class, 'destroy']);
     });
 
-    // 🚚 Tính phí vận chuyển
-    // Route::post('/shipping-fee/{orderId}', [ShippingController::class, 'calculateShipping']);
+    
 });

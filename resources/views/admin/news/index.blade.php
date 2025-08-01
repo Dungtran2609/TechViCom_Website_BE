@@ -41,7 +41,7 @@
                     @foreach ($news as $item)
                         <tr>
                             <td>{{ $loop->iteration }}</td>
-                            <td>{{ $item->news_id }}</td>
+                            <td>{{ $item->id }}</td>
                             <td>
                                 <p class="text-dark fw-medium fs-15 mb-0">{{ $item->title }}</p>
                             </td>
