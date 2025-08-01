@@ -1,34 +1,40 @@
 <?php
-
 namespace App\Http\Requests\Auth;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Contracts\Validation\Validator;
-use Illuminate\Http\Exceptions\HttpResponseException;
 
 class RegisterRequest extends FormRequest
 {
-    public function authorize(): bool
+    /**
+     * Xác định xem người dùng có được phép thực hiện request này không.
+     *
+     * @return bool
+     */
+    public function authorize()
     {
+        // Trả về 'true' để cho phép tất cả mọi người có thể thực hiện request này.
         return true;
     }
 
-    public function rules(): array
+    /**
+     * Lấy các quy tắc validation áp dụng cho request.
+     *
+     * @return array<string, mixed>
+     */
+    public function rules()
     {
         return [
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'unique:users,email'],
-            'password' => ['required', 'string', 'min:6', 'confirmed'],
-        ];
-    }
+            // Trường 'name' là bắt buộc (required), phải là chuỗi (string) và có độ dài tối đa 255 ký tự.
+            'name'     => ['required', 'string', 'max:255'],
 
-    /**
-     * Tùy chỉnh phản hồi khi validation thất bại để đảm bảo ReactJS nhận được JSON.
-     */
-    protected function failedValidation(Validator $validator)
-    {
-        throw new HttpResponseException(response()->json([
-            'errors' => $validator->errors(),
-        ], 422));
+            // Trường 'email' là bắt buộc, phải là chuỗi, có định dạng email, độ dài tối đa 255 ký tự,
+            // và quan trọng nhất, phải là duy nhất (unique) trong cột 'email' của bảng 'users'.
+            'email'    => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
+
+            // Trường 'password' là bắt buộc, phải là chuỗi, có độ dài tối thiểu 8 ký tự,
+            // và phải được xác nhận (confirmed). Quy tắc 'confirmed' yêu cầu phải có một
+            // trường 'password_confirmation' có giá trị khớp.
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+        ];
     }
 }
