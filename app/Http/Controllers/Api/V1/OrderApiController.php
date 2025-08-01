@@ -11,7 +11,9 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use App\Models\Coupon;
 
+use Illuminate\Support\Str;
 class OrderApiController extends Controller
 {
 
@@ -76,10 +78,220 @@ class OrderApiController extends Controller
         ];
 
         return response()->json($response);
+
     }
-   
-   
-   
+
+
+    // public function store(Request $request)
+    // {
+    // $validated = $request->validate([
+    // 
+    //  'province_id' => 'nullable|integer',
+    //  'district_id' => 'nullable|integer',
+    //  'ward_id' => 'nullable|integer',
+    //  'address' => 'nullable|string',
+    //  'shipping_fee' => 'nullable|numeric',
+    //  'payment_method' => 'nullable|string',
+    //  'status' => 'nullable|string',
+    //  'recipient_name' => 'nullable|string',
+    //  'recipient_phone' => 'nullable|string',
+    //  'recipient_address' => 'nullable|string',
+    //  'shipping_method_id' => 'nullable|integer',
+    //  'coupon_id' => 'nullable|integer|exists:coupons,id',
+
+    // ]);
+
+    // DB::beginTransaction();
+
+    // try {
+    // $totalAmount = 0;
+    // $orderItemsData = [];
+
+    // foreach ($validated['order_items'] as $item) {
+    // $variant = \App\Models\ProductVariant::with('product')->findOrFail($item['product_variant_id']);
+    // $price = $variant->sale_price ?? $variant->price ?? 0;
+    // $quantity = $item['quantity'];
+    // $totalAmount += $price * $quantity;
+
+    // $orderItemsData[] = [
+    // 'product_id' => $variant->product_id,
+    // 'product_variant_id' => $variant->id,
+    // 'quantity' => $quantity,
+    // 'price' => $price,
+    // ];
+    // }
+
+    // Phí vận chuyển
+    // $provinceName = DB::table('provinces')->where('id', $validated['province_id'])->value('name');
+    // $shippingFee = $provinceName === 'Hà Nội' ? ($totalAmount >= 3000000 ? 0 : 60000) : 0;
+
+    // Giảm giá từ mã giảm giá
+    // $couponDiscount = 0;
+    // $coupon = null;
+    // if (!empty($validated['coupon_id'])) {
+    // $coupon = Coupon::find($validated['coupon_id']);
+    // if ($coupon && $coupon->status && now()->between($coupon->start_date, $coupon->end_date)) {
+    // $couponDiscount = $this->calculateCouponDiscount($coupon, $totalAmount + $shippingFee);
+    // }
+    // }
+
+    // $finalTotal = $totalAmount + $shippingFee - $couponDiscount;
+
+    // $order = Order::create([
+    // 'user_id' => $validated['user_id'] ?? null,
+    // 'recipient_name' => $validated['recipient_name'],
+    // 'recipient_phone' => $validated['recipient_phone'],
+    // 'recipient_address' => $validated['recipient_address'],
+    // 'province_id' => $validated['province_id'],
+    // 'district_id' => $validated['district_id'],
+// 'ward_id' => $validated['ward_id'],
+    // 'payment_method' => $validated['payment_method'],
+    // 'shipping_method_id' => $validated['shipping_method_id'] ?? null,
+    // 'coupon_id' => $coupon?->id ?? null,
+    // 'coupon_discount' => $couponDiscount,
+    // 'shipping_fee' => $shippingFee,
+    // 'total_amount' => $totalAmount,
+    // 'final_total' => $finalTotal,
+    // 'status' => 'pending',
+    // ]);
+
+    // foreach ($orderItemsData as $itemData) {
+    // $order->orderItems()->create($itemData);
+    // }
+
+    // DB::commit();
+
+    // return response()->json([
+    // 'success' => true,
+    // 'message' => 'Tạo đơn hàng thành công.',
+    // 'data' => $order->load(['orderItems.product', 'orderItems.productVariant'])
+    // ], 201);
+    // } catch (\Exception $e) {
+    // DB::rollBack();
+
+    // return response()->json([
+    // 'success' => false,
+    // 'message' => 'Lỗi khi tạo đơn hàng.',
+    // 'error' => $e->getMessage(),
+    // ], 500);
+    // }
+    // }
+
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'province_id' => 'nullable|integer',
+            'district_id' => 'nullable|integer',
+            'ward_id' => 'nullable|integer',
+            'address' => 'nullable|string',
+            'shipping_fee' => 'nullable|numeric',
+            'payment_method' => 'nullable|string',
+            'status' => 'nullable|string',
+            'recipient_name' => 'nullable|string',
+            'recipient_phone' => 'nullable|string',
+            'recipient_address' => 'nullable|string',
+            'shipping_method_id' => 'nullable|integer',
+            'coupon_id' => 'nullable|integer|exists:coupons,id',
+            'user_id' => 'nullable|integer',
+
+        ]);
+
+        $orderItems = $request->input('order_items', []);
+        if (empty($orderItems)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Danh sách sản phẩm trống.',
+            ], 400);
+        }
+
+        DB::beginTransaction();
+
+        try {
+            $totalAmount = 0;
+            $orderItemsData = [];
+
+            foreach ($orderItems as $item) {
+                $variant = \App\Models\ProductVariant::with('product')->find($item['variant_id']);
+
+                if (!$variant) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Sản phẩm không tồn tại.',
+                    ], 404);
+                }
+
+                $price = $variant->sale_price ?? $variant->price ?? 0;
+                $quantity = $item['quantity'];
+                $totalAmount += $price * $quantity;
+                $orderItemsData[] = [
+                    'product_id' => $variant->product_id,
+                    'variant_id' => $variant->id,
+                    'quantity' => $quantity,
+                    'price' => $price,
+                ];
+            }
+
+            // Tính phí vận chuyển
+            $provinceName = DB::table('provinces')->where('id', $validated['province_id'])->value('name');
+            $shippingFee = 0;
+            if ($provinceName === 'Hà Nội') {
+                $shippingFee = $totalAmount >= 3000000 ? 0 : 60000;
+            } else {
+                $shippingFee = $validated['shipping_fee'] ?? 60000;
+            }
+
+            // Tính giảm giá
+            $couponDiscount = 0;
+            $coupon = null;
+            if (!empty($validated['coupon_id'])) {
+                $coupon = Coupon::find($validated['coupon_id']);
+                if ($coupon && $coupon->status && now()->between($coupon->start_date, $coupon->end_date)) {
+                    $couponDiscount = $this->calculateCouponDiscount($coupon, $totalAmount);
+                }
+            }
+
+            $finalTotal = $totalAmount + $shippingFee - $couponDiscount;
+
+            $order = Order::create([
+                'user_id' => $validated['user_id'] ?? null,
+                'recipient_name' => $validated['recipient_name'],
+                'recipient_phone' => $validated['recipient_phone'],
+                'recipient_address' => $validated['recipient_address'],
+                'address_id' => $request->address_id, // ✅ thêm dòng này
+                'province_id' => $validated['province_id'],
+                'district_id' => $validated['district_id'],
+                'ward_id' => $validated['ward_id'],
+                'payment_method' => $validated['payment_method'],
+                'shipping_method_id' => $validated['shipping_method_id'],
+                'coupon_id' => $coupon?->id ?? null,
+                'coupon_discount' => $couponDiscount,
+                'shipping_fee' => $shippingFee,
+                'total_amount' => $totalAmount,
+                'final_total' => $finalTotal,
+                'status' => $validated['status'] ?? 'pending',
+            ]);
+
+            foreach ($orderItemsData as $itemData) {
+                $order->orderItems()->create($itemData);
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Tạo đơn hàng thành công.',
+                'data' => $order->load(['orderItems.product', 'orderItems.productVariant']),
+            ], 201);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => 'Lỗi khi tạo đơn hàng.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
 
     public function update(Request $request, Order $order)
     {
@@ -126,9 +338,6 @@ class OrderApiController extends Controller
             ], 500);
         }
     }
-
-
-
 
     public function apiUserOrders(Request $request): JsonResponse
     {

@@ -19,10 +19,14 @@ Route::prefix('v1')->group(function () {
     // Ai cũng có thể xem sản phẩm, tin tức, danh mục... mà không cần đăng nhập
     Route::get('products', [ProductApiController::class, 'index']);
     Route::get('products/{product}', [ProductApiController::class, 'show']); // Sử dụng {product} để route model binding
-
     Route::get('news', [NewsController::class, 'index']);
     Route::get('news/{news}', [NewsController::class, 'show']); // Sử dụng {news} để route model binding
-
+    // 📦 Sản phẩm (public, không cần đăng nhập)
+    // Route::get('products', [\App\Http\Controllers\Api\V1\ProductApiController::class, 'index']);
+    // Route::get('products/{id}', [\App\Http\Controllers\Api\V1\ProductApiController::class, 'show']);
+    // categories
+    Route::get('categories', [\App\Http\Controllers\Api\V1\CategoryApiController::class, 'index']);
+    Route::get('categories/{id}', [\App\Http\Controllers\Api\V1\CategoryApiController::class, 'show']);
     // Bạn cũng có thể cần các route khác ở đây, ví dụ:
     // Route::get('categories', [CategoryController::class, 'index']);
 
@@ -54,25 +58,26 @@ Route::prefix('v1')->group(function () {
         });
 
         // Bạn có thể thêm các route yêu cầu đăng nhập khác ở đây
-        // Ví dụ: Viết bình luận, đánh giá sản phẩm...
+// Ví dụ: Viết bình luận, đánh giá sản phẩm...
     });
 
 
     // === CÁC ROUTE DÀNH CHO QUẢN TRỊ VIÊN (ADMIN) ===
     // Bạn nên thêm một middleware nữa ở đây để kiểm tra vai trò 'admin'
     Route::prefix('order')->middleware(['auth:sanctum'/*, 'role:admin'*/])->group(function () {
-        Route::get('/trashed', [OrderApiController::class, 'trashed']);
-        Route::post('/{id}/restore', [OrderApiController::class, 'restore']);
-        Route::delete('/{id}/force-delete', [OrderApiController::class, 'forceDelete']);
-        Route::post('/{id}/update-status', [OrderApiController::class, 'updateOrderStatus']);
+        // Route::get('/trashed', [OrderApiController::class, 'trashed']);
+        // Route::post('/{id}/restore', [OrderApiController::class, 'restore']);
+        // Route::delete('/{id}/force-delete', [OrderApiController::class, 'forceDelete']);
+        // Route::post('/{id}/update-status', [OrderApiController::class, 'updateOrderStatus']);
 
-        Route::get('/returns', [OrderApiController::class, 'returnsIndex']);
-        Route::post('/returns/{id}/process', [OrderApiController::class, 'processReturn']);
+        // Route::get('/returns', [OrderApiController::class, 'returnsIndex']);
+        // Route::post('/returns/{id}/process', [OrderApiController::class, 'processReturn']);
 
         Route::get('/', [OrderApiController::class, 'index']);
         Route::get('/{order}', [OrderApiController::class, 'show']);
-        Route::put('/{order}', [OrderApiController::class, 'update']);
-        Route::delete('/{order}', [OrderApiController::class, 'destroy']);
+        Route::get('/store', [OrderApiController::class, 'store']);
+        // Route::put('/{order}', [OrderApiController::class, 'update']);
+        // Route::delete('/{order}', [OrderApiController::class, 'destroy']);
     });
 
     // 🚚 Tính phí vận chuyển (chưa bật)
