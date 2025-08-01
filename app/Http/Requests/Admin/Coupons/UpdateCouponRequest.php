@@ -21,7 +21,7 @@ class UpdateCouponRequest extends FormRequest
 
     public function rules(): array
     {
-        $couponId = $this->route('coupon');
+        $couponId = $this->route('coupon') ?? $this->route('id');
 
         return [
             'code' => ['required', 'string', 'max:20', Rule::unique('coupons', 'code')->ignore($couponId)],
@@ -31,9 +31,9 @@ class UpdateCouponRequest extends FormRequest
             'min_order_value' => ['nullable', 'numeric', 'min:0'],
             'max_order_value' => ['nullable', 'numeric', 'min:0'],
             'max_usage_per_user' => ['nullable', 'integer', 'min:1'],
+            'status' => ['required', 'boolean'],
             'start_date' => ['required', 'date'],
             'end_date' => ['required', 'date', 'after_or_equal:start_date'],
-            'status' => ['required', Rule::in([0, 1])],
         ];
     }
 
