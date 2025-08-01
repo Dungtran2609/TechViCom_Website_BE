@@ -2,22 +2,24 @@
 
 return [
 
-    'paths' => ['api/*', 'sanctum/csrf-cookie', 'login', 'logout', 'me'],
+    /*
+    |--------------------------------------------------------------------------
+    | Cross-Origin Resource Sharing (CORS) Configuration
+    |--------------------------------------------------------------------------
+    */
 
-    'allowed_methods' => ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    'paths' => ['api/*', 'sanctum/csrf-cookie'],
 
+    'allowed_methods' => ['*'],
     'allowed_origins' => [
         'http://localhost:5173',
-        'http://localhost:3000',
-        'http://localhost',
-        'http://127.0.0.1',
     ],
 
     'allowed_origins_patterns' => [],
 
     'allowed_headers' => ['*'],
 
-    'exposed_headers' => ['Content-Type', 'Accept', 'Authorization'],
+    'exposed_headers' => [],
 
     'max_age' => 0,
 

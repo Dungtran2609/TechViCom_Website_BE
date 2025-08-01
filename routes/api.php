@@ -1,17 +1,33 @@
 <?php
+// File: routes/api.php (Bản hoàn chỉnh đã sửa lỗi)
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\UserController;
 use App\Http\Controllers\Api\V1\OrderApiController;
 use App\Http\Controllers\Api\ShippingController;
+// ✅ Đã thêm: Import các Controller còn thiếu
+use App\Http\Controllers\Api\V1\ProductApiController;
+use App\Http\Controllers\Api\V1\NewsController;
 
 Route::prefix('v1')->group(function () {
-    // ✅ Xác thực người dùng
+    // === CÁC ROUTE XÁC THỰC (CÔNG KHAI) ===
     Route::post('register', [AuthController::class, 'register']);
     Route::post('login', [AuthController::class, 'login']);
 
-    // 🔐 Các route yêu cầu đã đăng nhập
+    // === CÁC ROUTE DỮ LIỆU (CÔNG KHAI) ===
+    // Ai cũng có thể xem sản phẩm, tin tức, danh mục... mà không cần đăng nhập
+    Route::get('products', [ProductApiController::class, 'index']);
+    Route::get('products/{product}', [ProductApiController::class, 'show']); // Sử dụng {product} để route model binding
+
+    Route::get('news', [NewsController::class, 'index']);
+    Route::get('news/{news}', [NewsController::class, 'show']); // Sử dụng {news} để route model binding
+
+    // Bạn cũng có thể cần các route khác ở đây, ví dụ:
+    // Route::get('categories', [CategoryController::class, 'index']);
+
+
+    // === CÁC ROUTE YÊU CẦU ĐÃ ĐĂNG NHẬP (BẢO MẬT) ===
     Route::middleware('auth:sanctum')->group(function () {
 
         /**
@@ -36,12 +52,15 @@ Route::prefix('v1')->group(function () {
             Route::post('orders', [OrderApiController::class, 'apiStore']);
             Route::post('orders/{id}/return', [OrderApiController::class, 'returnOrder']);
         });
+
+        // Bạn có thể thêm các route yêu cầu đăng nhập khác ở đây
+        // Ví dụ: Viết bình luận, đánh giá sản phẩm...
     });
 
-    /**
-     * 🔧 Quản trị đơn hàng (ADMIN)
-     */
-    Route::prefix('order')->group(function () {
+
+    // === CÁC ROUTE DÀNH CHO QUẢN TRỊ VIÊN (ADMIN) ===
+    // Bạn nên thêm một middleware nữa ở đây để kiểm tra vai trò 'admin'
+    Route::prefix('order')->middleware(['auth:sanctum'/*, 'role:admin'*/])->group(function () {
         Route::get('/trashed', [OrderApiController::class, 'trashed']);
         Route::post('/{id}/restore', [OrderApiController::class, 'restore']);
         Route::delete('/{id}/force-delete', [OrderApiController::class, 'forceDelete']);
