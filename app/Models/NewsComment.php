@@ -22,6 +22,15 @@ class NewsComment extends Model
     ];
 
     /**
+     * Giá trị mặc định cho các trường
+     *
+     * @var array
+     */
+    protected $attributes = [
+        'is_hidden' => false,
+    ];
+
+    /**
      * Mối quan hệ với bảng User (Người dùng đã viết bình luận)
      */
     public function user()

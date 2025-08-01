@@ -59,8 +59,17 @@ class NewsController extends Controller
      */
     public function show(int $id): JsonResponse
     {
-        $news = News::with(['author', 'category', 'comments.user'])
+        $news = News::with(['author', 'category'])
             ->findOrFail($id);
+
+        // Lấy comments chỉ những comment được phép hiển thị
+        $comments = $news->comments()
+            ->with('user')
+            ->where('is_hidden', false)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $news->setRelation('comments', $comments);
 
         return response()->json([
             'success' => true,
@@ -163,6 +172,7 @@ class NewsController extends Controller
         ]);
 
         $validated['news_id'] = $newsId;
+        $validated['is_hidden'] = false; // Đảm bảo comment mới luôn hiển thị
         $comment = NewsComment::create($validated);
 
         return response()->json([
