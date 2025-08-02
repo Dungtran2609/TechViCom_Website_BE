@@ -23,6 +23,9 @@ return Application::configure(basePath: dirname(__DIR__))
             // Middleware tùy chỉnh
             'is_admin' => IsAdmin::class,
             'permission' => CheckPermission::class,
+
+            // === DÒNG QUAN TRỌNG CẦN THÊM VÀO ===
+            'role' => \App\Http\Middleware\CheckRole::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
