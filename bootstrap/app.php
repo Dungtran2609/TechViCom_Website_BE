@@ -23,6 +23,7 @@ return Application::configure(basePath: dirname(__DIR__))
             // Middleware tùy chỉnh
             'is_admin' => IsAdmin::class,
             'permission' => CheckPermission::class,
+            \Illuminate\Http\Middleware\HandleCors::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
