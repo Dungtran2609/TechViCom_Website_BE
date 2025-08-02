@@ -25,6 +25,7 @@ use App\Http\Controllers\Admin\Contacts\ContactsAdminController;
 use App\Http\Controllers\Admin\Coupons\CouponController;
 use App\Http\Controllers\Admin\News\NewsCommentController;
 use App\Http\Controllers\Admin\OrderController;
+use App\Http\Controllers\Client\CartController;
 
 // --- Admin routes ---
 Route::middleware(['auth', IsAdmin::class])->prefix('admin-control')->name('admin.')->group(function () {
@@ -179,3 +180,11 @@ Route::middleware('auth')->group(function () {
     Route::post('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
     Route::post('/profile/delete', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
+
+Route::get('products/{id}', [ProductController::class, 'show'])->name('products.show');
+Route::post('cart/add/{id}', [CartController::class, 'add'])->name('cart.add');
+Route::get('cart', [CartController::class, 'index'])->name('cart.index');
+Route::post('cart/update/{id}', [CartController::class, 'update'])->name('cart.update');
+Route::get('cart/remove/{id}', [CartController::class, 'remove'])->name('cart.remove');
+use App\Http\Controllers\Client\ProductController as ClientProductController;
+Route::get('products/{id}', [ClientProductController::class, 'show'])->name('products.show');

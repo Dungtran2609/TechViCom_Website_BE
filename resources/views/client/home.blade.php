@@ -43,7 +43,11 @@
                     <div class="card-body">
                         <h5 class="card-title">{{ $product->name }}</h5>
                         <p class="card-text">{{ number_format($product->price, 0, ',', '.') }} VNĐ</p>
-                        <a href="#" class="btn btn-outline-primary">Xem chi tiết</a>
+                        <a href="{{ route('products.show', $product->id) }}" class="btn btn-outline-primary">Xem chi tiết</a>
+                        <form action="{{ route('cart.add', $product->id) }}" method="POST" class="d-inline">
+                            @csrf
+                            <button type="submit" class="btn btn-success">Thêm vào giỏ hàng</button>
+                        </form>
                     </div>
                 </div>
             </div>

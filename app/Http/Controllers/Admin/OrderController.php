@@ -628,6 +628,10 @@ class OrderController extends Controller
 
         $returnData = $returns->map(function ($return) {
             $order = $return->order;
+            // Nếu order null thì bỏ qua phần tử này (hoặc return mặc định)
+if (!$order) {
+    return null; // hoặc [] nếu bạn muốn hiển thị return rỗng
+}
             $paymentMethodMap = [
                 'credit_card' => 'Thẻ tín dụng/ghi nợ',
                 'bank_transfer' => 'Chuyển khoản ngân hàng',
@@ -672,7 +676,8 @@ class OrderController extends Controller
                 'payment_method' => $order->payment_method,
                 'payment_method_vietnamese' => $paymentMethodMap[$order->payment_method] ?? $order->payment_method,
             ];
-        });
+        })->filter(); // loại bỏ null nếu có;
+
 
         return view('admin.oders.returns', [
             'returns' => $returnData,

@@ -48,12 +48,18 @@ class CouponController extends Controller
 
 public function update(UpdateCouponRequest $request, $id)
 {
-    $coupon = Coupon::findOrFail($id);
-    $coupon->update($request->validated());
+    try {
+        $coupon = Coupon::findOrFail($id);
+        $coupon->update($request->validated());
 
-    return redirect()
-        ->route('admin.coupons.edit', $coupon->id)
-        ->with('success', 'Cập nhật thành công');
+        return redirect()
+            ->route('admin.coupons.edit', $coupon->id)
+            ->with('success', 'Cập nhật thành công');
+    } catch (\Exception $e) {
+        return redirect()
+            ->route('admin.coupons.edit', $id)
+            ->with('error', 'Cập nhật thất bại: ' . $e->getMessage());
+    }
 }
 
 
