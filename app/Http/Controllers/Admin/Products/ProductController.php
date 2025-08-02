@@ -2,15 +2,13 @@
 
 namespace App\Http\Controllers\Admin\Products;
 
-use App\Models\Brand;
-use App\Models\Product;
-use App\Models\Category;
-use Illuminate\Support\Str;
-use App\Models\ProductAllImage;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Request;
-use Illuminate\Support\Facades\Storage;
 use App\Http\Requests\Admin\ProductRequest;
+use App\Models\Brand;
+use App\Models\Category;
+use App\Models\Product;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class ProductController extends Controller
 {
@@ -23,7 +21,7 @@ class ProductController extends Controller
             $query->where('name', 'like', '%' . $search . '%');
         }
 
-        $products = $query->orderByDesc('id')->paginate(5)->withQueryString();
+        $products = $query->orderByDesc('id')->paginate(10)->withQueryString();
 
         return view('admin.products.index', compact('products'));
     }
@@ -35,56 +33,52 @@ class ProductController extends Controller
         return view('admin.products.create', compact('brands', 'categories'));
     }
 
+    private function generateUniqueSku(string $name): string
+    {
+        $baseSku = strtoupper(substr(Str::slug($name), 0, 6));
+        do {
+            $randomPart = Str::upper(Str::random(6));
+            $sku = $baseSku . '-' . $randomPart;
+        } while (Product::where('sku', $sku)->exists());
+
+        return $sku;
+    }
+
     public function store(ProductRequest $request)
-{
-    // Sinh slug duy nhất
-    $baseSlug = Str::slug($request->name);
-    $slug = $baseSlug;
-    $i = 1;
-    while (Product::withTrashed()->where('slug', $slug)->exists()) {
-        $slug = $baseSlug . '-' . $i++;
-    }
+    {
+        $dataToCreate = $request->validated();
 
-    $thumbnailPath = $request->hasFile('thumbnail')
-        ? $request->file('thumbnail')->store('products', 'public')
-        : null;
-
-    $productData = [
-        'name' => $request->name,
-        'slug' => $slug,
-        'sku' => $request->sku,
-        'type' => $request->type,
-        'thumbnail' => $thumbnailPath,
-        'short_description' => $request->short_description,
-        'long_description' => $request->long_description,
-        'status' => $request->status,
-        'brand_id' => $request->brand_id,
-        'category_id' => $request->category_id,
-        'price' => null,
-        'sale_price' => null,
-        'stock' => null,
-        'low_stock_amount' => null,
-    ];
-
-    // Nếu là sản phẩm đơn thì gán giá trị từ request
-    if ($request->type === 'simple') {
-        $productData['price'] = $request->price;
-        $productData['sale_price'] = $request->sale_price;
-        $productData['stock'] = $request->stock;
-        $productData['low_stock_amount'] = $request->low_stock_amount;
-    }
-
-    $product = Product::create($productData);
-
-    // Xử lý ảnh phụ (gallery)
-    if ($request->hasFile('gallery')) {
-        foreach ($request->file('gallery') as $image) {
-            $path = $image->store('products/gallery', 'public');
-            $product->allImages()->create([
-                'image_path' => $path
-            ]);
+        $dataToCreate['slug'] = Str::slug($dataToCreate['name']);
+        while (Product::withTrashed()->where('slug', $dataToCreate['slug'])->exists()) {
+            $dataToCreate['slug'] = Str::slug($dataToCreate['name']) . '-' . Str::lower(Str::random(4));
         }
-    }
+
+        if ($request->hasFile('thumbnail')) {
+            $dataToCreate['thumbnail'] = $request->file('thumbnail')->store('products', 'public');
+        }
+
+        $dataToCreate['is_featured'] = $request->has('is_featured');
+
+        if ($dataToCreate['type'] === 'simple') {
+            if (empty($dataToCreate['sku'])) {
+                $dataToCreate['sku'] = $this->generateUniqueSku($dataToCreate['name']);
+            }
+        } else { // type === 'variable'
+            $dataToCreate['price'] = null;
+            $dataToCreate['stock'] = null;
+            $dataToCreate['sku'] = null;
+            $dataToCreate['sale_price'] = null;
+            $dataToCreate['low_stock_amount'] = null;
+        }
+
+        $product = Product::create($dataToCreate);
+
+        if ($request->hasFile('gallery')) {
+            foreach ($request->file('gallery') as $image) {
+                $path = $image->store('products/gallery', 'public');
+                $product->allImages()->create(['image_path' => $path]);
+            }
+        }
 
     return redirect()->route('admin.products.index')->with('success', 'Sản phẩm đã được thêm thành công.');
 }
@@ -93,7 +87,7 @@ class ProductController extends Controller
 
     public function show(Product $product)
     {
-        $product->load(['brand', 'category']);
+        $product->load(['brand', 'category', 'allImages']);
         return view('admin.products.show', compact('product'));
     }
 
@@ -107,32 +101,38 @@ class ProductController extends Controller
 
     public function update(ProductRequest $request, Product $product)
     {
-        // 1. Cập nhật ảnh đại diện
+        $dataToUpdate = $request->validated();
+
+        if ($request->name !== $product->name) {
+            $dataToUpdate['slug'] = Str::slug($request->name);
+            while (Product::withTrashed()->where('slug', $dataToUpdate['slug'])->where('id', '!=', $product->id)->exists()) {
+                $dataToUpdate['slug'] = Str::slug($request->name) . '-' . Str::lower(Str::random(4));
+            }
+        }
+
         if ($request->hasFile('thumbnail')) {
             if ($product->thumbnail) {
                 Storage::disk('public')->delete($product->thumbnail);
             }
-            $product->thumbnail = $request->file('thumbnail')->store('products', 'public');
+            $dataToUpdate['thumbnail'] = $request->file('thumbnail')->store('products', 'public');
         }
 
-        // 2. Cập nhật thông tin sản phẩm
-        $product->update([
-            'name' => $request->name,
-            'slug' => Str::slug($request->name),
-            'sku' => $request->sku,
-            'price' => $request->price,
-            'sale_price' => $request->sale_price,
-            'stock' => $request->stock,
-            'low_stock_amount' => $request->low_stock_amount,
-            'thumbnail' => $product->thumbnail,
-            'short_description' => $request->short_description,
-            'long_description' => $request->long_description,
-            'status' => $request->status,
-            'brand_id' => $request->brand_id,
-            'category_id' => $request->category_id,
-        ]);
+        $dataToUpdate['is_featured'] = $request->has('is_featured');
 
-        // 3. Xử lý xoá ảnh phụ
+        if ($dataToUpdate['type'] === 'simple') {
+            if (empty($dataToUpdate['sku'])) {
+                $dataToUpdate['sku'] = $this->generateUniqueSku($dataToUpdate['name']);
+            }
+        } else { // type === 'variable'
+            $dataToUpdate['price'] = null;
+            $dataToUpdate['stock'] = null;
+            $dataToUpdate['sku'] = null;
+            $dataToUpdate['sale_price'] = null;
+            $dataToUpdate['low_stock_amount'] = null;
+        }
+
+        $product->update($dataToUpdate);
+
         if ($request->filled('delete_images')) {
             foreach ($request->delete_images as $id) {
                 $image = $product->allImages()->find($id);
@@ -143,25 +143,10 @@ class ProductController extends Controller
             }
         }
 
-        // 4. Cập nhật ảnh phụ cũ nếu có file mới
-        if ($request->hasFile('existing_images')) {
-            foreach ($request->file('existing_images') as $id => $file) {
-                $image = $product->allImages()->find($id);
-                if ($image) {
-                    Storage::disk('public')->delete($image->image_path);
-                    $path = $file->store('products/gallery', 'public');
-                    $image->update(['image_path' => $path]);
-                }
-            }
-        }
-
-        // 5. Thêm ảnh phụ mới
         if ($request->hasFile('gallery')) {
             foreach ($request->file('gallery') as $file) {
                 $path = $file->store('products/gallery', 'public');
-                $product->allImages()->create([
-                    'image_path' => $path
-                ]);
+                $product->allImages()->create(['image_path' => $path]);
             }
         }
 
@@ -171,36 +156,32 @@ class ProductController extends Controller
     public function destroy(Product $product)
     {
         $product->delete();
-        return redirect()->route('admin.products.index')
-            ->with('success', 'Sản phẩm đã được ẩn.');
+        return redirect()->route('admin.products.index')->with('success', 'Sản phẩm đã được chuyển vào thùng rác.');
     }
 
     public function trashed()
     {
-        $products = Product::onlyTrashed()->with(['brand', 'category'])->get();
+        $products = Product::onlyTrashed()->with(['brand', 'category'])->orderByDesc('deleted_at')->paginate(10);
         return view('admin.products.trashed', compact('products'));
     }
 
     public function restore($id)
     {
-        $product = Product::onlyTrashed()->find($id);
-        if (!$product) {
-            return redirect()->route('admin.products.trashed')->with('error', 'Không tìm thấy sản phẩm.');
-        }
-
+        $product = Product::onlyTrashed()->findOrFail($id);
         $product->restore();
         return redirect()->route('admin.products.trashed')->with('success', 'Khôi phục sản phẩm thành công.');
     }
 
     public function forceDelete($id)
     {
-        $product = Product::onlyTrashed()->find($id);
-        if (!$product) {
-            return redirect()->route('admin.products.trashed')->with('error', 'Không tìm thấy sản phẩm.');
-        }
+        $product = Product::onlyTrashed()->findOrFail($id);
 
         if ($product->thumbnail) {
             Storage::disk('public')->delete($product->thumbnail);
+        }
+        
+        foreach ($product->allImages as $image) {
+            Storage::disk('public')->delete($image->image_path);
         }
 
         $product->forceDelete();

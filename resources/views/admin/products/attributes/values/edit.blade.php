@@ -9,17 +9,6 @@
         </a>
     </div>
 
-    @if ($errors->any())
-        <div class="alert alert-danger">
-            <strong><i class="fas fa-exclamation-circle"></i> Lỗi!</strong> Vui lòng kiểm tra lại thông tin bên dưới.
-            <ul class="mb-0 mt-2">
-                @foreach ($errors->all() as $error)
-                    <li><i class="fas fa-chevron-right text-danger"></i> {{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
-
     <div class="card shadow-sm border-0">
         <div class="card-header bg-light fw-semibold">
             <i class="fas fa-edit"></i> Chỉnh sửa giá trị
@@ -31,21 +20,31 @@
 
                 <div class="col-md-6">
                     <label for="value" class="form-label">Tên giá trị</label>
-                    <input type="text" name="value" id="value" class="form-control"
+                    <input type="text" name="value" id="value" class="form-control @error('value') is-invalid @enderror"
                            value="{{ old('value', $value->value) }}" placeholder="Ví dụ: Xanh, 32GB, Lớn">
+                    @error('value')
+                        <div class="invalid-feedback">
+                            {{ $message }}
+                        </div>
+                    @enderror
                 </div>
 
                 @if ($attribute->type === 'color')
                 <div class="col-md-2">
                     <label for="color_code" class="form-label">Mã màu</label>
                     <input type="color" name="color_code" id="color_code"
-                           class="form-control form-control-color"
+                           class="form-control form-control-color @error('color_code') is-invalid @enderror"
                            value="{{ old('color_code', $value->color_code ?? '#000000') }}">
+                    @error('color_code')
+                        <div class="invalid-feedback">
+                            {{ $message }}
+                        </div>
+                    @enderror
                 </div>
                 @endif
 
-                <div class="col-md-4 d-flex align-items-end">
-                    <button type="submit" class="btn btn-success px-4">
+                <div class="col-md-4 d-flex flex-column">
+                    <button type="submit" class="btn btn-success px-4 mt-auto">
                         <i class="fas fa-save me-1"></i> Cập nhật
                     </button>
                 </div>

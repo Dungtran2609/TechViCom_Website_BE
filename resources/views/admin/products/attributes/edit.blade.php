@@ -8,16 +8,6 @@
     </a>
 </div>
 
-@if ($errors->any())
-    <div class="alert alert-danger">
-        <ul class="mb-0">
-            @foreach ($errors->all() as $err)
-                <li>{{ $err }}</li>
-            @endforeach
-        </ul>
-    </div>
-@endif
-
 <div class="card">
     <div class="card-body">
         <form action="{{ route('admin.products.attributes.update', $attribute) }}" method="POST">
@@ -26,22 +16,37 @@
 
             <div class="mb-3">
                 <label for="name" class="form-label">Tên thuộc tính</label>
-                <input type="text" name="name" value="{{ old('name', $attribute->name) }}" class="form-control" required>
+                <input type="text" name="name" id="name" value="{{ old('name', $attribute->name) }}" class="form-control @error('name') is-invalid @enderror">
+                @error('name')
+                    <div class="invalid-feedback">
+                        {{ $message }}
+                    </div>
+                @enderror
             </div>
 
             <div class="mb-3">
                 <label for="type" class="form-label">Loại</label>
-                <select name="type" class="form-select" required>
-                    <option value="select" @selected($attribute->type === 'select')>Select</option>
-                    <option value="text" @selected($attribute->type === 'text')>Text</option>
-                    <option value="color" @selected($attribute->type === 'color')>Color</option>
-                    <option value="number" @selected($attribute->type === 'number')>Number</option>
+                <select name="type" id="type" class="form-select @error('type') is-invalid @enderror">
+                    <option value="select" @selected(old('type', $attribute->type) === 'select')>Select</option>
+                    <option value="text" @selected(old('type', $attribute->type) === 'text')>Text</option>
+                    <option value="color" @selected(old('type', $attribute->type) === 'color')>Color</option>
+                    <option value="number" @selected(old('type', $attribute->type) === 'number')>Number</option>
                 </select>
+                @error('type')
+                    <div class="invalid-feedback">
+                        {{ $message }}
+                    </div>
+                @enderror
             </div>
 
             <div class="mb-3">
                 <label for="description" class="form-label">Mô tả</label>
-                <textarea name="description" rows="3" class="form-control">{{ old('description', $attribute->description) }}</textarea>
+                <textarea name="description" id="description" rows="3" class="form-control @error('description') is-invalid @enderror">{{ old('description', $attribute->description) }}</textarea>
+                @error('description')
+                    <div class="invalid-feedback">
+                        {{ $message }}
+                    </div>
+                @enderror
             </div>
 
             <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Cập nhật</button>

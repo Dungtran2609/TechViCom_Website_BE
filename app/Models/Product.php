@@ -24,6 +24,8 @@ class Product extends Model
         'status',
         'brand_id',
         'category_id',
+        'is_featured',
+        'view_count',
     ];
 
     protected $casts = [
@@ -49,8 +51,6 @@ class Product extends Model
     {
         return $this->hasMany(ProductAllImage::class);
     }
-    // app/Models/Product.php
-
     public function variants()
     {
         return $this->hasMany(ProductVariant::class);
@@ -59,22 +59,18 @@ class Product extends Model
     public function getDisplayPriceAttribute()
 {
     if ($this->type === 'simple') {
-        return $this->price
-            ? number_format($this->price, 0, ',', '.') . ' đ'
-            : 'Chưa có giá';
+        return $this->sale_price && $this->sale_price < $this->price
+            ? $this->sale_price
+            : $this->price;
     }
-
     if ($this->variants->count()) {
         $min = $this->variants->min('price');
         $max = $this->variants->max('price');
-
-        return ($min && $max)
-            ? 'Từ ' . number_format($min, 0, ',', '.') . ' đ - ' . number_format($max, 0, ',', '.') . ' đ'
-            : 'Chưa có giá';
+        return ($min && $max && $min != $max)
+            ? ['min' => $min, 'max' => $max]
+            : $min;
     }
-
-    return 'Chưa có giá';
+    return null;
 }
-
-
+    
 }

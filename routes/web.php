@@ -16,8 +16,8 @@ use App\Http\Controllers\Admin\Products\BrandController;
 use App\Http\Controllers\Admin\Products\CategoryController;
 use App\Http\Controllers\Admin\Products\AttributeController;
 use App\Http\Controllers\Admin\Products\AttributeValueController;
-use App\Http\Controllers\Admin\Products\ProductController;
 use App\Http\Controllers\Admin\Products\ProductVariantController;
+use App\Http\Controllers\Admin\Products\ProductController;
 use App\Http\Controllers\Admin\Users\UserController;
 use App\Http\Controllers\Admin\Users\RoleController;
 use App\Http\Controllers\Admin\Users\PermissionController;
@@ -56,8 +56,8 @@ Route::middleware(['auth', IsAdmin::class])->prefix('admin-control')->name('admi
         Route::put('values/{value}', [AttributeValueController::class, 'update'])->name('values.update');
         Route::delete('values/{value}', [AttributeValueController::class, 'destroy'])->name('values.destroy');
     });
-
-    Route::get('products/variants/select', [ProductVariantController::class, 'selectProduct'])->name('products.variants.select');
+    // Product Variants
+     Route::get('products/variants/select', [ProductVariantController::class, 'selectProduct'])->name('products.variants.select');
     Route::prefix('products')->name('products.')->group(function () {
         Route::get('variants/{variant}', [ProductVariantController::class, 'show'])->name('variants.show');
         Route::get('{product}/variants', [ProductVariantController::class, 'index'])->name('variants.index');
@@ -67,6 +67,8 @@ Route::middleware(['auth', IsAdmin::class])->prefix('admin-control')->name('admi
         Route::put('variants/{variant}', [ProductVariantController::class, 'update'])->name('variants.update');
         Route::delete('variants/{variant}', [ProductVariantController::class, 'destroy'])->name('variants.destroy');
     });
+    // Quản lý bài viết
+
 
     Route::resource('products', ProductController::class)->names('products');
     Route::get('products/trashed', [ProductController::class, 'trashed'])->name('products.trashed');
@@ -74,6 +76,8 @@ Route::middleware(['auth', IsAdmin::class])->prefix('admin-control')->name('admi
     Route::delete('products/{id}/force-delete', [ProductController::class, 'forceDelete'])->name('products.force-delete');
 
     // News
+
+
     Route::resource('news', NewsController::class);
     Route::resource('news-categories', NewsCategoryController::class);
 
@@ -101,11 +105,11 @@ Route::middleware(['auth', IsAdmin::class])->prefix('admin-control')->name('admi
 
     // Roles
     Route::prefix('roles')->middleware(CheckRole::class . ':admin')->name('roles.')->group(function () {
-        Route::resource('/', RoleController::class)->parameters(['' => 'role']);
+        Route::get('list', [RoleController::class, 'list'])->name('list');
+        Route::resource('', RoleController::class)->parameters(['' => 'role']);
         Route::get('trashed', [RoleController::class, 'trashed'])->name('trashed');
         Route::post('{id}/restore', [RoleController::class, 'restore'])->name('restore');
         Route::delete('{id}/force-delete', [RoleController::class, 'forceDelete'])->name('force-delete');
-        Route::get('list', [RoleController::class, 'list'])->name('list');
         Route::post('update-users', [RoleController::class, 'updateUsers'])->name('updateUsers');
     });
 
