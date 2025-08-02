@@ -8,7 +8,7 @@ use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\UserController;
 use App\Http\Controllers\Api\V1\OrderApiController;
 use App\Http\Controllers\Api\ShippingController;
-use App\Http\Controllers\Api\V1\NewsController;
+use App\Http\Controllers\Api\V1\NewsApiController;
 
 Route::prefix('v1')->group(function () {
     // 📦 Biến thể sản phẩm (public, không cần đăng nhập)
@@ -20,15 +20,15 @@ Route::prefix('v1')->group(function () {
 
     // 📰 News API (public)
     Route::prefix('news')->group(function () {
-        Route::get('/', [NewsController::class, 'index']);
-        Route::get('/featured', [NewsController::class, 'featured']);
-        Route::get('/{id}', [NewsController::class, 'show']);
-        Route::get('/{id}/comments', [NewsController::class, 'comments']);
+        Route::get('/', [NewsApiController::class, 'index']);
+        Route::get('/featured', [NewsApiController::class, 'featured']);
+        Route::get('/{id}', [NewsApiController::class, 'show']);
+        Route::get('/{id}/comments', [NewsApiController::class, 'comments']);
     });
 
     // 📂 News Categories API (public)
-    Route::get('news-categories', [NewsController::class, 'categories']);
-    Route::get('news-categories/{categoryId}/news', [NewsController::class, 'newsByCategory']);
+    Route::get('news-categories', [NewsApiController::class, 'categories']);
+    Route::get('news-categories/{categoryId}/news', [NewsApiController::class, 'newsByCategory']);
 
     // 🔐 Các route cần xác thực
     Route::middleware('auth:sanctum')->group(function () {
@@ -40,10 +40,10 @@ Route::prefix('v1')->group(function () {
 
         // 📰 News API (cần auth)
         Route::prefix('news')->group(function () {
-            Route::post('/', [NewsController::class, 'store']);
-            Route::put('/{id}', [NewsController::class, 'update']);
-            Route::delete('/{id}', [NewsController::class, 'destroy']);
-            Route::post('/{id}/comments', [NewsController::class, 'addComment']);
+            Route::post('/', [NewsApiController::class, 'store']);
+            Route::put('/{id}', [NewsApiController::class, 'update']);
+            Route::delete('/{id}', [NewsApiController::class, 'destroy']);
+            Route::post('/{id}/comments', [NewsApiController::class, 'addComment']);
         });
 
         // 📦 Quản lý đơn hàng cho người dùng
@@ -84,10 +84,6 @@ Route::prefix('v1')->group(function () {
     // 📢 Banner (public)
     Route::get('banners', [\App\Http\Controllers\Api\V1\BannerApiController::class, 'index']);
     Route::get('banners/{id}', [\App\Http\Controllers\Api\V1\BannerApiController::class, 'show']);
-
-    // 📰 News (public)
-    Route::get('news', [\App\Http\Controllers\Api\V1\NewsApiController::class, 'index']);
-    Route::get('news/{id}', [\App\Http\Controllers\Api\V1\NewsApiController::class, 'show']);
 
     // 🎟️ Voucher (public)
 
