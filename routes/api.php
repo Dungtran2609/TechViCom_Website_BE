@@ -1,20 +1,19 @@
 <?php
 
-use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Http\Request;
-
 use App\Http\Controllers\Api\V1\AuthController;
-use App\Http\Controllers\Api\V1\UserController;
+use App\Http\Controllers\Api\V1\CategoryApiController;
+use App\Http\Controllers\Api\V1\NewsController;
 use App\Http\Controllers\Api\V1\OrderApiController;
-use App\Http\Controllers\Api\ShippingController;
+
 use App\Http\Controllers\Api\V1\NewsApiController;
+use App\Http\Controllers\Api\V1\ProductApiController;
+use App\Http\Controllers\Api\V1\UserController;
+
 
 Route::prefix('v1')->group(function () {
-    // 📦 Biến thể sản phẩm (public, không cần đăng nhập)
-    Route::get('product-variants', [\App\Http\Controllers\Api\V1\ProductVariantApiController::class, 'index']);
-    Route::get('product-variants/{id}', [\App\Http\Controllers\Api\V1\ProductVariantApiController::class, 'show']);
-    // ✅ Đăng ký & Đăng nhập
+
+    // Nhóm xác thực
     Route::post('register', [AuthController::class, 'register']);
     Route::post('login', [AuthController::class, 'login']);
 
@@ -31,20 +30,30 @@ Route::prefix('v1')->group(function () {
     Route::get('news-categories/{categoryId}/news', [NewsApiController::class, 'newsByCategory']);
 
     // 🔐 Các route cần xác thực
+    // Nhóm dữ liệu công khai
+    Route::get('categories', [CategoryApiController::class, 'index']);
+    Route::get('categories/{category}', [CategoryApiController::class, 'show']);
+
+    Route::get('products', [ProductApiController::class, 'index']);
+    Route::get('products/{product}', [ProductApiController::class, 'show']);
+
+
     Route::middleware('auth:sanctum')->group(function () {
-        // 👤 Thông tin người dùng
+        Route::post('logout', [AuthController::class, 'logout']);
         Route::get('me', [UserController::class, 'me']);
 
         // 🔓 Đăng xuất
         Route::post('logout', [AuthController::class, 'logout']);
 
         // 📰 News API (cần auth)
-        Route::prefix('news')->group(function () {
-            Route::post('/', [NewsApiController::class, 'store']);
-            Route::put('/{id}', [NewsApiController::class, 'update']);
-            Route::delete('/{id}', [NewsApiController::class, 'destroy']);
-            Route::post('/{id}/comments', [NewsApiController::class, 'addComment']);
-        });
+        Route::post('/news', [NewsApiController::class, 'store']);
+        Route::put('/news/{news}', [NewsApiController::class, 'update']);
+        Route::delete('/news/{news}', [NewsApiController::class, 'destroy']);
+
+        // Tương tác với Tin tức (bất kỳ user nào đã đăng nhập)
+        Route::post('/news/{news}/comments', [NewsApiController::class, 'addComment']);
+        Route::post('/news/{news}/like', [NewsApiController::class, 'toggleLikePost']);
+        Route::post('/comments/{comment}/like', [NewsApiController::class, 'toggleLikeComment']);
 
         // 📦 Quản lý đơn hàng cho người dùng
         Route::get('user/orders', [OrderApiController::class, 'apiUserOrders']);
@@ -53,40 +62,22 @@ Route::prefix('v1')->group(function () {
         Route::post('user/orders/{id}/return', [OrderApiController::class, 'returnOrder']);
     });
 
-    // 🔧 Quản trị đơn hàng (ADMIN)
-    Route::prefix('order')->group(function () {
-        Route::get('/trashed', [OrderApiController::class, 'trashed']);
-        Route::post('/{id}/restore', [OrderApiController::class, 'restore']);
-        Route::delete('/{id}/force-delete', [OrderApiController::class, 'forceDelete']);
+    // Middleware 'role:admin,staff' sẽ chỉ cho phép những người dùng có vai trò là
+    // 'admin' hoặc 'staff' đi qua.
+    Route::prefix('admin')->as('admin.')->middleware(['auth:sanctum', 'role:admin,staff'])->group(function () {
+        // Quản lý tất cả người dùng
+        // Sử dụng apiResource để tạo các route index, store, show, update, destroy
+        Route::apiResource('users', UserController::class);
 
-        Route::post('/{id}/update-status', [OrderApiController::class, 'updateOrderStatus']);
+        // Quản lý tất cả đơn hàng
+        Route::prefix('orders')->as('orders.')->group(function () {
+            Route::get('/', [OrderApiController::class, 'index'])->name('index');
+            Route::post('/', [OrderApiController::class, 'store'])->name('store');
+            Route::get('/{order}', [OrderApiController::class, 'show'])->name('show');
+            Route::put('/{order}', [OrderApiController::class, 'update'])->name('update');
+            Route::delete('/{order}', [OrderApiController::class, 'destroy'])->name('destroy');
+        });
 
-        Route::get('/returns', [OrderApiController::class, 'returnsIndex']);
-        Route::post('/returns/{id}/process', [OrderApiController::class, 'processReturn']);
-
-        Route::get('/', [OrderApiController::class, 'index']);
-        Route::get('/{order}', [OrderApiController::class, 'show']);
-        Route::put('/{order}', [OrderApiController::class, 'update']);
-        Route::delete('/{order}', [OrderApiController::class, 'destroy']);
+        // Bạn có thể thêm các route quản trị khác ở đây
     });
-
-    // 📦 Sản phẩm (public, không cần đăng nhập)
-    Route::get('products', [\App\Http\Controllers\Api\V1\ProductApiController::class, 'index']);
-    Route::get('products/{id}', [\App\Http\Controllers\Api\V1\ProductApiController::class, 'show']);
-    // categories
-    Route::get('categories', [\App\Http\Controllers\Api\V1\CategoryApiController::class, 'index']);
-    Route::get('categories/{id}', [\App\Http\Controllers\Api\V1\CategoryApiController::class, 'show']);
-    // brands
-
-    // �🚚 Tính phí vận chuyển
-    // Route::post('/shipping-fee/{orderId}', [ShippingController::class, 'calculateShipping']);
-
-    // 📢 Banner (public)
-    Route::get('banners', [\App\Http\Controllers\Api\V1\BannerApiController::class, 'index']);
-    Route::get('banners/{id}', [\App\Http\Controllers\Api\V1\BannerApiController::class, 'show']);
-
-    // 🎟️ Voucher (public)
-
-    Route::get('coupons', [\App\Http\Controllers\Api\V1\CouponApiController::class, 'index']);
-    Route::get('coupons/{id}', [\App\Http\Controllers\Api\V1\CouponApiController::class, 'show']);
 });

@@ -4,6 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class NewsComment extends Model
 {
@@ -19,6 +22,7 @@ class NewsComment extends Model
         'news_id',
         'content',
         'is_hidden',
+        'parent_id', // ID của bình luận cha (nếu có)
     ];
 
     /**
@@ -44,6 +48,26 @@ class NewsComment extends Model
     public function news()
     {
         return $this->belongsTo(\App\Models\News::class, 'news_id', 'id');
+    }
 
+    public function likes(): MorphMany
+    {
+        return $this->morphMany(Like::class, 'likeable');
+    }
+
+    /**
+     * Lấy bình luận cha (nếu có).
+     */
+    public function parent(): BelongsTo
+    {
+        return $this->belongsTo(NewsComment::class, 'parent_id');
+    }
+
+    /**
+     * Lấy các bình luận con (trả lời).
+     */
+    public function children(): HasMany
+    {
+        return $this->hasMany(NewsComment::class, 'parent_id');
     }
 }

@@ -3,7 +3,6 @@
 use App\Http\Middleware\IsAdmin;
 use App\Http\Middleware\CheckPermission;
 use Illuminate\Auth\Middleware\Authenticate;
-use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful; // <-- thêm use này
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -17,10 +16,16 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
+            // Sử dụng cùng một class Authenticate cho cả 'auth' và 'auth:sanctum'
             'auth' => Authenticate::class,
-            'auth:sanctum' => EnsureFrontendRequestsAreStateful::class,
+            'auth:sanctum' => Authenticate::class,
+
+            // Middleware tùy chỉnh
             'is_admin' => IsAdmin::class,
             'permission' => CheckPermission::class,
+
+            // === DÒNG QUAN TRỌNG CẦN THÊM VÀO ===
+            'role' => \App\Http\Middleware\CheckRole::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

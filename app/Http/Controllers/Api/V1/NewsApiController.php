@@ -18,27 +18,22 @@ class NewsApiController extends Controller
     {
         $query = News::with(['author', 'category']);
 
-        // Lọc theo trạng thái nổi bật
         if ($request->boolean('featured')) {
             $query->where('status', 'featured');
         }
 
-        // Tìm kiếm theo tiêu đề
         if ($request->filled('q')) {
             $query->where('title', 'like', '%' . $request->q . '%');
         }
 
-        // Lọc theo category
         if ($request->filled('category_id')) {
             $query->where('category_id', $request->category_id);
         }
 
-        // Sắp xếp
         $sortBy = $request->get('sort_by', 'published_at');
         $sortOrder = $request->get('sort_order', 'desc');
         $query->orderBy($sortBy, $sortOrder);
 
-        // Phân trang
         $perPage = $request->get('per_page', 10);
         $news = $query->paginate($perPage);
 
@@ -57,17 +52,40 @@ class NewsApiController extends Controller
     /**
      * Lấy chi tiết bài viết
      */
-    public function show(int $id): JsonResponse
+    public function show(Request $request, $id): JsonResponse
     {
-        $news = News::with(['author', 'category'])
-            ->findOrFail($id);
+        $user = $request->user();
 
-        // Lấy comments chỉ những comment được phép hiển thị
+        $news = \App\Models\News::findOrFail($id); // Sẽ trả về 404 nếu không tìm thấy
+
+        $news->load(['author', 'category'])->loadCount('likes');
+        $news->is_liked_by_user = $user ? $user->hasLikedNews($news) : false;
+
         $comments = $news->comments()
-            ->with('user')
+            ->with(['user', 'children' => function ($query) use ($user) {
+                $query->with('user')->withCount('likes');
+                if ($user) {
+                    $query->withCasts(['is_liked_by_user' => 'boolean']);
+                    $query->addSelect([
+                        'is_liked_by_user' => \App\Models\Like::select('id')
+                            ->where('user_id', $user->id)
+                            ->whereColumn('likeable_id', 'news_comments.id')
+                            ->where('likeable_type', \App\Models\NewsComment::class)
+                            ->limit(1)
+                    ]);
+                }
+            }])
+            ->withCount('likes')
             ->where('is_hidden', false)
+            ->whereNull('parent_id')
             ->orderBy('created_at', 'desc')
             ->get();
+
+        if ($user) {
+            $comments->each(function ($comment) use ($user) {
+                $comment->is_liked_by_user = $user->hasLikedComment($comment);
+            });
+        }
 
         $news->setRelation('comments', $comments);
 
@@ -160,26 +178,71 @@ class NewsApiController extends Controller
     }
 
     /**
-     * Thêm comment vào bài viết
+     * Thêm comment (gốc hoặc trả lời)
      */
-    public function addComment(Request $request, int $newsId): JsonResponse
+    public function addComment(Request $request, News $news): JsonResponse
     {
-        $news = News::findOrFail($newsId);
-
         $validated = $request->validate([
-            'user_id' => 'required|integer|exists:users,id',
             'content' => 'required|string|max:1000',
+            'parent_id' => 'nullable|integer|exists:news_comments,id',
         ]);
 
-        $validated['news_id'] = $newsId;
-        $validated['is_hidden'] = false; // Đảm bảo comment mới luôn hiển thị
-        $comment = NewsComment::create($validated);
+        $comment = $news->comments()->create([
+            'user_id' => $request->user()->id,
+            'content' => $validated['content'],
+            'parent_id' => $validated['parent_id'] ?? null,
+            'is_hidden' => false,
+        ]);
 
         return response()->json([
             'success' => true,
             'message' => 'Comment đã được thêm thành công',
             'data' => $comment->load('user')
         ], 201);
+    }
+
+    /**
+     * Thích hoặc bỏ thích bài viết
+     */
+    public function toggleLikePost(Request $request, News $news): JsonResponse
+    {
+        $user = $request->user();
+        $like = $news->likes()->where('user_id', $user->id)->first();
+
+        if ($like) {
+            $like->delete();
+            $message = 'Đã bỏ thích bài viết.';
+        } else {
+            $news->likes()->create(['user_id' => $user->id]);
+            $message = 'Đã thích bài viết.';
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => $message
+        ]);
+    }
+
+    /**
+     * Thích hoặc bỏ thích bình luận
+     */
+    public function toggleLikeComment(Request $request, NewsComment $comment): JsonResponse
+    {
+        $user = $request->user();
+        $like = $comment->likes()->where('user_id', $user->id)->first();
+
+        if ($like) {
+            $like->delete();
+            $message = 'Đã bỏ thích bình luận.';
+        } else {
+            $comment->likes()->create(['user_id' => $user->id]);
+            $message = 'Đã thích bình luận.';
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => $message
+        ]);
     }
 
     /**
@@ -200,7 +263,7 @@ class NewsApiController extends Controller
     }
 
     /**
-     * Lấy danh sách danh mục tin tức
+     * Lấy danh mục tin tức
      */
     public function categories(): JsonResponse
     {
@@ -218,7 +281,7 @@ class NewsApiController extends Controller
     public function newsByCategory(int $categoryId): JsonResponse
     {
         $category = \App\Models\NewsCategory::findOrFail($categoryId);
-        
+
         $news = News::with(['author', 'category'])
             ->where('category_id', $categoryId)
             ->where('status', 'published')
