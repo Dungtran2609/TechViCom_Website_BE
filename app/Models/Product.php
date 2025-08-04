@@ -75,6 +75,9 @@ class Product extends Model
 
     return 'Chưa có giá';
 }
-
+   public function comments()
+    {
+        return $this->hasMany(ProductComment::class);
+    }
 
 }
